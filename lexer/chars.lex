@@ -1,9 +1,12 @@
 %{
 #include <stdio.h>
-
-char strtochar(char *str, int len);
+#include "lexer.h"
+#define YYSTYPE void *
+/* extern YYSTYPE yylval; */
+YYSTYPE yylval;
 
 %}
+
 letter [A-Za-z]
 digit [0-9]
 sp [ ]
@@ -35,49 +38,76 @@ char_esc \\[ntbrfv\\'"a?]
 '{backslash}{backslash}'  |
 '{char_esc}'  |
 '{octal_esc}' {
-        printf("got a char: %c|\n", strtochar(yytext, yyleng));
+        yylval = (YYSTYPE) create_character(strtochar(yytext, yyleng));
+        return CHAR_CONSTANT;
     }
 %%
 
-char strtochar(char *str, int len);
-char convert_single_escape(char c);
-char convert_octal_escape(char *seq);
-static inline int isodigit(const char c);
-
-/* error conditions should not happen based on regular expressions but check anyway */ 
-char strtochar(char *str, int len) {
-    if (len < 3) {
-        /* error: empty or malformed character constant */
-        return '\0';
-    }
-    if (len == 3) {
-        /* normal case: 'a' */
-        return str[1];
-    }
-    /* len > 3 */
-    if (str[1] == '\\') {
-        /* escape code */
-        if (len > 6) {
-            /* error: invalid escape sequence */
-            /* longest at 6 chars is in the form '\377' */
-            return '\0';
-        }
-
-        if (isodigit(str[2])) {
-            return convert_octal_escape(str + 2);
-        }
-
-        /* not an octal escape. that implies it must be be one character => len == 4 */
-        if (len == 4) {
-            return convert_single_escape(str[2]);
-        }
-    }
-
-    /* error: sequence longer than 1 char and not a valid escape */
-    return '\0';
+struct character *create_character(char c) {
+    struct character *sc = malloc(sizeof(struct character));
+    sc->c = c;
+    return sc;
 }
 
-char convert_single_escape(char c) {
+/* error conditions should not happen based on regular expressions but check anyway */ 
+int strtochar(char *str, int len) {
+    int rv;
+    int char_seq_len = len - 2;
+    char *buf = malloc(char_seq_len + 1);
+
+    if (str[0] != '\'' || str[len - 1] != '\'') {
+        /* error: input not wrapped in '' */
+        rv = E_INPUT;
+        goto cleanup;
+    }
+
+    if (len < 3) {
+        /* error: empty or malformed character constant */
+        rv = E_INPUT;
+        goto cleanup;
+    }
+
+    /* trim the surrounding '' characters, leaving room for terminating '\0' */
+    strncpy(buf, str+1, char_seq_len);
+    buf[char_seq_len] = '\0';
+
+    if (char_seq_len == 1) {
+        /* normal case: 'a' */
+        rv = buf[0];
+        goto cleanup;
+    }
+
+    if (char_seq_len > 4) {
+        /* error: invalid escape sequence */
+        /* longest format is 4 chars e.g. '\377' */
+        rv = E_INPUT;
+        goto cleanup;
+    }
+
+    if (buf[0] == '\\') {
+        /* escape code */
+        if ( isodigit(buf[1]) ) {
+            /* length of octal digit sequence is char_seq_len-1 for the leading \ */
+            rv = convert_octal_escape(buf+1, char_seq_len-1);
+            goto cleanup;
+        }
+        /* not an octal escape. that implies it must be one escaped character */
+        if (char_seq_len != 2) {
+            rv = E_INPUT;
+            goto cleanup;
+        }
+        rv = convert_single_escape(buf[1]);
+        goto cleanup;
+    }
+    /* error: reaching here means sequence longer than 1 char and not a valid escape */
+    rv = E_INPUT;
+
+    cleanup:
+    free(buf);
+    return rv;
+}
+
+int convert_single_escape(char c) {
     switch (c) {
         case 'n':
             return '\n';
@@ -102,23 +132,23 @@ char convert_single_escape(char c) {
         case '?':
             return '\?';
         default:
-            /* maybe error: our specification does not allow "identity" escapes */
-            return c;
+            /* return c; */
+            /* error: our specification does not allow "identity" escapes */
+            return E_ESCAPE_CHAR;
     }
 }
 
-char convert_octal_escape(char *seq) {
-    /* put up to 3 octal digits from seq into buf */
+int convert_octal_escape(char *seq, int len) {
+    /* put up to len octal digits from seq into buf */
     /* then convert buf to an octal number and return it as a char */
     int i = 0;
-    char buf[4];
-    printf("cos: %s\n", seq);
-    while (i < 3 && isodigit(seq[i])) {
-        buf[i] = seq[i];
+    while (i < len) {
+        if (!isodigit(seq[i])) {
+            return E_NOT_OCTAL;
+        }
         i++;
     }
-    buf[i] = '\0';
-    return (char) strtol(buf, NULL, 8);
+    return strtol(seq, NULL, 8);
 }
 
 /* this convenience function copied from
