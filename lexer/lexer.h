@@ -1,0 +1,1 @@
+#define EOL 0

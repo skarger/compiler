@@ -15,3 +15,6 @@
 *.exe
 *.out
 *.app
+
+# lex intermediate file
+lex.yy.c
