@@ -1,4 +1,4 @@
-CC = gcc -pedantic -Wall
+CC = gcc
 LEX = flex
 CFLAGS += -pedantic -Wall -Wextra
 LDLIBS += -lfl
@@ -8,9 +8,14 @@ EXECS = lexer
 
 all : $(EXECS)
 
-lex.yy.c : chars.lex
-	$(LEX) $(LFLAGS) -o $@ $<
+clean :
+	rm -f $(EXECS) *.o lex.yy.c
 
-lexer : lexer.h chars.lex lex.yy.c
-	$(CC) lex.yy.c $(LDLIBS)
-	
+lexer : lex.yy.o lexer.h 
+	$(CC) $(CFLAGS) lex.yy.o -o $@ $(LDLIBS)
+
+lex.yy.o : lex.yy.c
+	$(CC) -c lex.yy.c
+
+lex.yy.c : chars.lex lexer.h
+	$(LEX) $(LFLAGS) -o $@ $<

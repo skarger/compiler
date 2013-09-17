@@ -1,7 +1,11 @@
 %{
 #include <stdio.h>
+#include <string.h>
+#include <error.h>
+
 #include "lexer.h"
-#define YYSTYPE void *
+
+
 /* extern YYSTYPE yylval; */
 YYSTYPE yylval;
 
@@ -33,78 +37,31 @@ char_esc \\[ntbrfv\\'"a?]
 '{letter}'    |
 '{digit}'     |
 '{sp}'        |
-'{graphic}'   |
-'{backslash}{apostrophe}' |
-'{backslash}{backslash}'  |
-'{char_esc}'  |
+'{graphic}'   {
+    yylval = (YYSTYPE) create_character(yytext[1]);
+    return CHAR_CONSTANT;
+}
+'{char_esc}'  {
+    yylval = (YYSTYPE) create_character( (char) convert_single_escape(yytext[2]) );
+    return CHAR_CONSTANT;
+}
 '{octal_esc}' {
-        yylval = (YYSTYPE) create_character(strtochar(yytext, yyleng));
-        return CHAR_CONSTANT;
-    }
+    /* format is '\nnn' with 1-3 n values. the number of n chars is yyleng - 3 */
+    char buf[4];
+    int num_chars = yyleng - 3;
+    strncpy(buf, yytext + 2, num_chars);
+    buf[num_chars] = '\0';
+    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( buf, num_chars ));
+    return CHAR_CONSTANT;
+}
 %%
 
+/* characters */
 struct character *create_character(char c) {
-    struct character *sc = malloc(sizeof(struct character));
+    struct character *sc;
+    emalloc((void **) &sc, sizeof(struct character));
     sc->c = c;
     return sc;
-}
-
-/* error conditions should not happen based on regular expressions but check anyway */ 
-int strtochar(char *str, int len) {
-    int rv;
-    int char_seq_len = len - 2;
-    char *buf = malloc(char_seq_len + 1);
-
-    if (str[0] != '\'' || str[len - 1] != '\'') {
-        /* error: input not wrapped in '' */
-        rv = E_INPUT;
-        goto cleanup;
-    }
-
-    if (len < 3) {
-        /* error: empty or malformed character constant */
-        rv = E_INPUT;
-        goto cleanup;
-    }
-
-    /* trim the surrounding '' characters, leaving room for terminating '\0' */
-    strncpy(buf, str+1, char_seq_len);
-    buf[char_seq_len] = '\0';
-
-    if (char_seq_len == 1) {
-        /* normal case: 'a' */
-        rv = buf[0];
-        goto cleanup;
-    }
-
-    if (char_seq_len > 4) {
-        /* error: invalid escape sequence */
-        /* longest format is 4 chars e.g. '\377' */
-        rv = E_INPUT;
-        goto cleanup;
-    }
-
-    if (buf[0] == '\\') {
-        /* escape code */
-        if ( isodigit(buf[1]) ) {
-            /* length of octal digit sequence is char_seq_len-1 for the leading \ */
-            rv = convert_octal_escape(buf+1, char_seq_len-1);
-            goto cleanup;
-        }
-        /* not an octal escape. that implies it must be one escaped character */
-        if (char_seq_len != 2) {
-            rv = E_INPUT;
-            goto cleanup;
-        }
-        rv = convert_single_escape(buf[1]);
-        goto cleanup;
-    }
-    /* error: reaching here means sequence longer than 1 char and not a valid escape */
-    rv = E_INPUT;
-
-    cleanup:
-    free(buf);
-    return rv;
 }
 
 int convert_single_escape(char c) {
@@ -134,7 +91,7 @@ int convert_single_escape(char c) {
         default:
             /* return c; */
             /* error: our specification does not allow "identity" escapes */
-            return E_ESCAPE_CHAR;
+            handle_error(E_ESCAPE_CHAR, "convert_single_escape");
     }
 }
 
@@ -144,16 +101,40 @@ int convert_octal_escape(char *seq, int len) {
     int i = 0;
     while (i < len) {
         if (!isodigit(seq[i])) {
-            return E_NOT_OCTAL;
+            handle_error(E_NOT_OCTAL, "convert_octal_escape");
         }
         i++;
     }
     return strtol(seq, NULL, 8);
 }
 
+/* helpers */
+
 /* this convenience function copied from
  * http://comments.gmane.org/gmane.linux.network/265196 */
 static inline int isodigit(const char c)
 {
     return c >= '0' && c <= '7';
+}
+
+int emalloc(void **ptr, size_t n) {
+    if ( (*ptr = malloc(n)) == NULL ) {
+        handle_error(E_MALLOC, "emalloc");
+    }
+    return E_SUCCESS;
+}
+
+void handle_error(enum lexer_error e, char *source) {
+    switch (e) {
+        case E_SUCCESS:
+            return;
+        case E_MALLOC:
+            error(e, 0, "%s: out of memory", source);
+        case E_NOT_OCTAL:
+            error(e, 0, "%s: non-octal digit", source);
+        case E_ESCAPE_CHAR:
+            error(e, 0, "%s: invalid escape char", source);
+        default:
+            return;
+    }
 }
