@@ -8,6 +8,7 @@ enum lexer_error {
 };
 
 enum token {
+    UNRECOGNIZED,
     CHAR_CONSTANT
 };
 

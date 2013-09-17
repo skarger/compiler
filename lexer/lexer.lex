@@ -60,14 +60,10 @@ char_esc \\[ntbrfv\\'"a?]
     return CHAR_CONSTANT;
 }
 '{octal_esc}' {
-    /* format is '\nnn' with 1-3 n values. the number of n chars is yyleng - 3 */
-    char buf[4];
-    int num_chars = yyleng - 3;
-    strncpy(buf, yytext + 2, num_chars);
-    buf[num_chars] = '\0';
-    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( buf, num_chars ));
+    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( yytext, yyleng ));
     return CHAR_CONSTANT;
 }
+. return UNRECOGNIZED;
 %%
 
 /* character constants */
@@ -136,9 +132,9 @@ int convert_single_escape(char c) {
 /*
  * convert_octal_escape
  * Purpose:
- *      Transform a sequence of octal number chars into an escaped char value.
+ *      Transform a string representing an octal escape sequence into the char value.
  * Parameters:
- *      seq - the string of chars, each of which is an octal number
+ *      seq - the string of chars int the form '\377' including 1 to 3 octal digit values
  *      len - the length of the string, i.e. the number of digits
  * Returns:
  *      An escape character value. For example, given "142" return 'b'.
@@ -146,16 +142,22 @@ int convert_single_escape(char c) {
  *      None
  */
 int convert_octal_escape(char *seq, int len) {
-    /* put up to len octal digits from seq into buf */
-    /* then convert buf to an octal number and return it as a char */
+    /* create a string with only the digits */
+    char buf[4]; /* room for up to three digits and null byte */
+    /* subtracting the two apostrophes and slash, the num of octal digits is len - 3 */
+    int n_digits = len - 3;
+    strncpy(buf, seq + 2, n_digits);
+    buf[n_digits] = '\0';
+
+    /* convert digit string to an octal number and return it as a char */
     int i = 0;
-    while (i < len) {
-        if (!isodigit(seq[i])) {
+    while (i < n_digits) {
+        if (!isodigit(buf[i])) {
             handle_error(E_NOT_OCTAL, "convert_octal_escape");
         }
         i++;
     }
-    return strtol(seq, NULL, 8);
+    return strtol(buf, NULL, 8);
 }
 
 /* helpers */
