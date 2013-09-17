@@ -12,6 +12,8 @@
  * calling program containing data for those variable-value tokens.
  */
 
+%option noyywrap
+
 %{
 #include <stdio.h>
 #include <string.h>
@@ -48,6 +50,9 @@ octal_esc \\[0-3]?[0-7]?[0-7]
   */
 char_esc \\[ntbrfv\\'"a?]
 %%
+{nl}+ ; /* do nothing with newline, using yylineno */
+{ws}+ ; /* do nothing */
+
 '{letter}'    |
 '{digit}'     |
 '{sp}'        |
@@ -123,9 +128,11 @@ int convert_single_escape(char c) {
         case '?':
             return '\?';
         default:
-            /* return c; */
-            /* error: our specification does not allow "identity" escapes */
+            /* error: not a supported escape. */
             handle_error(E_ESCAPE_CHAR, "convert_single_escape");
+            /* this code is unreachable, but pretend to return the "identity" escape */
+            /* to make the compiler happy */
+            return c;
     }
 }
 
@@ -170,15 +177,15 @@ int convert_octal_escape(char *seq, int len) {
  *      ptr - a pointer to the pointer that should be set with malloc's return value.
  *      n - the number of bytes to allocate.
  * Returns:
- *      An escape character value. For example, given "142" return 'b'.
+ *      None
  * Side effects:
+ *      Sets the value of ptr.
  *      Terminates program if malloc errors.
  */
-int emalloc(void **ptr, size_t n) {
+void emalloc(void **ptr, size_t n) {
     if ( (*ptr = malloc(n)) == NULL ) {
         handle_error(E_MALLOC, "emalloc");
     }
-    return E_SUCCESS;
 }
 
 /*
@@ -210,7 +217,6 @@ void handle_error(enum lexer_error e, char *source) {
 
 /* this convenience function copied from
  * http://comments.gmane.org/gmane.linux.network/265196 */
-static inline int isodigit(const char c)
-{
+static inline int isodigit(const char c) {
     return c >= '0' && c <= '7';
 }
