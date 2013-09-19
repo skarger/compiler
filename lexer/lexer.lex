@@ -13,6 +13,9 @@
  */
 
 %option noyywrap
+%option yylineno
+
+%x STRING
 
 %{
 #include <stdio.h>
@@ -25,6 +28,8 @@
 /* extern YYSTYPE yylval; */
 YYSTYPE yylval;
 
+struct String *create_string(int len);
+
 %}
 
 letter [A-Za-z]
@@ -34,9 +39,7 @@ ws [ \v\f\t]
 nl \r?\n
 
  /* graphic chars: ! # % ^ & * ( ) \ - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
-graphic [!#%^&*()\-_+=~\[\]|;:\"\{\},.<>\/?$@`]
-apostrophe '
-backslash \\
+graphic [!#%^&*()\\\-_+=~\[\]|;:"{},.<>/?$@`]
 
  /* From the C specification:
   * "The value of the octal or hexadecimal escape sequence must be in the range of 
@@ -49,7 +52,11 @@ octal_esc \\[0-3]?[0-7]?[0-7]
   * Notably this does not allow the "identity" escape of non-codes, for example '\c'
   */
 char_esc \\[ntbrfv\\'"a?]
+
+invalid_esc \\[^ntbrfv\\'"a?0-7]
+
 %%
+ /* rules for character constants */
 {nl}+ ; /* do nothing with newline, using yylineno */
 {ws}+ ; /* do nothing */
 
@@ -71,11 +78,75 @@ char_esc \\[ntbrfv\\'"a?]
     yylval = (YYSTYPE) create_character( (char) convert_octal_escape( start, n_digits ));
     return CHAR_CONSTANT;
 }
+'{invalid_esc}' {
+    handle_error(E_ESCAPE_SEQ, yytext, yylineno);
+    return UNRECOGNIZED;
+}
+
+ /* rules for string constants */
+\"(.|\n)*\" {
+    BEGIN(STRING);
+    /* create storage for string literal and then push it back for re-scanning
+     * do not push back the leading quote though so the re-scan starts
+     * with the first content char (or the trailing " for an empty string)
+     */
+    yylval = (YYSTYPE) create_string(yyleng);
+    yyless(1);
+}
+<STRING>[^"\n\\] {
+    /* this is tricky:
+     * yylval points to a struct String that we created upon finding the string literal
+     * yylval's current member points to the end of its str member where we want to append
+     * so we append yytext's value and increment current to where we want to append next
+     */
+    *( ((struct String *) yylval)->current++ ) = *yytext;
+}
+<STRING>{char_esc} {
+    /* yytext is something like \n */
+    *( ((struct String *) yylval)->current++ ) = (char) convert_single_escape(yytext[1]);
+}
+<STRING>{octal_esc} {
+    /* yytext is something like \377 */
+    /* subtracting the slash, the num of octal digits is len - 1 */
+    int n_digits = yyleng - 1;
+    char *start = yytext + 1; /* the first octal digit is after the \ */
+    *( ((struct String *) yylval)->current++ ) = 
+        (char) convert_octal_escape( start, n_digits );
+}
+<STRING>\n {
+    handle_error(E_NEWLINE, "string literals cannot contain un-escaped newlines",
+                    yylineno);
+}
+<STRING>{invalid_esc} {
+    handle_error(E_ESCAPE_SEQ, yytext, yylineno);
+}
+<STRING>\" {
+    /* if we're in a string then a non-escaped " means end of string */
+    *( ((struct String *) yylval)->current ) = '\0';
+    BEGIN(0);
+    /* error found */
+    if (1==0) {
+        return UNRECOGNIZED;
+    }
+    return STRING_CONSTANT;
+}
+
 . return UNRECOGNIZED;
 %%
 
-/* character constants */
+ /* string constants */
 
+struct String *create_string(int len) {
+    struct String *ss;
+    emalloc((void **) &ss, sizeof(struct String));
+    emalloc((void **) &(ss->str), len + 1);
+    /* current is used to append chars to string so set it equal to str initially */
+    ss->current = ss->str;
+    return ss;
+}
+
+
+/* character constants */
 
 /*
  * create_character
@@ -84,13 +155,13 @@ char_esc \\[ntbrfv\\'"a?]
  * Parameters:
  *      c - the character value
  * Returns:
- *      A pointer to the struct character containing this constant
+ *      A pointer to the struct Character containing this constant
  * Side effects:
  *      Allocates memory on the heap
  */
-struct character *create_character(char c) {
-    struct character *sc;
-    emalloc((void **) &sc, sizeof(struct character));
+struct Character *create_character(char c) {
+    struct Character *sc;
+    emalloc((void **) &sc, sizeof(struct Character));
     sc->c = c;
     return sc;
 }
@@ -132,10 +203,7 @@ int convert_single_escape(char c) {
             return '\?';
         default:
             /* error: not a supported escape. */
-            handle_error(E_ESCAPE_CHAR, "convert_single_escape");
-            /* this code is unreachable, but pretend to return the "identity" escape */
-            /* to make the compiler happy */
-            return c;
+            return E_ESCAPE_SEQ;
     }
 }
 
@@ -161,7 +229,7 @@ int convert_octal_escape(char *seq, int n_digits) {
     int i = 0;
     while (i < n_digits) {
         if (!isodigit(buf[i])) {
-            handle_error(E_NOT_OCTAL, "convert_octal_escape");
+            handle_error(E_NOT_OCTAL, "convert_octal_escape", 0);
         }
         i++;
     }
@@ -185,7 +253,7 @@ int convert_octal_escape(char *seq, int n_digits) {
  */
 void emalloc(void **ptr, size_t n) {
     if ( (*ptr = malloc(n)) == NULL ) {
-        handle_error(E_MALLOC, "emalloc");
+        handle_error(E_MALLOC, "lexer", 0);
     }
 }
 
@@ -194,23 +262,30 @@ void emalloc(void **ptr, size_t n) {
  * Purpose:
  *      Handle an error caught in the calling method.
  * Parameters:
- *      e - the error value that will become the program's exit status
- *      source - the name of the calling method that will be printed to stderr
+ *      e - the error value. if non-zero the program will exit with e as the status
+ *      data - string that will be inserted into the message printed to stderr
+ *      line - line number that caused error, if applicable (e.g. from input source)
  * Returns:
  *      None
  * Side effects:
  *      Terminates program unless e == E_SUCCESS
  */
-void handle_error(enum lexer_error e, char *source) {
+void handle_error(enum lexer_error e, char *data, int line) {
     switch (e) {
         case E_SUCCESS:
             return;
         case E_MALLOC:
-            error(e, 0, "%s: out of memory", source);
+            error(e, 0, "%s: out of memory", data);
+            return;
         case E_NOT_OCTAL:
-            error(e, 0, "%s: non-octal digit", source);
-        case E_ESCAPE_CHAR:
-            error(e, 0, "%s: invalid escape char", source);
+            error(0, 0, "line %d: %s: non-octal digit", line, data);
+            return;
+        case E_ESCAPE_SEQ:
+            error(0, 0, "line %d: %s: invalid escape sequence", line, data);
+            return;
+        case E_NEWLINE:
+            error(0, 0, "line %d: invalid newline: %s", line, data);
+            return;
         default:
             return;
     }

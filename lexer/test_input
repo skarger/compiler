@@ -1,4 +1,12 @@
-'a' '\n' '\'' '2'
+'a' '\n' '\'' '2' '\e'
 '\\' '\?' '\142'
 '\0' '\00' '\000' '\76' '\076'
-
+"this is a string"
+"two""strings"
+"a string with a\ttab and\na newline"
+"digits \76\758 should not be treated as octal"
+""
+"strings cannot have fak\e escape sequences either"
+"embedded newlines
+should provoke errors"
+'c'

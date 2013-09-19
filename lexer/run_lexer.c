@@ -16,7 +16,8 @@ FILE *input, *output;
 
 int token;
 
-struct character *character;
+struct Character *character;
+struct String *string;
 
     /* Figure out whether we're using stdin/stdout or file in/file out. */
     if (argc < 2 || !strcmp("-", argv[1])) {
@@ -37,9 +38,19 @@ yyin = input;
 /* Begin scanning. */
 token = yylex();
 while (0 != token) {
-    character = (struct character *) yylval;
-    if (token == CHAR_CONSTANT)
-    printf("token: CHARACTER CONSTANT value: %c\n", character->c);
+    if (token == CHAR_CONSTANT) {
+        character = (struct Character *) yylval;
+        printf("token: CHARACTER CONSTANT value: %c\n", character->c);
+    }
+
+    if (token == STRING_CONSTANT) {
+        string = (struct String *) yylval;
+        printf("token: STRING CONSTANT value: %s\n", string->str);
+    }
+
+    if (token == UNRECOGNIZED) {
+        ;
+    }
 
       token = yylex();
     }
