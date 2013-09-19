@@ -20,7 +20,7 @@ struct character {
 
 
 int convert_single_escape(char c);
-int convert_octal_escape(char *seq, int len);
+int convert_octal_escape(char *seq, int n_digits);
 static inline int isodigit(const char c);
 struct character *create_character(char c);
 void handle_error(enum lexer_error e, char *source);

@@ -65,7 +65,10 @@ char_esc \\[ntbrfv\\'"a?]
     return CHAR_CONSTANT;
 }
 '{octal_esc}' {
-    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( yytext, yyleng ));
+    /* subtracting the two apostrophes and slash, the num of octal digits is len - 3 */
+    int n_digits = yyleng - 3;
+    char *start = yytext + 2; /* the first octal digit is after the first ' and the \ */
+    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( start, n_digits ));
     return CHAR_CONSTANT;
 }
 . return UNRECOGNIZED;
@@ -141,19 +144,17 @@ int convert_single_escape(char c) {
  * Purpose:
  *      Transform a string representing an octal escape sequence into the char value.
  * Parameters:
- *      seq - the string of chars int the form '\377' including 1 to 3 octal digit values
- *      len - the length of the string, i.e. the number of digits
+ *      seq - the sequence of chars in the form 377, with 1 to 3 octal digit values
+ *      len - the number of digits
  * Returns:
  *      An escape character value. For example, given "142" return 'b'.
  * Side effects:
  *      None
  */
-int convert_octal_escape(char *seq, int len) {
+int convert_octal_escape(char *seq, int n_digits) {
     /* create a string with only the digits */
     char buf[4]; /* room for up to three digits and null byte */
-    /* subtracting the two apostrophes and slash, the num of octal digits is len - 3 */
-    int n_digits = len - 3;
-    strncpy(buf, seq + 2, n_digits);
+    strncpy(buf, seq, n_digits);
     buf[n_digits] = '\0';
 
     /* convert digit string to an octal number and return it as a char */
