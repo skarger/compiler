@@ -1,5 +1,5 @@
 'a' '\n' '\'' '2' '\e'
-'\\' '\?' '\142'
+'\\' '\?' '\142' '\8'
 '\0' '\00' '\000' '\76' '\076'
 "this is a string"
 "two""strings"
@@ -11,5 +11,7 @@
 "strings cannot have fak\e escape sequences either"
 "embedded newlines
 should provoke errors"
+"invalid \escape sequence and
+embedded newline in the same string!"
 'c'
 

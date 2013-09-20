@@ -117,18 +117,14 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
     /* copy the invalid newline to the string but mark it as invalid */
     ((struct String *) yylval)->valid = FALSE;
     *( ((struct String *) yylval)->current++ ) = *yytext;
-    /* temporarily terminate the string for error reporting */
-    *( ((struct String *) yylval)->current ) = '\0';
-    handle_error(E_NEWLINE, ((struct String *) yylval)->str, yylineno);
+    handle_error(E_NEWLINE, "", yylineno);
 }
 <STRING>{invalid_esc} {
     /* copy the invalid escape sequence to the string but mark it as invalid */
     ((struct String *) yylval)->valid = FALSE;
     *( ((struct String *) yylval)->current++ ) = yytext[0];
     *( ((struct String *) yylval)->current++ ) = yytext[1];
-    /* temporarily terminate the string for error reporting */
-    *( ((struct String *) yylval)->current ) = '\0';
-    handle_error(E_ESCAPE_SEQ, ((struct String *) yylval)->str, yylineno);
+    handle_error(E_ESCAPE_SEQ, "", yylineno);
 }
 <STRING>\" {
     /* if we're in a string then a non-escaped " means end of string */
@@ -138,6 +134,7 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
         return STRING_CONSTANT;
     }
     /* error found somewhere in string */
+    handle_error(E_INVALID_STRING, ((struct String *) yylval)->str, yylineno);
     return UNRECOGNIZED;
 }
 
@@ -292,10 +289,13 @@ void handle_error(enum lexer_error e, char *data, int line) {
             error(0, 0, "line %d: %s: non-octal digit", line, data);
             return;
         case E_ESCAPE_SEQ:
-            error(0, 0, "line %d: invalid escape sequence: %s", line, data);
+            error(0, 0, "line %d: invalid escape sequence %s", line, data);
             return;
         case E_NEWLINE:
-            error(0, 0, "line %d: invalid newline: %s", line, data);
+            error(0, 0, "line %d: invalid newline", line, data);
+            return;
+        case E_INVALID_STRING:
+            error(0, 0, "line %d: invalid string literal: %s", line, data);
             return;
         default:
             return;
