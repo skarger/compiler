@@ -114,21 +114,29 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
         (char) convert_octal_escape( start, n_digits );
 }
 <STRING>\n {
+    /* copy the invalid newline to the string but mark it as invalid */
+    ((struct String *) yylval)->valid = FALSE;
+    *( ((struct String *) yylval)->current++ ) = *yytext;
     handle_error(E_NEWLINE, "string literals cannot contain un-escaped newlines",
                     yylineno);
 }
 <STRING>{invalid_esc} {
+    /* copy the invalid escape sequence to the string but mark it as invalid */
+    ((struct String *) yylval)->valid = FALSE;
+    *( ((struct String *) yylval)->current++ ) = yytext[0];
+    *( ((struct String *) yylval)->current++ ) = yytext[1];
     handle_error(E_ESCAPE_SEQ, yytext, yylineno);
 }
 <STRING>\" {
     /* if we're in a string then a non-escaped " means end of string */
     *( ((struct String *) yylval)->current ) = '\0';
     BEGIN(0);
-    /* error found */
-    if (1==0) {
-        return UNRECOGNIZED;
+    if (((struct String *) yylval)->valid) {
+        return STRING_CONSTANT;
     }
-    return STRING_CONSTANT;
+    /* error found somewhere in string */
+    handle_error(E_INVALID_STRING, ((struct String *) yylval)->str, yylineno);
+    return UNRECOGNIZED;
 }
 
 . return UNRECOGNIZED;
@@ -142,6 +150,7 @@ struct String *create_string(int len) {
     emalloc((void **) &(ss->str), len + 1);
     /* current is used to append chars to string so set it equal to str initially */
     ss->current = ss->str;
+    ss->valid = TRUE;
     return ss;
 }
 

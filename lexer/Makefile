@@ -8,13 +8,11 @@ EXECS = lexer
 
 TESTS = run_lexer
 
-all : $(EXECS)
+all : $(EXECS) $(TESTS)
 
-test : $(TESTS)
-	./run_lexer
 
 clean :
-	rm -f $(EXECS) *.o lex.yy.c
+	rm -f $(EXECS) $(TESTS) *.o lex.yy.c
 
 lexer : lex.yy.o lexer.h 
 	$(CC) $(CFLAGS) lex.yy.o -o $@ $(LDLIBS)

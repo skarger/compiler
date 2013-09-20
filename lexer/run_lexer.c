@@ -34,7 +34,6 @@ struct String *string;
 
 /* Tell lex where to get input. */
 yyin = input;
-
 /* Begin scanning. */
 token = yylex();
 while (0 != token) {
@@ -53,7 +52,7 @@ while (0 != token) {
     }
 
       token = yylex();
-    }
+}
 
     return 0;
 }

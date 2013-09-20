@@ -2,12 +2,18 @@
 
 #define YYSTYPE void *
 
+enum Boolean {
+    FALSE = 0,
+    TRUE = 1
+};
+
 enum lexer_error {
     E_SUCCESS,
     E_ESCAPE_SEQ = -1,
     E_NOT_OCTAL = -2,
     E_MALLOC = -3,
-    E_NEWLINE = -4
+    E_NEWLINE = -4,
+    E_INVALID_STRING = -5
 };
 
 enum token {
@@ -24,6 +30,7 @@ struct String {
     char *str;
     char *current; /* pointer to an arbitrary character in str, used for construction */
     int length;
+    enum Boolean valid;
 };
 
 
