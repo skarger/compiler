@@ -4,9 +4,12 @@
 "this is a string"
 "two""strings"
 "a string with a\ttab and\na newline"
+"octal escape: ab\143d"
 "digits \76\758 should not be treated as octal"
+"a \n c"
 ""
 "strings cannot have fak\e escape sequences either"
 "embedded newlines
 should provoke errors"
 'c'
+

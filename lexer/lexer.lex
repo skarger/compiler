@@ -84,7 +84,7 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
 }
 
  /* rules for string constants */
-\"(.|\n)*\" {
+\"([^"]|\\\")*\" {
     BEGIN(STRING);
     /* create storage for string literal and then push it back for re-scanning
      * do not push back the leading quote though so the re-scan starts
@@ -117,15 +117,18 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
     /* copy the invalid newline to the string but mark it as invalid */
     ((struct String *) yylval)->valid = FALSE;
     *( ((struct String *) yylval)->current++ ) = *yytext;
-    handle_error(E_NEWLINE, "string literals cannot contain un-escaped newlines",
-                    yylineno);
+    /* temporarily terminate the string for error reporting */
+    *( ((struct String *) yylval)->current ) = '\0';
+    handle_error(E_NEWLINE, ((struct String *) yylval)->str, yylineno);
 }
 <STRING>{invalid_esc} {
     /* copy the invalid escape sequence to the string but mark it as invalid */
     ((struct String *) yylval)->valid = FALSE;
     *( ((struct String *) yylval)->current++ ) = yytext[0];
     *( ((struct String *) yylval)->current++ ) = yytext[1];
-    handle_error(E_ESCAPE_SEQ, yytext, yylineno);
+    /* temporarily terminate the string for error reporting */
+    *( ((struct String *) yylval)->current ) = '\0';
+    handle_error(E_ESCAPE_SEQ, ((struct String *) yylval)->str, yylineno);
 }
 <STRING>\" {
     /* if we're in a string then a non-escaped " means end of string */
@@ -135,7 +138,6 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
         return STRING_CONSTANT;
     }
     /* error found somewhere in string */
-    handle_error(E_INVALID_STRING, ((struct String *) yylval)->str, yylineno);
     return UNRECOGNIZED;
 }
 
@@ -290,7 +292,7 @@ void handle_error(enum lexer_error e, char *data, int line) {
             error(0, 0, "line %d: %s: non-octal digit", line, data);
             return;
         case E_ESCAPE_SEQ:
-            error(0, 0, "line %d: %s: invalid escape sequence", line, data);
+            error(0, 0, "line %d: invalid escape sequence: %s", line, data);
             return;
         case E_NEWLINE:
             error(0, 0, "line %d: invalid newline: %s", line, data);
