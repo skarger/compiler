@@ -19,7 +19,24 @@ enum lexer_error {
 enum token {
     UNRECOGNIZED = 1,
     CHAR_CONSTANT = 2,
-    STRING_CONSTANT = 3
+    STRING_CONSTANT = 3,
+    ID,
+    BREAK,
+    CHAR,
+    CONTINUE,
+    DO,
+    ELSE,
+    FOR,
+    GOTO,
+    IF,
+    INT,
+    LONG,
+    RETURN,
+    SIGNED,
+    SHORT,
+    UNSIGNED,
+    VOID,
+    WHILE
 };
 
 struct Character {

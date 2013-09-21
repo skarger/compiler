@@ -37,6 +37,32 @@ yyin = input;
 /* Begin scanning. */
 token = yylex();
 while (0 != token) {
+    switch (token) {
+        case ID:
+            printf("identifier\n");
+            break;
+        case BREAK:
+        case CHAR:
+        case CONTINUE:
+        case DO:
+        case ELSE:
+        case FOR:
+        case GOTO:
+        case IF:
+        case INT:
+        case LONG:
+        case RETURN:
+        case SIGNED:
+        case SHORT:
+        case UNSIGNED:
+        case VOID:
+        case WHILE:
+            printf("reserved word\n");
+            break;
+        default:
+            break;
+    }
+
     if (token == CHAR_CONSTANT) {
         character = (struct Character *) yylval;
         printf("token: CHARACTER CONSTANT value: %c\n", character->c);

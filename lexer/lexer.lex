@@ -60,12 +60,39 @@ char_esc \\[ntbrfv\\'"a?]
 
 invalid_esc \\[^ntbrfv\\'"a?0-7]
 
+
+
 %%
- /* rules for character constants */
+
 {nl}+ ; /* do nothing with newline, using yylineno */
 {ws}+ ; /* do nothing */
 {comment} /* do nothing */
 
+
+ /* reserved words begin */
+break return BREAK;
+char return CHAR;
+continue return CONTINUE;
+do return DO;
+else return ELSE;
+for return FOR;
+goto return GOTO;
+if return IF;
+int return INT;
+long return LONG;
+return return RETURN;
+signed return SIGNED;
+short return SHORT;
+unsigned return UNSIGNED;
+void return VOID;
+while return WHILE;
+ /* reserved words end */
+
+ /* identifiers begin */
+_|{letter}(_|{letter}|{digit})* return ID;
+ /* identifiers end */
+
+ /* character constants begin */
 '{letter}'    |
 '{digit}'     |
 '{sp}'        |
@@ -88,8 +115,9 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
     handle_error(E_ESCAPE_SEQ, yytext, yylineno);
     return UNRECOGNIZED;
 }
+ /* character constants end */
 
- /* rules for string constants */
+ /* string constants begin */
 \"([^"]|\\\")*\" {
     BEGIN(STRING);
     /* create storage for string literal and then push it back for re-scanning
@@ -143,6 +171,7 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
     handle_error(E_INVALID_STRING, ((struct String *) yylval)->str, yylineno);
     return UNRECOGNIZED;
 }
+ /* string constants end */
 
 . return UNRECOGNIZED;
 %%
