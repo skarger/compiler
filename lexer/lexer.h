@@ -13,14 +13,15 @@ enum lexer_error {
     E_NOT_OCTAL = -2,
     E_MALLOC = -3,
     E_NEWLINE = -4,
-    E_INVALID_STRING = -5
+    E_INVALID_STRING = -5,
+    E_INVALID_ID = -6
 };
 
 enum token {
     UNRECOGNIZED = 1,
     CHAR_CONSTANT = 2,
     STRING_CONSTANT = 3,
-    ID,
+    IDENTIFIER,
     BREAK,
     CHAR,
     CONTINUE,
@@ -44,10 +45,10 @@ struct Character {
 };
 
 struct String {
-    char *str;
+    char *str; /* pointer to the beginning of the string */
     char *current; /* pointer to an arbitrary character in str, used for construction */
-    int length;
-    enum Boolean valid;
+    int length; /* the length of the string */
+    enum Boolean valid; /* flag for whether str is valid by the standards of CSCI-E95 C */
 };
 
 

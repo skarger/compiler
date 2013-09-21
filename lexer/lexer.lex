@@ -89,7 +89,17 @@ while return WHILE;
  /* reserved words end */
 
  /* identifiers begin */
-_|{letter}(_|{letter}|{digit})* return ID;
+(_|{letter}|{digit})+ {
+    if (yytext[0] >= '0' && yytext[0] <= '9') {
+        handle_error(E_INVALID_ID, yytext, yylineno);
+        return UNRECOGNIZED;
+    }
+    yylval = (YYSTYPE) create_string(yyleng);
+    strncpy( ((struct String *) yylval)->str, yytext, yyleng );
+    ((struct String *) yylval)->current = ((struct String *) yylval)->str + yyleng;
+    *( ((struct String *) yylval)->current ) = '\0';
+    return IDENTIFIER;
+}
  /* identifiers end */
 
  /* character constants begin */
@@ -178,11 +188,25 @@ _|{letter}(_|{letter}|{digit})* return ID;
 
  /* string constants */
 
+/*
+ * create_string
+ * Purpose:
+ *      Construct a string.
+ * Parameters:
+ *      len - the length of string. This function will allocate memory for len characters
+ *          plus a null byte.
+ * Returns:
+ *      A pointer to the struct String. The contained string will be initially null.
+ * Side effects:
+ *      Allocates memory on the heap.
+ */
 struct String *create_string(int len) {
     struct String *ss;
     emalloc((void **) &ss, sizeof(struct String));
     emalloc((void **) &(ss->str), len + 1);
-    /* current is used to append chars to string so set it equal to str initially */
+    /* initialize to the empty string */
+    *(ss->str) = '\0';
+    /* current is used to append chars so set it equal to str initially */
     ss->current = ss->str;
     ss->valid = TRUE;
     return ss;
@@ -196,11 +220,11 @@ struct String *create_string(int len) {
  * Purpose:
  *      Store a character constant in and return it.
  * Parameters:
- *      c - the character value
+ *      c - the character value.
  * Returns:
- *      A pointer to the struct Character containing this constant
+ *      A pointer to the struct Character containing this constant.
  * Side effects:
- *      Allocates memory on the heap
+ *      Allocates memory on the heap.
  */
 struct Character *create_character(char c) {
     struct Character *sc;
@@ -331,6 +355,9 @@ void handle_error(enum lexer_error e, char *data, int line) {
             return;
         case E_INVALID_STRING:
             error(0, 0, "line %d: invalid string literal: %s", line, data);
+            return;
+        case E_INVALID_ID:
+            error(0, 0, "line %d: invalid identifier: %s", line, data);
             return;
         default:
             return;

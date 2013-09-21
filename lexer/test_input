@@ -24,3 +24,17 @@ embedded newline in the same string!"
 /*
  * multi-line comment
  */
+identifiers
+i j k x1 x2 a_var
+snake_case CamelCase lowerCamelCase
+_nothing_to_see_here
+_123
+1_not_ok
+
+reserved_words
+break char continue do else for goto if int long
+return signed short unsigned void while
+
+not_reserved_words
+Break Char Continue Do Else For Goto If Int Long
+Return Signed Short Unsigned Void While
