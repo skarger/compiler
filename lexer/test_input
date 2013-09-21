@@ -14,4 +14,13 @@ should provoke errors"
 "invalid \escape sequence and
 embedded newline in the same string!"
 'c'
-
+/* comment */
+/* * */
+/**/
+/*" comment that looks like a string "*/
+"/* string that looks like a comment */"
+/* " ' */
+/* one *//* two */
+/*
+ * multi-line comment
+ */

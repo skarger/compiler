@@ -37,6 +37,11 @@ digit [0-9]
 sp [ ]
 ws [ \v\f\t]
 nl \r?\n
+start_comment \/\*
+end_comment \*\/
+chars_within_comment ([^*])|(\*[^/])
+comment {start_comment}({chars_within_comment})*{end_comment}
+
 
  /* graphic chars: ! # % ^ & * ( ) \ - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
 graphic [!#%^&*()\\\-_+=~\[\]|;:"{},.<>/?$@`]
@@ -59,6 +64,7 @@ invalid_esc \\[^ntbrfv\\'"a?0-7]
  /* rules for character constants */
 {nl}+ ; /* do nothing with newline, using yylineno */
 {ws}+ ; /* do nothing */
+{comment} /* do nothing */
 
 '{letter}'    |
 '{digit}'     |
