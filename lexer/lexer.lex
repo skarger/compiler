@@ -145,10 +145,15 @@ while return WHILE;
     return UNRECOGNIZED;
 }
  /* any char not matched above is not part of the accepted character set */
- /* this will not catch multibyte chars. they will error more generically */
-'.+' {
-    handle_error(E_INVALID_CHAR, yytext, yylineno);
-    return UNRECOGNIZED;
+''|'''|'[^']+' {
+    if (yyleng == 2) {
+        /* we have '' */
+        handle_error(E_EMPTY_CHAR, yytext, yylineno);
+        return UNRECOGNIZED;
+    } else {
+        handle_error(E_INVALID_CHAR, yytext, yylineno);
+        return UNRECOGNIZED;
+    }
 }
 
  /* character constants end */
@@ -425,6 +430,9 @@ void handle_error(enum lexer_error e, char *data, int line) {
             return;
         case E_INVALID_CHAR:
             error(0, 0, "line %d: invalid character: %s", line, data);
+            return;
+        case E_EMPTY_CHAR:
+            error(0, 0, "line %d: empty character constant: %s", line, data);
             return;
         default:
             return;

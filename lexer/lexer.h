@@ -20,7 +20,8 @@ enum lexer_error {
     E_NEWLINE = -4,
     E_INVALID_STRING = -5,
     E_INVALID_ID = -6,
-    E_INVALID_CHAR = -7
+    E_INVALID_CHAR = -7,
+    E_EMPTY_CHAR = -8
 };
 
 enum integer_type {
