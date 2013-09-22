@@ -1,13 +1,13 @@
 /*
  * lexer.lex
- * Specification for the (f)lex generated lexer for the CSCI-E95 source language,
- * which is a simplified version of the ISO C language.
+ * Specification for the (f)lex generated lexer for the CSCI-E95 source
+ * language, which is a simplified version of the ISO C language.
  *
- * Certain tokens are uniquely specified: reserved words, operators, and separators.
+ * Certain tokens are uniquely specified: reserved words, operators, separators.
  *
  * Other tokens can take on arbitrary values:
- *      identifiers are sequences of letters, digits, and underscores.
- *      constants (also known as literals) are integers, characters, and strings.
+ *  identifiers are sequences of letters, digits, and underscores.
+ *  constants (also known as literals) are integers, characters, and strings.
  * This file contains helper routines to create structures to be returned to the
  * calling program containing data for those variable-value tokens.
  */
@@ -31,34 +31,41 @@ YYSTYPE yylval;
 struct String *create_string(int len);
 
 %}
-
+ /* basic chars */
 letter [A-Za-z]
 digit [0-9]
 sp [ ]
+ /* rules below rely on ws not including newlines */
 ws [ \v\f\t]
 nl \r?\n
+
+ /* graphic chars: */
+ /* ! # % ^ & * ( ) \ - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
+ /* keep quote and apostrophe separate because of their use in constants */
+graphic [!#%^&*()\\\-_+=~\[\]|;:'"{},.<>/?$@`]
+graphic_no_quote [!#%^&*()\\\-_+=~\[\]|;:'{},.<>/?$@`]
+graphic_no_apostrophe [!#%^&*()\\\-_+=~\[\]|;:"{},.<>/?$@`]
+
+
+ /* octal escapes
+  * From the C specification:
+  * "The value of the octal or hexadecimal escape sequence must be in the range 
+  * of representable values for type unsigned char for a character constant and
+  * type wchar_t for a wide-character constant."
+  * This lexer does not accomodate wide-characters.
+  */
+octal_esc \\[0-3]?[0-7]?[0-7]
+ /* character escape codes may be n, t, b, r, f, v, \, ', ", a, and ?. */
+char_esc \\[ntbrfv\\'"a?]
+invalid_esc \\[^ntbrfv\\'"a?0-7]
+
+ /* comments */
 start_comment \/\*
 end_comment \*\/
 chars_within_comment ([^*])|(\*[^/])
 comment {start_comment}({chars_within_comment})*{end_comment}
 
 
- /* graphic chars: ! # % ^ & * ( ) \ - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
-graphic [!#%^&*()\\\-_+=~\[\]|;:"{},.<>/?$@`]
-
- /* From the C specification:
-  * "The value of the octal or hexadecimal escape sequence must be in the range of 
-  * representable values for type unsigned char for a character constant and type wchar_t 
-  * for a wide-character constant."
-  * This lexer does not accomodate wide-characters
-  */
-octal_esc \\[0-3]?[0-7]?[0-7]
- /* Character escape code may be n, t, b, r, f, v, \, ', ", a, and ?.
-  * Notably this does not allow the "identity" escape of non-codes, for example '\c'
-  */
-char_esc \\[ntbrfv\\'"a?]
-
-invalid_esc \\[^ntbrfv\\'"a?0-7]
 
 
 
@@ -89,42 +96,54 @@ while return WHILE;
  /* reserved words end */
 
  /* identifiers begin */
-(_|{letter}|{digit})+ {
-    if (yytext[0] >= '0' && yytext[0] <= '9') {
-        handle_error(E_INVALID_ID, yytext, yylineno);
-        return UNRECOGNIZED;
-    }
+(_|{letter})(_|{letter}|{digit})* {
     yylval = (YYSTYPE) create_string(yyleng);
     strncpy( ((struct String *) yylval)->str, yytext, yyleng );
-    ((struct String *) yylval)->current = ((struct String *) yylval)->str + yyleng;
+    ((struct String *) yylval)->current =
+        ((struct String *) yylval)->str + yyleng;
     *( ((struct String *) yylval)->current ) = '\0';
     return IDENTIFIER;
+}
+ /* error on string that starts with a number but looks like an identifier */
+({digit}+)(_|{letter})+(_|{letter}|{digit})* {
+    handle_error(E_INVALID_ID, yytext, yylineno);
+    return UNRECOGNIZED;
 }
  /* identifiers end */
 
  /* character constants begin */
-'{letter}'    |
-'{digit}'     |
-'{sp}'        |
-'{graphic}'   {
+'{letter}'                |
+'{digit}'                 |
+'{sp}'                    |
+'{graphic_no_apostrophe}' {
     yylval = (YYSTYPE) create_character(yytext[1]);
     return CHAR_CONSTANT;
 }
 '{char_esc}'  {
-    yylval = (YYSTYPE) create_character( (char) convert_single_escape(yytext[2]) );
+    yylval =
+        (YYSTYPE) create_character( (char) convert_single_escape(yytext[2]) );
     return CHAR_CONSTANT;
 }
 '{octal_esc}' {
-    /* subtracting the two apostrophes and slash, the num of octal digits is len - 3 */
+    /* minus the two apostrophes and slash, num of octal digits is len - 3 */
     int n_digits = yyleng - 3;
-    char *start = yytext + 2; /* the first octal digit is after the first ' and the \ */
-    yylval = (YYSTYPE) create_character( (char) convert_octal_escape( start, n_digits ));
+    /* the first octal digit is after the first ' and the \ */
+    char *start = yytext + 2;
+    yylval =
+        (YYSTYPE) create_character((char)convert_octal_escape(start, n_digits));
     return CHAR_CONSTANT;
 }
 '{invalid_esc}' {
     handle_error(E_ESCAPE_SEQ, yytext, yylineno);
     return UNRECOGNIZED;
 }
+ /* any char not matched above is not part of the accepted character set */
+ /* this will not catch multibyte chars. they will error more generically */
+'.' {
+    handle_error(E_INVALID_CHAR, yytext, yylineno);
+    return UNRECOGNIZED;
+}
+
  /* character constants end */
 
  /* string constants begin */
@@ -137,17 +156,21 @@ while return WHILE;
     yylval = (YYSTYPE) create_string(yyleng);
     yyless(1);
 }
-<STRING>[^"\n\\] {
+
+<STRING>{letter}|{digit}|{ws}|{graphic_no_quote} {
     /* this is tricky:
-     * yylval points to a struct String that we created upon finding the string literal
-     * yylval's current member points to the end of its str member where we want to append
-     * so we append yytext's value and increment current to where we want to append next
+     * yylval points to a struct String that we created
+     *      upon finding the string literal
+     * yylval's current member points to the end of its str member
+    *       where we want to append
+     * so we append yytext's value and then increment current
      */
     *( ((struct String *) yylval)->current++ ) = *yytext;
 }
 <STRING>{char_esc} {
     /* yytext is something like \n */
-    *( ((struct String *) yylval)->current++ ) = (char) convert_single_escape(yytext[1]);
+    *( ((struct String *) yylval)->current++ ) =
+        (char) convert_single_escape(yytext[1]);
 }
 <STRING>{octal_esc} {
     /* yytext is something like \377 */
@@ -157,9 +180,12 @@ while return WHILE;
     *( ((struct String *) yylval)->current++ ) = 
         (char) convert_octal_escape( start, n_digits );
 }
-<STRING>\n {
+<STRING>{nl} {
     /* copy the invalid newline to the string but mark it as invalid */
     ((struct String *) yylval)->valid = FALSE;
+    if (*yytext == '\r') {
+        *( ((struct String *) yylval)->current++ ) = *yytext++;
+    }
     *( ((struct String *) yylval)->current++ ) = *yytext;
     handle_error(E_NEWLINE, "", yylineno);
 }
@@ -169,6 +195,13 @@ while return WHILE;
     *( ((struct String *) yylval)->current++ ) = yytext[0];
     *( ((struct String *) yylval)->current++ ) = yytext[1];
     handle_error(E_ESCAPE_SEQ, "", yylineno);
+}
+<STRING>[^"] {
+    /* any other character is not in the accepted input character set */
+    /* copy the char to the string but mark it as invalid */
+    ((struct String *) yylval)->valid = FALSE;
+    *( ((struct String *) yylval)->current++ ) = *yytext;
+    handle_error(E_INVALID_CHAR, yytext, yylineno);
 }
 <STRING>\" {
     /* if we're in a string then a non-escaped " means end of string */
@@ -193,10 +226,10 @@ while return WHILE;
  * Purpose:
  *      Construct a string.
  * Parameters:
- *      len - the length of string. This function will allocate memory for len characters
- *          plus a null byte.
+ *      len - the length of string. This function will allocate memory for
+ *          len characters plus a null byte.
  * Returns:
- *      A pointer to the struct String. The contained string will be initially null.
+ *      A pointer to the struct String. The str member will be initially null.
  * Side effects:
  *      Allocates memory on the heap.
  */
@@ -240,7 +273,7 @@ struct Character *create_character(char c) {
  * Parameters:
  *      c - the character value
  * Returns:
- *      An escape character value. For example, given 'n' return the newline '\n'.
+ *      An escape character value. E.g. given 'n' return the newline '\n'.
  * Side effects:
  *      None
  */
@@ -277,9 +310,9 @@ int convert_single_escape(char c) {
 /*
  * convert_octal_escape
  * Purpose:
- *      Transform a string representing an octal escape sequence into the char value.
+ *      Transform an octal escape sequence string into the intended char value.
  * Parameters:
- *      seq - the sequence of chars in the form 377, with 1 to 3 octal digit values
+ *      seq - the sequence of chars in the form 377, with 1-3 octal digit values
  *      len - the number of digits
  * Returns:
  *      An escape character value. For example, given "142" return 'b'.
@@ -310,7 +343,7 @@ int convert_octal_escape(char *seq, int n_digits) {
  * Purpose:
  *      Allocate heap memory and store it in the passed in pointer.
  * Parameters:
- *      ptr - a pointer to the pointer that should be set with malloc's return value.
+ *      ptr - pointer to pointer that should be set to malloc's return value.
  *      n - the number of bytes to allocate.
  * Returns:
  *      None
@@ -329,9 +362,9 @@ void emalloc(void **ptr, size_t n) {
  * Purpose:
  *      Handle an error caught in the calling method.
  * Parameters:
- *      e - the error value. if non-zero the program will exit with e as the status
+ *      e - the error value. if non-zero the program will exit with status e
  *      data - string that will be inserted into the message printed to stderr
- *      line - line number that caused error, if applicable (e.g. from input source)
+ *      line - line number causing error, if applicable (e.g. from input source)
  * Returns:
  *      None
  * Side effects:
@@ -358,6 +391,9 @@ void handle_error(enum lexer_error e, char *data, int line) {
             return;
         case E_INVALID_ID:
             error(0, 0, "line %d: invalid identifier: %s", line, data);
+            return;
+        case E_INVALID_CHAR:
+            error(0, 0, "line %d: invalid character: %s", line, data);
             return;
         default:
             return;

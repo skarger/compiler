@@ -1,6 +1,8 @@
-'a' '\n' '\'' '2' '\e'
-'\\' '\?' '\142' '\8'
-'\0' '\00' '\000' '\76' '\076'
+'a' '\'' '2' '"' ''
+'\\' '\?' '\142' '\n'
+'\0' '\00' '\000' '\75' '\076'
+'\e' ''' '\8'
+"unescaped null character should error" ''
 "this is a string"
 "two""strings"
 "a string with a\ttab and\na newline"
@@ -8,7 +10,9 @@
 "digits \76\758 should not be treated as octal"
 "a \n c"
 ""
+"graphic characters: !#%^&*()\-_+=~[]|;:'{},.<>/?$@` and also \"."
 "strings cannot have fak\e escape sequences either"
+"$ is OK but ¥ is not"
 "embedded newlines
 should provoke errors"
 "invalid \escape sequence and
@@ -29,7 +33,9 @@ i j k x1 x2 a_var
 snake_case CamelCase lowerCamelCase
 _nothing_to_see_here
 _123
+123
 1_not_ok
+0_0
 
 reserved_words
 break char continue do else for goto if int long

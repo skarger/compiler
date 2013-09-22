@@ -14,7 +14,8 @@ enum lexer_error {
     E_MALLOC = -3,
     E_NEWLINE = -4,
     E_INVALID_STRING = -5,
-    E_INVALID_ID = -6
+    E_INVALID_ID = -6,
+    E_INVALID_CHAR = -7
 };
 
 enum token {
