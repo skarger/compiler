@@ -88,6 +88,32 @@ while (0 != token) {
         case WHILE:
             printf("reserved word: %s\n", get_token_name(token));
             break;
+        case EXCLAMATION_POINT:
+        case PERCENT:
+        case CARET:
+        case AMPERSAND:
+        case ASTERISK:
+        case HYPHEN_MINUS:
+        case PLUS:
+        case EQUALS:
+        case PIPE:
+        case LESS_THAN:
+        case GREATER_THAN:
+        case SLASH:
+        case QUESTION_MARK:
+            printf("operator: %s\n", get_token_name(token));
+            break;
+        case LEFT_PAREN:
+        case RIGHT_PAREN:
+        case LEFT_BRACKET:
+        case RIGHT_BRACKET:
+        case LEFT_BRACE:
+        case RIGHT_BRACE:
+        case COMMA:
+        case SEMICOLON:
+        case COLON:
+            printf("separator: %s\n", get_token_name(token));
+            break;
         default:
             break;
     }
@@ -152,6 +178,28 @@ char *get_token_name(int token) {
         CASE_FOR(BREAK);
         CASE_FOR(VOID);
         CASE_FOR(WHILE);
+        CASE_FOR(EXCLAMATION_POINT);
+        CASE_FOR(PERCENT);
+        CASE_FOR(CARET);
+        CASE_FOR(AMPERSAND);
+        CASE_FOR(ASTERISK);
+        CASE_FOR(HYPHEN_MINUS);
+        CASE_FOR(PLUS);
+        CASE_FOR(EQUALS);
+        CASE_FOR(PIPE);
+        CASE_FOR(LESS_THAN);
+        CASE_FOR(GREATER_THAN);
+        CASE_FOR(SLASH);
+        CASE_FOR(QUESTION_MARK);
+        CASE_FOR(LEFT_PAREN);
+        CASE_FOR(RIGHT_PAREN);
+        CASE_FOR(LEFT_BRACKET);
+        CASE_FOR(RIGHT_BRACKET);
+        CASE_FOR(LEFT_BRACE);
+        CASE_FOR(RIGHT_BRACE);
+        CASE_FOR(COMMA);
+        CASE_FOR(SEMICOLON);
+        CASE_FOR(COLON);
     #undef CASE_FOR
         default: return "";
   }

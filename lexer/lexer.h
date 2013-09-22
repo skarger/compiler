@@ -58,7 +58,29 @@ enum token {
     SHORT,
     UNSIGNED,
     VOID,
-    WHILE
+    WHILE,
+    EXCLAMATION_POINT,
+    PERCENT,
+    CARET,
+    AMPERSAND,
+    ASTERISK,
+    HYPHEN_MINUS,
+    PLUS,
+    EQUALS,
+    PIPE,
+    LESS_THAN,
+    GREATER_THAN,
+    SLASH,
+    QUESTION_MARK,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
+    LEFT_BRACE,
+    RIGHT_BRACE,
+    COMMA,
+    SEMICOLON,
+    COLON
 };
 
 struct Character {

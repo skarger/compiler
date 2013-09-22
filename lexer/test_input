@@ -45,14 +45,16 @@ _123
 123 0 456,789
 -1 2-1 2+2
 01 3.14 1. .1
+"integer suffixes are not allowed and should be marked as invalid identifiers"
+2147483647l 65536u
 65535
 65536
 2147483647
 2147483648
 4294967295
 4294967296
+"strings with overflowing integers should be fine"
 "4294967296"
-
 
 reserved_words
 break char continue do else for goto if int long
@@ -61,3 +63,8 @@ return signed short unsigned void while
 not_reserved_words
 Break Char Continue Do Else For Goto If Int Long
 Return Signed Short Unsigned Void While
+
+operators
+!   %   ^   &   *   -   +   =   ~   |   <   >   /   ?
+separators
+(   )   [   ]   {   }   ,   ;   :

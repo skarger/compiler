@@ -110,6 +110,41 @@ while return WHILE;
 }
  /* identifiers end */
 
+/* operators and separators begin */
+ /* must escape: " \ [ ] ^ - ? . * + | ( ) $ / { } % < > */
+
+ /* simple operators begin */
+ /*   !   %   ^   &   *   -   +   =   ~   |   <   >   /   ?   */
+!  return EXCLAMATION_POINT;
+\% return PERCENT;
+\^ return CARET;
+&  return AMPERSAND;
+\* return ASTERISK;
+\- return HYPHEN_MINUS;
+\+ return PLUS;
+=  return EQUALS;
+\| return PIPE;
+\< return LESS_THAN;
+\> return GREATER_THAN;
+\/ return SLASH;
+\? return QUESTION_MARK;
+ /* simple operators end */
+
+ /* other separators begin */
+ /*   (   )   [   ]   {   }   ,   ;   :   */
+\( return LEFT_PAREN;
+\) return RIGHT_PAREN;
+\[ return LEFT_BRACKET;
+\] return RIGHT_BRACKET;
+\{ return LEFT_BRACE;
+\} return RIGHT_BRACE;
+,  return COMMA;
+;  return SEMICOLON;
+:  return COLON;
+ /* other separators end */
+
+/* operators and separators end */
+
  /* integral constants begin */
 0 |
 [1-9][0-9]* {
