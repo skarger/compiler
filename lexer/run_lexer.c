@@ -90,6 +90,10 @@ while (0 != token) {
             break;
     }
 
+    if (token == NUMBER_CONSTANT) {
+
+    }
+
     if (token == CHAR_CONSTANT) {
         character = (struct Character *) yylval;
         printf("token: CHARACTER CONSTANT value: %c\n", character->c);

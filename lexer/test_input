@@ -1,8 +1,14 @@
 'a' '\'' '2' '"' ''
 '\\' '\?' '\142' '\n'
 '\0' '\00' '\000' '\75' '\076'
-'\e' ''' '\8'
-"unescaped null character should error" ''
+'\e'
+'\8'
+'¥'
+'''
+'ab'
+"unescaped null and del characters are not in the accepted input set"
+''
+''
 "this is a string"
 "two""strings"
 "a string with a\ttab and\na newline"
@@ -10,7 +16,7 @@
 "digits \76\758 should not be treated as octal"
 "a \n c"
 ""
-"graphic characters: !#%^&*()\-_+=~[]|;:'{},.<>/?$@` and also \"."
+"graphic characters: ! # % ^ & * ( ) - _ + = ~ [ ] \\ | ; : ' \" { } , . < > / ? $ @ `"
 "strings cannot have fak\e escape sequences either"
 "$ is OK but ¥ is not"
 "embedded newlines

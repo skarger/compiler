@@ -28,7 +28,6 @@
 /* extern YYSTYPE yylval; */
 YYSTYPE yylval;
 
-struct String *create_string(int len);
 
 %}
  /* basic chars */
@@ -40,7 +39,7 @@ ws [ \v\f\t]
 nl \r?\n
 
  /* graphic chars: */
- /* ! # % ^ & * ( ) \ - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
+ /* ! # % ^ & * ( ) - _ + = ~ [ ] \ | ; : ' " { } , . < > / ? $ @ ` */
  /* keep quote and apostrophe separate because of their use in constants */
 graphic [!#%^&*()\\\-_+=~\[\]|;:'"{},.<>/?$@`]
 graphic_no_quote [!#%^&*()\\\-_+=~\[\]|;:'{},.<>/?$@`]
@@ -111,6 +110,14 @@ while return WHILE;
 }
  /* identifiers end */
 
+ /* integral constants begin */
+0 |
+[1-9][0-9]* {
+    printf("found an integer\n");
+    return NUMBER_CONSTANT;
+}
+ /* integral constants end */
+
  /* character constants begin */
 '{letter}'                |
 '{digit}'                 |
@@ -139,7 +146,7 @@ while return WHILE;
 }
  /* any char not matched above is not part of the accepted character set */
  /* this will not catch multibyte chars. they will error more generically */
-'.' {
+'.+' {
     handle_error(E_INVALID_CHAR, yytext, yylineno);
     return UNRECOGNIZED;
 }
@@ -219,6 +226,30 @@ while return WHILE;
 . return UNRECOGNIZED;
 %%
 
+/* integral constants */
+struct Number *create_number(char *digit_str) {
+    struct Number *n;
+    emalloc((void **) &n, sizeof(struct Number));
+    errno = 0;
+    n->value = strtoul(digit_str, NULL, 10);
+    if (ERANGE == errno || n->value > 4294967295ul) {
+        /*
+        * Integer constant was too large for unsigned long. value will be
+        * MAX_ULONG, as defined by strtoul.
+        */
+
+        /* Do something about overflow here! */
+    }  else if (n->value > 2147483647) {
+        n->type = UNSIGNED_LONG_T;
+    } else if (n->value > 65535) {
+        n->type = INT_T;
+    } else {
+        n->type = SHORT_T;
+    }
+
+    return n;
+}
+
  /* string constants */
 
 /*
@@ -234,15 +265,15 @@ while return WHILE;
  *      Allocates memory on the heap.
  */
 struct String *create_string(int len) {
-    struct String *ss;
-    emalloc((void **) &ss, sizeof(struct String));
-    emalloc((void **) &(ss->str), len + 1);
+    struct String *s;
+    emalloc((void **) &s, sizeof(struct String));
+    emalloc((void **) &(s->str), len + 1);
     /* initialize to the empty string */
-    *(ss->str) = '\0';
+    *(s->str) = '\0';
     /* current is used to append chars so set it equal to str initially */
-    ss->current = ss->str;
-    ss->valid = TRUE;
-    return ss;
+    s->current = s->str;
+    s->valid = TRUE;
+    return s;
 }
 
 
