@@ -40,10 +40,12 @@ FILE *input, *output;
 
 int token;
 
+struct Number *number;
 struct Character *character;
 struct String *string;
 
 char *get_token_name(int token);
+char *get_integer_type(enum integer_type type);
 
     /* Figure out whether we're using stdin/stdout or file in/file out. */
     if (argc < 2 || !strcmp("-", argv[1])) {
@@ -91,7 +93,9 @@ while (0 != token) {
     }
 
     if (token == NUMBER_CONSTANT) {
-
+        number = (struct Number *) yylval;
+        printf("token: NUMBER CONSTANT type: %s value: %u\n",
+                    get_integer_type(number->type), number->value);
     }
 
     if (token == CHAR_CONSTANT) {
@@ -129,26 +133,41 @@ while (0 != token) {
  *
  */
 char *get_token_name(int token) {
-  switch (token) {
-#define CASE_FOR(token) case token: return #token
-    CASE_FOR(IDENTIFIER);
-    CASE_FOR(CHAR);
-    CASE_FOR(CONTINUE);
-    CASE_FOR(DO);
-    CASE_FOR(ELSE);
-    CASE_FOR(FOR);
-    CASE_FOR(GOTO);
-    CASE_FOR(IF);
-    CASE_FOR(INT);
-    CASE_FOR(LONG);
-    CASE_FOR(RETURN);
-    CASE_FOR(SHORT);
-    CASE_FOR(SIGNED);
-    CASE_FOR(UNSIGNED);
-    CASE_FOR(BREAK);
-    CASE_FOR(VOID);
-    CASE_FOR(WHILE);
-#undef CASE_FOR
-    default: return "";
+    switch (token) {
+    #define CASE_FOR(token) case token: return #token
+        CASE_FOR(IDENTIFIER);
+        CASE_FOR(CHAR);
+        CASE_FOR(CONTINUE);
+        CASE_FOR(DO);
+        CASE_FOR(ELSE);
+        CASE_FOR(FOR);
+        CASE_FOR(GOTO);
+        CASE_FOR(IF);
+        CASE_FOR(INT);
+        CASE_FOR(LONG);
+        CASE_FOR(RETURN);
+        CASE_FOR(SHORT);
+        CASE_FOR(SIGNED);
+        CASE_FOR(UNSIGNED);
+        CASE_FOR(BREAK);
+        CASE_FOR(VOID);
+        CASE_FOR(WHILE);
+    #undef CASE_FOR
+        default: return "";
   }
+}
+
+char *get_integer_type(enum integer_type type) {
+    switch (type) {
+    #define CASE_FOR(token) case token: return #token
+        CASE_FOR(OVERFLOW);
+        CASE_FOR(SIGNED_SHORT);
+        CASE_FOR(UNSIGNED_SHORT);
+        CASE_FOR(SIGNED_INT);
+        CASE_FOR(UNSIGNED_INT);
+        CASE_FOR(SIGNED_LONG);
+        CASE_FOR(UNSIGNED_LONG);
+    #undef CASE_FOR
+        default: return "";
+    }
 }

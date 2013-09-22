@@ -39,9 +39,20 @@ i j k x1 x2 a_var
 snake_case CamelCase lowerCamelCase
 _nothing_to_see_here
 _123
-123
 1_not_ok
 0_0
+"integral constants"
+123 0 456,789
+-1 2-1 2+2
+01 3.14 1. .1
+65535
+65536
+2147483647
+2147483648
+4294967295
+4294967296
+"4294967296"
+
 
 reserved_words
 break char continue do else for goto if int long

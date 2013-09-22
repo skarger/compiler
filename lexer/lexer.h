@@ -21,14 +21,20 @@ enum lexer_error {
     E_INVALID_STRING = -5,
     E_INVALID_ID = -6,
     E_INVALID_CHAR = -7,
-    E_EMPTY_CHAR = -8
+    E_EMPTY_CHAR = -8,
+    E_OCTAL = -9,
+    E_FLOAT = -10,
+    E_INTEGER_OVERFLOW = -11
 };
 
 enum integer_type {
-    SHORT_T,
-    INT_T,
-    LONG_T,
-    UNSIGNED_LONG_T
+    OVERFLOW,
+    SIGNED_SHORT,
+    UNSIGNED_SHORT,
+    SIGNED_INT,
+    UNSIGNED_INT,
+    SIGNED_LONG,
+    UNSIGNED_LONG
 };
 
 enum token {
@@ -68,7 +74,6 @@ struct String {
 
 struct Number {
     unsigned long value;
-    int overflow;
     enum integer_type type;
 };
 

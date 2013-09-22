@@ -113,8 +113,21 @@ while return WHILE;
  /* integral constants begin */
 0 |
 [1-9][0-9]* {
-    printf("found an integer\n");
+    yylval = (YYSTYPE) create_number(yytext);
+    if ( ((struct Number *) yylval)->type == OVERFLOW ) {
+        handle_error(E_INTEGER_OVERFLOW, yytext, yylineno);
+        return UNRECOGNIZED;
+    }
     return NUMBER_CONSTANT;
+}
+0[0-9]+ {
+    handle_error(E_OCTAL, yytext, yylineno);
+    return UNRECOGNIZED;
+}
+[0-9]+\.[0-9]* |
+[0-9]*\.[0-9]+ {
+    handle_error(E_FLOAT, yytext, yylineno);
+    return UNRECOGNIZED;
 }
  /* integral constants end */
 
@@ -232,24 +245,39 @@ while return WHILE;
 %%
 
 /* integral constants */
+
+/*
+ * create_number
+ * Purpose:
+ *      Construct a number.
+ * Parameters:
+ *      digit_str - string of digits representing the number.
+ * Returns:
+ *      A pointer to the struct Number containing the value and integer type.
+ *      The type member will be set to the minimum size required by the value.
+ *      The type is assumed to be signed unless the value implies unsigned.
+ * Side effects:
+ *      Allocates memory on the heap.
+*/
 struct Number *create_number(char *digit_str) {
     struct Number *n;
     emalloc((void **) &n, sizeof(struct Number));
     errno = 0;
     n->value = strtoul(digit_str, NULL, 10);
+    /* default n->type to signed unless the value implies unsigned */
+    /* the parser can change n->type to unsigned if specified */
     if (ERANGE == errno || n->value > 4294967295ul) {
         /*
         * Integer constant was too large for unsigned long. value will be
         * MAX_ULONG, as defined by strtoul.
         */
-
-        /* Do something about overflow here! */
+        n->type = OVERFLOW;
     }  else if (n->value > 2147483647) {
-        n->type = UNSIGNED_LONG_T;
+        n->type = UNSIGNED_LONG;
     } else if (n->value > 65535) {
-        n->type = INT_T;
+        n->type = SIGNED_INT;
     } else {
-        n->type = SHORT_T;
+        n->type = SIGNED_SHORT;
     }
 
     return n;
@@ -433,6 +461,15 @@ void handle_error(enum lexer_error e, char *data, int line) {
             return;
         case E_EMPTY_CHAR:
             error(0, 0, "line %d: empty character constant: %s", line, data);
+            return;
+        case E_OCTAL:
+            error(0, 0, "line %d: octal constants unsupported: %s", line, data);
+            return;
+        case E_FLOAT:
+            error(0, 0, "line %d: floating point unsupported: %s", line, data);
+            return;
+        case E_INTEGER_OVERFLOW:
+            error(0, 0, "line %d: integer constant too large: %s", line, data);
             return;
         default:
             return;
