@@ -88,19 +88,19 @@ while (0 != token) {
         case WHILE:
             printf("reserved word: %s\n", get_token_name(token));
             break;
-        case EXCLAMATION_POINT:
-        case PERCENT:
-        case CARET:
+        case LOGICAL_NOT:
+        case REMAINDER:
+        case BITWISE_XOR:
         case AMPERSAND:
         case ASTERISK:
-        case HYPHEN_MINUS:
+        case MINUS:
         case PLUS:
-        case EQUALS:
-        case PIPE:
+        case ASSIGN:
+        case BITWISE_OR:
         case LESS_THAN:
         case GREATER_THAN:
-        case SLASH:
-        case QUESTION_MARK:
+        case DIVIDE:
+        case TERNARY_CONDITIONAL:
             printf("operator: %s\n", get_token_name(token));
             break;
         case LEFT_PAREN:
@@ -113,6 +113,30 @@ while (0 != token) {
         case SEMICOLON:
         case COLON:
             printf("separator: %s\n", get_token_name(token));
+            break;
+        case ADD_ASSIGN:
+        case SUBTRACT_ASSIGN:
+        case MULTIPLY_ASSIGN:
+        case DIVIDE_ASSIGN:
+        case REMAINDER_ASSIGN:
+        case BITWISE_LSHIFT_ASSIGN:
+        case BITWISE_RSHIFT_ASSIGN:
+        case BITWISE_AND_ASSIGN:
+        case BITWISE_XOR_ASSSIGN:
+        case BITWISE_OR_ASSIGN:
+            printf("compound assignment operator: %s\n", get_token_name(token));
+            break;
+        case INCREMENT:
+        case DECREMENT:
+        case BITWISE_LSHIFT:
+        case BITWISE_RSHIFT:
+        case LESS_THAN_EQUAL:
+        case GREATER_THAN_EQUAL:
+        case EQUAL:
+        case NOT_EQUAL:
+        case LOGICAL_AND:
+        case LOGICAL_OR:
+            printf("compound operator: %s\n", get_token_name(token));
             break;
         default:
             break;
@@ -178,19 +202,19 @@ char *get_token_name(int token) {
         CASE_FOR(BREAK);
         CASE_FOR(VOID);
         CASE_FOR(WHILE);
-        CASE_FOR(EXCLAMATION_POINT);
-        CASE_FOR(PERCENT);
-        CASE_FOR(CARET);
+        CASE_FOR(LOGICAL_NOT);
+        CASE_FOR(REMAINDER);
+        CASE_FOR(BITWISE_XOR);
         CASE_FOR(AMPERSAND);
         CASE_FOR(ASTERISK);
-        CASE_FOR(HYPHEN_MINUS);
+        CASE_FOR(MINUS);
         CASE_FOR(PLUS);
-        CASE_FOR(EQUALS);
-        CASE_FOR(PIPE);
+        CASE_FOR(ASSIGN);
+        CASE_FOR(BITWISE_OR);
         CASE_FOR(LESS_THAN);
         CASE_FOR(GREATER_THAN);
-        CASE_FOR(SLASH);
-        CASE_FOR(QUESTION_MARK);
+        CASE_FOR(DIVIDE);
+        CASE_FOR(TERNARY_CONDITIONAL);
         CASE_FOR(LEFT_PAREN);
         CASE_FOR(RIGHT_PAREN);
         CASE_FOR(LEFT_BRACKET);
@@ -200,6 +224,26 @@ char *get_token_name(int token) {
         CASE_FOR(COMMA);
         CASE_FOR(SEMICOLON);
         CASE_FOR(COLON);
+        CASE_FOR(ADD_ASSIGN);
+        CASE_FOR(SUBTRACT_ASSIGN);
+        CASE_FOR(MULTIPLY_ASSIGN);
+        CASE_FOR(DIVIDE_ASSIGN);
+        CASE_FOR(REMAINDER_ASSIGN);
+        CASE_FOR(BITWISE_LSHIFT_ASSIGN);
+        CASE_FOR(BITWISE_RSHIFT_ASSIGN);
+        CASE_FOR(BITWISE_AND_ASSIGN);
+        CASE_FOR(BITWISE_XOR_ASSSIGN);
+        CASE_FOR(BITWISE_OR_ASSIGN);
+        CASE_FOR(INCREMENT);
+        CASE_FOR(DECREMENT);
+        CASE_FOR(BITWISE_LSHIFT);
+        CASE_FOR(BITWISE_RSHIFT);
+        CASE_FOR(LESS_THAN_EQUAL);
+        CASE_FOR(GREATER_THAN_EQUAL);
+        CASE_FOR(EQUAL);
+        CASE_FOR(NOT_EQUAL);
+        CASE_FOR(LOGICAL_AND);
+        CASE_FOR(LOGICAL_OR);
     #undef CASE_FOR
         default: return "";
   }

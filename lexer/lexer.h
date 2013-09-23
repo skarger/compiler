@@ -59,19 +59,19 @@ enum token {
     UNSIGNED,
     VOID,
     WHILE,
-    EXCLAMATION_POINT,
-    PERCENT,
-    CARET,
+    LOGICAL_NOT,
+    REMAINDER,
+    BITWISE_XOR,
     AMPERSAND,
     ASTERISK,
-    HYPHEN_MINUS,
+    MINUS,
     PLUS,
-    EQUALS,
-    PIPE,
+    ASSIGN,
+    BITWISE_OR,
     LESS_THAN,
     GREATER_THAN,
-    SLASH,
-    QUESTION_MARK,
+    DIVIDE,
+    TERNARY_CONDITIONAL,
     LEFT_PAREN,
     RIGHT_PAREN,
     LEFT_BRACKET,
@@ -80,7 +80,27 @@ enum token {
     RIGHT_BRACE,
     COMMA,
     SEMICOLON,
-    COLON
+    COLON,
+    ADD_ASSIGN,
+    SUBTRACT_ASSIGN,
+    MULTIPLY_ASSIGN,
+    DIVIDE_ASSIGN,
+    REMAINDER_ASSIGN,
+    BITWISE_LSHIFT_ASSIGN,
+    BITWISE_RSHIFT_ASSIGN,
+    BITWISE_AND_ASSIGN,
+    BITWISE_XOR_ASSSIGN,
+    BITWISE_OR_ASSIGN,
+    INCREMENT,
+    DECREMENT,
+    BITWISE_LSHIFT,
+    BITWISE_RSHIFT,
+    LESS_THAN_EQUAL,
+    GREATER_THAN_EQUAL,
+    EQUAL,
+    NOT_EQUAL,
+    LOGICAL_AND,
+    LOGICAL_OR
 };
 
 struct Character {
@@ -99,12 +119,6 @@ struct Number {
     enum integer_type type;
 };
 
-
-int convert_single_escape(char c);
-int convert_octal_escape(char *seq, int n_digits);
-static inline int isodigit(const char c);
 struct Character *create_character(char c);
 struct String *create_string(int len);
 struct Number *create_number(char *digit_str);
-void handle_error(enum lexer_error e, char *data, int line);
-void emalloc(void **ptr, size_t n);

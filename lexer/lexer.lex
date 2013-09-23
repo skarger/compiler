@@ -24,10 +24,15 @@
 
 #include "lexer.h"
 
-
 /* extern YYSTYPE yylval; */
 YYSTYPE yylval;
 
+/* helpers */
+int convert_single_escape(char c);
+int convert_octal_escape(char *seq, int n_digits);
+static inline int isodigit(const char c);
+void handle_error(enum lexer_error e, char *data, int line);
+void emalloc(void **ptr, size_t n);
 
 %}
  /* basic chars */
@@ -110,25 +115,50 @@ while return WHILE;
 }
  /* identifiers end */
 
-/* operators and separators begin */
+ /* operators and separators begin */
  /* must escape: " \ [ ] ^ - ? . * + | ( ) $ / { } % < > */
 
- /* simple operators begin */
+ /* simple operators */
  /*   !   %   ^   &   *   -   +   =   ~   |   <   >   /   ?   */
-!  return EXCLAMATION_POINT;
-\% return PERCENT;
-\^ return CARET;
+!  return LOGICAL_NOT;
+\% return REMAINDER;
+\^ return BITWISE_XOR;
 &  return AMPERSAND;
 \* return ASTERISK;
-\- return HYPHEN_MINUS;
+\- return MINUS;
 \+ return PLUS;
-=  return EQUALS;
-\| return PIPE;
+=  return ASSIGN;
+\| return BITWISE_OR;
 \< return LESS_THAN;
 \> return GREATER_THAN;
-\/ return SLASH;
-\? return QUESTION_MARK;
- /* simple operators end */
+\/ return DIVIDE;
+\? return TERNARY_CONDITIONAL;
+
+ /* compound assignment operators */
+ /*  +=  -=  *=  /=  %=  <<=  >>=  &=  ^=  |=  */
+\+=   return ADD_ASSIGN;
+\-=   return SUBTRACT_ASSIGN;
+\*=   return MULTIPLY_ASSIGN;
+\/=   return DIVIDE_ASSIGN;
+\%=   return REMAINDER_ASSIGN;
+\<\<= return BITWISE_LSHIFT_ASSIGN;
+\>\>= return BITWISE_RSHIFT_ASSIGN;
+&=    return BITWISE_AND_ASSIGN;
+\^=   return BITWISE_XOR_ASSSIGN;
+\|=   return BITWISE_OR_ASSIGN;
+
+ /* other compound operators */
+ /*  ++  --  <<  >>  <=  >=  ==  !=  &&  ||  */
+\+\+ return INCREMENT;
+\-\- return DECREMENT;
+\<\< return BITWISE_LSHIFT;
+\>\> return BITWISE_RSHIFT;
+\<=  return LESS_THAN_EQUAL;
+\>=  return GREATER_THAN_EQUAL;
+==   return EQUAL;
+!=   return NOT_EQUAL;
+&&   return LOGICAL_AND;
+\|\| return LOGICAL_OR;
 
  /* other separators begin */
  /*   (   )   [   ]   {   }   ,   ;   :   */
@@ -143,7 +173,7 @@ while return WHILE;
 :  return COLON;
  /* other separators end */
 
-/* operators and separators end */
+ /* operators and separators end */
 
  /* integral constants begin */
 0 |

@@ -68,3 +68,14 @@ operators
 !   %   ^   &   *   -   +   =   ~   |   <   >   /   ?
 separators
 (   )   [   ]   {   }   ,   ;   :
+"compound assignment operators"
++=  -=  *=  /=  %=  <<=  >>=  &=  ^=  |=
+i += 1;
+k = i & j;
+&var
+"compound operators"
+++  --  <<  >>  <=  >=  ==  !=  &&  ||
+a && b; j++;
+if (x != 0) {
+    x ? y : z;
+}
