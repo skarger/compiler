@@ -69,16 +69,11 @@ end_comment \*\/
 chars_within_comment ([^*])|(\*[^/])
 comment {start_comment}({chars_within_comment})*{end_comment}
 
-
-
-
-
 %%
 
 {nl}+ ; /* do nothing with newline, using yylineno */
 {ws}+ ; /* do nothing */
 {comment} /* do nothing */
-
 
  /* reserved words begin */
 break return BREAK;
@@ -128,6 +123,7 @@ while return WHILE;
 \- return MINUS;
 \+ return PLUS;
 =  return ASSIGN;
+~  return BITWISE_NOT;
 \| return BITWISE_OR;
 \< return LESS_THAN;
 \> return GREATER_THAN;

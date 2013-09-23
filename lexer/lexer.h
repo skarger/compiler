@@ -39,9 +39,9 @@ enum integer_type {
 
 enum token {
     UNRECOGNIZED = 1,
-    CHAR_CONSTANT = 2,
-    STRING_CONSTANT = 3,
-    NUMBER_CONSTANT = 4,
+    CHAR_CONSTANT,
+    STRING_CONSTANT,
+    NUMBER_CONSTANT,
     IDENTIFIER,
     BREAK,
     CHAR,
@@ -67,6 +67,7 @@ enum token {
     MINUS,
     PLUS,
     ASSIGN,
+    BITWISE_NOT,
     BITWISE_OR,
     LESS_THAN,
     GREATER_THAN,

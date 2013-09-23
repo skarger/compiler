@@ -1,8 +1,8 @@
-
 /*
  * This file heavily inspired by class provided scanner_main.c
  * http://sites.fas.harvard.edu/~libe295/fall2013/willenson/asst1/scanner_main.c
- *  main
+ * The description from that file remains true for this version:
+ *
  *    The entry point for assignment one. reads input from either stdin or a
  *    file specified on the command line. Writes output to stdout or a file
  *    specified on the command line. After each call to yylex(), decodes the
@@ -20,7 +20,6 @@
  *  Exit values:
  *    0 for normal
  *    1 for out of memory
- *
  */
 #include <stdio.h>
 #include <string.h>
@@ -65,105 +64,132 @@ yyin = input;
 /* Begin scanning. */
 token = yylex();
 while (0 != token) {
-    switch (token) {
-        case IDENTIFIER:
-            string = (struct String *) yylval;
-            printf("identifier: %s\n", string->str);
-            break;
-        case BREAK:
-        case CHAR:
-        case CONTINUE:
-        case DO:
-        case ELSE:
-        case FOR:
-        case GOTO:
-        case IF:
-        case INT:
-        case LONG:
-        case RETURN:
-        case SIGNED:
-        case SHORT:
-        case UNSIGNED:
-        case VOID:
-        case WHILE:
-            printf("reserved word: %s\n", get_token_name(token));
-            break;
-        case LOGICAL_NOT:
-        case REMAINDER:
-        case BITWISE_XOR:
-        case AMPERSAND:
-        case ASTERISK:
-        case MINUS:
-        case PLUS:
-        case ASSIGN:
-        case BITWISE_OR:
-        case LESS_THAN:
-        case GREATER_THAN:
-        case DIVIDE:
-        case TERNARY_CONDITIONAL:
-            printf("operator: %s\n", get_token_name(token));
-            break;
-        case LEFT_PAREN:
-        case RIGHT_PAREN:
-        case LEFT_BRACKET:
-        case RIGHT_BRACKET:
-        case LEFT_BRACE:
-        case RIGHT_BRACE:
-        case COMMA:
-        case SEMICOLON:
-        case COLON:
-            printf("separator: %s\n", get_token_name(token));
-            break;
-        case ADD_ASSIGN:
-        case SUBTRACT_ASSIGN:
-        case MULTIPLY_ASSIGN:
-        case DIVIDE_ASSIGN:
-        case REMAINDER_ASSIGN:
-        case BITWISE_LSHIFT_ASSIGN:
-        case BITWISE_RSHIFT_ASSIGN:
-        case BITWISE_AND_ASSIGN:
-        case BITWISE_XOR_ASSSIGN:
-        case BITWISE_OR_ASSIGN:
-            printf("compound assignment operator: %s\n", get_token_name(token));
-            break;
-        case INCREMENT:
-        case DECREMENT:
-        case BITWISE_LSHIFT:
-        case BITWISE_RSHIFT:
-        case LESS_THAN_EQUAL:
-        case GREATER_THAN_EQUAL:
-        case EQUAL:
-        case NOT_EQUAL:
-        case LOGICAL_AND:
-        case LOGICAL_OR:
-            printf("compound operator: %s\n", get_token_name(token));
-            break;
-        default:
-            break;
-    }
+    /* 
+     * Print the line number. Use printf formatting and tabs to keep columns 
+     * lined up.
+     */
+    fprintf(output, "line = %-5d\t", yylineno);
 
-    if (token == NUMBER_CONSTANT) {
-        number = (struct Number *) yylval;
-        printf("token: NUMBER CONSTANT type: %s value: %u\n",
-                    get_integer_type(number->type), number->value);
-    }
-
-    if (token == CHAR_CONSTANT) {
-        character = (struct Character *) yylval;
-        printf("token: CHARACTER CONSTANT value: %c\n", character->c);
-    }
-
+    /* 
+     * Print the scanned text. Try to use formatting but give up instead of 
+     * truncating if the text is too long.
+     * Do not print scanned string text. TODO: change that?
+     */
     if (token == STRING_CONSTANT) {
-        string = (struct String *) yylval;
-        printf("token: STRING CONSTANT value: %s\n", string->str);
+        fprintf(output, "    %-20s\t", "");
+    } else {
+        fprintf(output, (yyleng < 20 ? "text = %-20s\t" : "text = %s\t"), yytext);
     }
 
-    if (token == UNRECOGNIZED) {
-        ;
-    }
+    if (token != UNRECOGNIZED) {
+        /* Look up and print the token's name. */
+        fprintf(output, "token = %-15s\t", get_token_name(token));
 
-      token = yylex();
+        switch (token) {
+            case IDENTIFIER:
+                string = (struct String *) yylval;
+                fprintf(output, "    id = %s\n", string->str);
+                break;
+            case BREAK:
+            case CHAR:
+            case CONTINUE:
+            case DO:
+            case ELSE:
+            case FOR:
+            case GOTO:
+            case IF:
+            case INT:
+            case LONG:
+            case RETURN:
+            case SIGNED:
+            case SHORT:
+            case UNSIGNED:
+            case VOID:
+            case WHILE:
+                fprintf(output, "    rsvwd = %-20s\n", get_token_name(token));
+                break;
+            case LOGICAL_NOT:
+            case REMAINDER:
+            case BITWISE_XOR:
+            case AMPERSAND:
+            case ASTERISK:
+            case MINUS:
+            case PLUS:
+            case ASSIGN:
+            case BITWISE_NOT:
+            case BITWISE_OR:
+            case LESS_THAN:
+            case GREATER_THAN:
+            case DIVIDE:
+            case TERNARY_CONDITIONAL:
+                fprintf(output, "    op = %-20s\n", get_token_name(token));
+                break;
+            case LEFT_PAREN:
+            case RIGHT_PAREN:
+            case LEFT_BRACKET:
+            case RIGHT_BRACKET:
+            case LEFT_BRACE:
+            case RIGHT_BRACE:
+            case COMMA:
+            case SEMICOLON:
+            case COLON:
+                fprintf(output, "    sep = %-20s\n", get_token_name(token));
+                break;
+            case ADD_ASSIGN:
+            case SUBTRACT_ASSIGN:
+            case MULTIPLY_ASSIGN:
+            case DIVIDE_ASSIGN:
+            case REMAINDER_ASSIGN:
+            case BITWISE_LSHIFT_ASSIGN:
+            case BITWISE_RSHIFT_ASSIGN:
+            case BITWISE_AND_ASSIGN:
+            case BITWISE_XOR_ASSSIGN:
+            case BITWISE_OR_ASSIGN:
+                fprintf(output, "    cmp asgn op = %-20s\n", get_token_name(token));
+                break;
+            case INCREMENT:
+            case DECREMENT:
+            case BITWISE_LSHIFT:
+            case BITWISE_RSHIFT:
+            case LESS_THAN_EQUAL:
+            case GREATER_THAN_EQUAL:
+            case EQUAL:
+            case NOT_EQUAL:
+            case LOGICAL_AND:
+            case LOGICAL_OR:
+                fprintf(output, "    cmp op = %-20s\n", get_token_name(token));
+                break;
+            case NUMBER_CONSTANT:
+                number = (struct Number *) yylval;
+                fprintf(output, "\ttype = %20s\tvalue = %-10lu\n", 
+                        get_integer_type(number->type),
+                        number->value);
+                break;
+            case CHAR_CONSTANT:
+                character = (struct Character *) yylval;
+                fprintf(output, "\tvalue: %c\n", character->c);
+                break;
+            case STRING_CONSTANT:
+                string = (struct String *) yylval;
+                fprintf(output, "\tvalue: %s\n", string->str);
+                break;
+            default:
+                break;
+        }
+    } else {
+        /* unrecognized input */
+        fputs("error = SCANNING ERROR\n", output);
+    }
+    token = yylex();
 }
+
+    /* Scanning complete. */
+    if (output != stdout) {
+    fclose(output);
+    }
+    if (input != stdin) {
+    fclose(input);
+    }
 
     return 0;
 }
@@ -185,6 +211,9 @@ while (0 != token) {
 char *get_token_name(int token) {
     switch (token) {
     #define CASE_FOR(token) case token: return #token
+        CASE_FOR(CHAR_CONSTANT);
+        CASE_FOR(STRING_CONSTANT);
+        CASE_FOR(NUMBER_CONSTANT);
         CASE_FOR(IDENTIFIER);
         CASE_FOR(CHAR);
         CASE_FOR(CONTINUE);
@@ -210,6 +239,7 @@ char *get_token_name(int token) {
         CASE_FOR(MINUS);
         CASE_FOR(PLUS);
         CASE_FOR(ASSIGN);
+        CASE_FOR(BITWISE_NOT);
         CASE_FOR(BITWISE_OR);
         CASE_FOR(LESS_THAN);
         CASE_FOR(GREATER_THAN);
@@ -249,6 +279,17 @@ char *get_token_name(int token) {
   }
 }
 
+/*
+ * get_integer_type
+ *   Get the string name of an integer type returned by yylex()
+ *
+ * Parameters:
+ *   type - enum integer_type - the type of an integral constant found by yylex()
+ * 
+ * Return: A pointer to the zero-terminated the type name.
+ * Side effects: none
+ *
+ */
 char *get_integer_type(enum integer_type type) {
     switch (type) {
     #define CASE_FOR(token) case token: return #token
