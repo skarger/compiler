@@ -6,6 +6,15 @@ make lexer
 To remove scanner and intermediate files:
 make clean
 
+Files:
+README
+Makefile
+lexer.c
+lexer.h
+lexer.lex
+test_input
+typescript
+
 CSCI-E295 Problem Set 1: Lexer
 
 Note: this README is partially paraphrased from the course provided
