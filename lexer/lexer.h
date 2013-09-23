@@ -1,3 +1,9 @@
+/*
+ * Definitions, enumerations, structures and function prototypes
+ * used in lexer.lex and lexer.c.
+ * Those files are the Lex file and corresponding standalone runner for the
+ * CSCI-E95 C language scanner.
+ */
 #include <sys/types.h>
 
 #define YYSTYPE void *

@@ -1,0 +1,70 @@
+Build:
+make
+or
+make lexer
+
+To remove scanner and intermediate files:
+make clean
+
+CSCI-E295 Problem Set 1: Lexer
+
+Note: this README is partially paraphrased from the course provided
+http://sites.fas.harvard.edu/~libe295/fall2013/willenson/asst1/README
+
+This program scans source code written in the subset of C89 used for CSCI-E95.
+It will read the provided file (or standard input) and produce as output a
+stream of lines, each line representing a token in CSCI-E95 C.
+
+Usage:
+    scanner [<input>] [<output>]
+
+Both the input filename and output filename are optional. If the input filename
+is not specified or is given as '-', it is assumed to be stdin. If the output
+filename is not specified or is given as '-', it is assumed to be stdout.
+
+Output consists of lines with tab separated fields:
+
+line = <line-number>            the current line number in the source program
+
+text = <text>                   the source text consumed
+                                Not used for string literals
+
+token = <token>                 if the scanner found a valid token, what it is.
+                                See enum token in lexer.h for possibilities.
+
+error = SCANNING ERROR          if the scanner did not find a valid token
+
+rsvwd = <reserved-word>         an enumerated type indicating which reserved
+                                word was found; same as token for reserved words
+                                
+id = <identifier>               a string representing the identifier found, if 
+                                token = IDENTIFIER
+                                
+op = <operator>                 an enumerated type indicating which operator
+                                was found; same as token for operators
+                                
+type = <number_type>            an enumerated type indicating the size of 
+                                integer constant found,
+                                if token = NUMBER_CONSTANT
+                                one of:
+                                        OVERFLOW, SIGNED_SHORT, UNSIGNED_SHORT,
+                                        SIGNED_INT, UNSIGNED_INT,
+                                        SIGNED_LONG, UNSIGNED_LONG
+                                    
+value = <integer>               the value of the integer constant, if 
+                                token = NUMBER_CONSTANT
+
+In addition the lexer will print discovered errors to stderr
+along with the line number of the offending input. These errors include the
+following, which will be printed with other relavant info (e.g. the input).
+    "out of memory"
+    "non-octal digit"
+    "invalid escape sequence"
+    "invalid newline"
+    "invalid string literal"
+    "invalid identifier"
+    "invalid character"
+    "empty character constant"
+    "octal constants unsupported"
+    "floating point unsupported"
+    "integer constant too large"
