@@ -22,7 +22,7 @@
 #include <string.h>
 #include <error.h>
 
-#include "lexer.h"
+#include "src/include/lexer.h"
 
 /* extern YYSTYPE yylval; */
 YYSTYPE yylval;

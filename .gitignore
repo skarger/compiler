@@ -20,8 +20,8 @@
 lex.yy.c
 
 # lexer scratch files
-lexer/handin
-lexer/lexer.h.gch
-lexer/provided
-lexer/test_result
-
+*/lexer/handin
+*/lexer/lexer.h.gch
+*/lexer/provided
+*/lexer/test_result
+*/include/lexer.h.gch

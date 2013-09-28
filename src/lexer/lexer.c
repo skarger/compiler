@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "lexer.h"
+#include "../include/lexer.h"
 
 int yylex();
 extern char *yytext;
