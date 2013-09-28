@@ -13,6 +13,7 @@
  */
 
 %option noyywrap
+%option nounput
 %option yylineno
 
 %x STRING
@@ -24,8 +25,8 @@
 
 #include "src/include/lexer.h"
 
-/* extern YYSTYPE yylval; */
-YYSTYPE yylval;
+extern YYSTYPE yylval;
+/* YYSTYPE yylval; */
 
 /* helpers */
 int convert_single_escape(char c);
@@ -445,13 +446,13 @@ int convert_single_escape(char c) {
  *      None
  */
 int convert_octal_escape(char *seq, int n_digits) {
+    int i = 0;
     /* create a string with only the digits */
     char buf[4]; /* room for up to three digits and null byte */
     strncpy(buf, seq, n_digits);
     buf[n_digits] = '\0';
 
     /* convert digit string to an octal number and return it as a char */
-    int i = 0;
     while (i < n_digits) {
         if (!isodigit(buf[i])) {
             handle_error(E_NOT_OCTAL, "convert_octal_escape", 0);
@@ -509,7 +510,7 @@ void handle_error(enum lexer_error e, char *data, int line) {
             error(0, 0, "line %d: invalid escape sequence %s", line, data);
             return;
         case E_NEWLINE:
-            error(0, 0, "line %d: invalid newline", line, data);
+            error(0, 0, "line %d: invalid newline", line);
             return;
         case E_INVALID_STRING:
             error(0, 0, "line %d: invalid string literal: %s", line, data);

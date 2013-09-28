@@ -6,6 +6,10 @@
  */
 #include <sys/types.h>
 
+
+#ifndef LEXER_H
+#define LEXER_H
+
 #define YYSTYPE void *
 
 #define CHAR_BYTES 1
@@ -129,3 +133,5 @@ struct Number {
 struct Character *create_character(char c);
 struct String *create_string(int len);
 struct Number *create_number(char *digit_str);
+
+#endif /* LEXER_H */
