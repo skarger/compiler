@@ -25,7 +25,11 @@
 #include <string.h>
 
 #include "../include/lexer.h"
-#include "../include/token.h"
+#ifdef STANDALONE
+#include "src/include/token.h"
+#else
+#include "../../y.tab.h"
+#endif
 
 int yylex();
 extern char *yytext;

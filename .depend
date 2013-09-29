@@ -1,4 +1,4 @@
 y.tab.o: y.tab.c src/include/lexer.h lex.yy.c y.tab.h
 lex.yy.o: lex.yy.c src/include/lexer.h y.tab.h
 lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
-  src/lexer/../include/token.h
+  src/lexer/../../y.tab.h

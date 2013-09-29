@@ -15,7 +15,7 @@ all : $(EXECS)
 
 
 clean :
-	rm -f $(EXECS) *.o lex.yy.c y.tab.c y.tab.h .depend
+	rm -f $(EXECS) *.o lex.yy.c y.tab.c y.tab.h
 
 # autmatically pull in dependencies on included header files
 # copied from http://stackoverflow.com/a/2394668/1424966
