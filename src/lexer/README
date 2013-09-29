@@ -11,6 +11,7 @@ README
 Makefile
 lexer.c
 lexer.h
+token.h
 lexer.lex
 test_input
 typescript
@@ -39,7 +40,7 @@ text = <text>                   the source text consumed
                                 Not used for string literals
 
 token = <token>                 if the scanner found a valid token, what it is.
-                                See enum token in lexer.h for possibilities.
+                                See token.h for possibilities.
 
 error = SCANNING ERROR          if the scanner did not find a valid token
 

@@ -47,80 +47,13 @@ enum integer_type {
     UNSIGNED_LONG
 };
 
-enum token {
-    UNRECOGNIZED = 1,
-    CHAR_CONSTANT,
-    STRING_CONSTANT,
-    NUMBER_CONSTANT,
-    IDENTIFIER,
-    BREAK,
-    CHAR,
-    CONTINUE,
-    DO,
-    ELSE,
-    FOR,
-    GOTO,
-    IF,
-    INT,
-    LONG,
-    RETURN,
-    SIGNED,
-    SHORT,
-    UNSIGNED,
-    VOID,
-    WHILE,
-    LOGICAL_NOT,
-    REMAINDER,
-    BITWISE_XOR,
-    AMPERSAND,
-    ASTERISK,
-    MINUS,
-    PLUS,
-    ASSIGN,
-    BITWISE_NOT,
-    BITWISE_OR,
-    LESS_THAN,
-    GREATER_THAN,
-    DIVIDE,
-    TERNARY_CONDITIONAL,
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-    LEFT_BRACE,
-    RIGHT_BRACE,
-    COMMA,
-    SEMICOLON,
-    COLON,
-    ADD_ASSIGN,
-    SUBTRACT_ASSIGN,
-    MULTIPLY_ASSIGN,
-    DIVIDE_ASSIGN,
-    REMAINDER_ASSIGN,
-    BITWISE_LSHIFT_ASSIGN,
-    BITWISE_RSHIFT_ASSIGN,
-    BITWISE_AND_ASSIGN,
-    BITWISE_XOR_ASSSIGN,
-    BITWISE_OR_ASSIGN,
-    INCREMENT,
-    DECREMENT,
-    BITWISE_LSHIFT,
-    BITWISE_RSHIFT,
-    LESS_THAN_EQUAL,
-    GREATER_THAN_EQUAL,
-    EQUAL,
-    NOT_EQUAL,
-    LOGICAL_AND,
-    LOGICAL_OR
-};
-
 struct Character {
     char c;
 };
 
 struct String {
     char *str; /* pointer to the beginning of the string */
-    char *current; /* pointer to an arbitrary character in str, used for construction */
+    char *current; /* pointer to an arbitrary character in str used for construction */
     int length; /* the length of the string */
     enum Boolean valid; /* flag for whether str is valid by the standards of CSCI-E95 C */
 };
