@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "../include/lexer.h"
+#include "../include/token.h"
 
 int yylex();
 extern char *yytext;

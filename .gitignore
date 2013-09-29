@@ -16,6 +16,12 @@
 *.out
 *.app
 
+# yacc intermediate files
+y.tab.c
+y.tab.h
+
+parser
+
 # lex intermediate file
 lex.yy.c
 

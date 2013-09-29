@@ -25,6 +25,14 @@
 
 #include "src/include/lexer.h"
 
+#ifdef STANDALONE
+#include "src/include/token.h"
+#else
+#include "y.tab.h"
+#endif
+
+
+
 extern YYSTYPE yylval;
 /* YYSTYPE yylval; */
 
