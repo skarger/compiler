@@ -30,3 +30,8 @@ lex.yy.c
 */lexer/provided
 */lexer/test_result
 */include/lexer.h.gch
+
+# binaries
+lexer
+parser
+
