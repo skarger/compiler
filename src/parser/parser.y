@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "src/include/lexer.h"
+#include "src/include/parser.h"
 #include "src/include/utilities.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
@@ -152,7 +153,8 @@ character_type_specifier : CHAR
     | UNSIGNED CHAR
     ;
 
-void_type_specifier : VOID;
+void_type_specifier : VOID
+    {  $$ = create_type_spec_node((int) VOID); pretty_print($$); };
 
 
 abstract_declarator : pointer
@@ -179,4 +181,30 @@ void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
+void *create_type_spec_node(int type) {
+    Node *n;
+    util_emalloc((void **) &n, sizeof(Node));
+    n->n_type = TYPE_SPECIFIER;
+    n->type = VOID;
+    return (void *) n;
+}
 
+void pretty_print(Node *n) {
+    switch (n->n_type) {
+        case TYPE_SPECIFIER:
+            printf("%s", get_type_name(n->type));
+            break;
+        default:
+            error(1, 0, "unknown node type");
+            break;
+    }
+}
+
+char *get_type_name(int token) {
+    switch (token) {
+        case VOID:
+            return "void";
+        default:
+            return "";
+    }
+}
