@@ -8,7 +8,7 @@ YFLAGS += -d
 VPATH = src
 
 EXECS = lexer parser
-SRCS = y.tab.c lex.yy.c src/lexer/lexer.c
+SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c
 
 all : $(EXECS)
 
@@ -23,6 +23,9 @@ clean :
 	rm -f ./.depend
 	$(CC) $(CFLAGS) -MM $^ >>./.depend
 include .depend
+
+utilities.o :
+	$(CC) -c src/utilities/utilities.c
 
 lex.yy.o :
 	$(CC) -c lex.yy.c
@@ -40,6 +43,8 @@ lexer : lexer.o
 y.tab.c : src/parser/parser.y lex.yy.c
 	$(YACC) $(YFLAGS) -o $@ $<
 
-parser : y.tab.c
-	$(CC) y.tab.c -o $@
+y.tab.o :
+	$(CC) -c y.tab.c
+parser : y.tab.o utilities.o
+	$(CC) y.tab.o utilities.o -o $@
 

@@ -11,7 +11,11 @@
  *      Sets the value of ptr.
  *      Terminates program if malloc errors.
  */
-void emalloc(void **ptr, size_t n) {
+#include <error.h>
+#include <stdlib.h>
+#include "../include/utilities.h"
+
+void util_emalloc(void **ptr, size_t n) {
     if ( (*ptr = malloc(n)) == NULL ) {
         util_handle_error(UE_MALLOC, "util_emalloc");
     }
