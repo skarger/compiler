@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "src/include/lexer.h"
+#include "src/include/utilities.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H
@@ -177,4 +178,5 @@ main() {
 void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
+
 
