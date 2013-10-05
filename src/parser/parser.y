@@ -105,8 +105,9 @@ assignment_op : ASSIGN
     ;
 
 /* type name and children */
-type_name : type_specifier
-    | abstract_declarator
+type_name : type_specifier abstract_declarator
+        { pretty_print($1); }
+        { pretty_print($2); }
     ;
 
 type_specifier : integer_type_specifier
@@ -154,7 +155,7 @@ character_type_specifier : CHAR
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_type_spec_node((int) VOID); pretty_print($$); };
+    {  $$ = create_type_spec_node(VOID_T); }
 
 
 abstract_declarator : pointer
@@ -162,7 +163,13 @@ abstract_declarator : pointer
     ;
 
 pointer : ASTERISK
+        {  $$ = create_type_spec_node(POINTER_T); }
     | ASTERISK pointer
+        { 
+            Node *n = (Node *) create_type_spec_node(POINTER_T);
+            n->right = $2;
+            $$ = n;
+        }
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
@@ -181,18 +188,23 @@ void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
-void *create_type_spec_node(int type) {
+void *create_type_spec_node(enum data_type type) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = TYPE_SPECIFIER;
-    n->type = VOID;
+    n->type = type;
+    n->left = NULL;
+    n->right = NULL;
     return (void *) n;
 }
 
 void pretty_print(Node *n) {
     switch (n->n_type) {
         case TYPE_SPECIFIER:
-            printf("%s", get_type_name(n->type));
+            printf("%s ", get_type_name(n->type));
+            if (n->right != NULL) {
+                pretty_print(n->right);
+            }
             break;
         default:
             error(1, 0, "unknown node type");
@@ -200,10 +212,12 @@ void pretty_print(Node *n) {
     }
 }
 
-char *get_type_name(int token) {
-    switch (token) {
-        case VOID:
+char *get_type_name(enum data_type type) {
+    switch (type) {
+        case VOID_T:
             return "void";
+        case POINTER_T:
+            return "*";
         default:
             return "";
     }
