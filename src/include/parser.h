@@ -1,4 +1,7 @@
 #define MAX_ITEMS 3
+#define MAX_CHILDREN 5
+#define LEFT 0
+#define RIGHT 1
 
 enum node_type {
     TYPE_SPECIFIER,
@@ -42,13 +45,10 @@ union NodeData {
     union LiteralData values;
 };
 
-/* default Node has two children, although sometimes we won't need them */
 struct Node {
     enum node_type n_type;
     union NodeData data;
-    /* left and right children */
-    struct Node *left;
-    struct Node *right;
+    struct Node *children[MAX_CHILDREN];
 };
 
 

@@ -173,7 +173,7 @@ pointer : ASTERISK
     | ASTERISK pointer
         {
             Node *n = (Node *) create_zero_item_node((int) POINTER);
-            n->right = $2;
+            n->children[RIGHT] = $2;
             $$ = n;
         }
     ;
@@ -257,8 +257,10 @@ void *create_node(enum node_type nt) {
 }
 
 void initialize_children(Node *n) {
-    n->left = NULL;
-    n->right = NULL;
+    int i;
+    for (i = 0; i < MAX_CHILDREN; i++) {
+        n->children[i] = NULL;
+    }
 }
 
 void *create_zero_item_node(enum node_type nt) {
@@ -282,7 +284,7 @@ void traverse_node(void *np) {
     switch (n->n_type) {
         case POINTER:
             printf("*");
-            traverse_node((void *) n->right);
+            traverse_node((void *) n->children[RIGHT]);
             break;
         case TYPE_SPECIFIER:
             printf("%s", get_type_name(n->data.symbols[TYPE]));
@@ -298,8 +300,8 @@ void pretty_print(Node *n) {
     switch (n->n_type) {
         case TYPE_SPECIFIER:
             printf("%s ", get_type_name(n->data.symbols[TYPE]));
-            if (n->right != NULL) {
-                pretty_print(n->right);
+            if (n->children[RIGHT] != NULL) {
+                pretty_print(n->children[RIGHT]);
             }
             break;
         default:
