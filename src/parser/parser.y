@@ -68,8 +68,9 @@ postfix_expr : primary_expr
     ;
 
 primary_expr : IDENTIFIER
-        { $$ = create_data_node( IDENTIFIER, yylval ); }
+        { $$ = create_data_node( IDENTIFIER, yylval ); traverse_data_node($$); }
     | constant
+        { $$ = $1; traverse_data_node($$); }
     | LEFT_PAREN expr RIGHT_PAREN
     ;
 
@@ -159,19 +160,19 @@ character_type_specifier : CHAR
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_type_spec_node((enum data_type) VOID); }
+    {  $$ = create_one_item_node(TYPE_SPECIFIER, (int) VOID); traverse_node($$);}
 
 
-abstract_declarator : pointer
+abstract_declarator : pointer { traverse_node($1); }
     | pointer direct_abstract_declarator
     | direct_abstract_declarator
     ;
 
 pointer : ASTERISK
-        {  $$ = create_type_spec_node(POINTER); }
+        {  $$ = create_zero_item_node((int) POINTER); }
     | ASTERISK pointer
-        { 
-            Node *n = (Node *) create_type_spec_node(POINTER);
+        {
+            Node *n = (Node *) create_zero_item_node((int) POINTER);
             n->right = $2;
             $$ = n;
         }
@@ -198,23 +199,22 @@ void yyerror(char *s) {
 
 
 void *create_data_node(enum node_type n_type, void *data) {
-    DataNode *n;
-    util_emalloc((void **) &n, sizeof(DataNode));
+    Node *n;
+    util_emalloc((void **) &n, sizeof(Node));
     n->n_type = n_type;
     /* populate the data field, accounting for the type of data */
     switch (n_type) {
         case IDENTIFIER:
-            n->data.str = strdup( ((struct String *) data)->str );
+            n->data.values.str = strdup( ((struct String *) data)->str );
             break;
         case STRING_CONSTANT:
-            printf("cd\n");
-            n->data.str = strdup( ((struct String *) data)->str );
+            n->data.values.str = strdup( ((struct String *) data)->str );
             break;
         case NUMBER_CONSTANT:
-            n->data.num = ((struct Number *) data)->value;
+            n->data.values.num = ((struct Number *) data)->value;
             break;
         case CHAR_CONSTANT:
-            n->data.ch = ((struct Character *) data)->c;
+            n->data.values.ch = ((struct Character *) data)->c;
             break;
         default:
             handle_parser_error(PE_INVALID_DATA_TYPE,
@@ -225,20 +225,79 @@ void *create_data_node(enum node_type n_type, void *data) {
     return (void *) n;
 }
 
-void *create_type_spec_node(enum data_type type) {
+void traverse_data_node(void *np) {
+    Node *n = (Node *) np;
+    switch (n->n_type) {
+        case IDENTIFIER:
+            printf("%s", n->data.values.str);
+            break;
+        case STRING_CONSTANT:
+            /* TODO: replace special characters, e.g. replace newline with \n */
+            printf("\"%s\"", n->data.values.str);
+            break;
+        case NUMBER_CONSTANT:
+            printf("%d", n->data.values.num);
+            break;
+        case CHAR_CONSTANT:
+            /* TODO: replace special characters, e.g. replace null with \0 */
+            printf("'%c'", n->data.values.ch);
+            break;
+        default:
+            handle_parser_error(PE_INVALID_DATA_TYPE,
+                                get_token_name((int) n->n_type), yylineno);
+            break;
+        }
+}
+
+void *create_node(enum node_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
-    n->n_type = TYPE_SPECIFIER;
-    n->type = type;
+    n->n_type = nt;
+    return n;
+}
+
+void initialize_children(Node *n) {
     n->left = NULL;
     n->right = NULL;
+}
+
+void *create_zero_item_node(enum node_type nt) {
+    Node *n = create_node(nt);
+    initialize_children(n);
     return (void *) n;
 }
+
+void *create_one_item_node(enum node_type nt, int item1) {
+    Node *n = create_node(nt);
+    n->data.symbols[0] = item1;
+    initialize_children(n);
+    return (void *) n;
+}
+
+void traverse_node(void *np) {
+    Node *n = (Node *) np;
+    if (n == NULL) {
+        return;
+    }
+    switch (n->n_type) {
+        case POINTER:
+            printf("*");
+            traverse_node((void *) n->right);
+            break;
+        case TYPE_SPECIFIER:
+            printf("%s", get_type_name(n->data.symbols[TYPE]));
+            break;
+        default:
+            error(1, 0, "unknown node type");
+            break;
+    }
+}
+
 
 void pretty_print(Node *n) {
     switch (n->n_type) {
         case TYPE_SPECIFIER:
-            printf("%s ", get_type_name(n->type));
+            printf("%s ", get_type_name(n->data.symbols[TYPE]));
             if (n->right != NULL) {
                 pretty_print(n->right);
             }
@@ -253,8 +312,6 @@ char *get_type_name(enum data_type type) {
     switch (type) {
         case VOID:
             return "void";
-        case POINTER:
-            return "*";
         default:
             return "";
     }
