@@ -67,4 +67,6 @@ struct Character *create_character(char c);
 struct String *create_string(int len);
 struct Number *create_number(char *digit_str);
 
+char *get_token_name(int token);
+
 #endif /* LEXER_H */

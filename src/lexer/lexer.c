@@ -48,7 +48,7 @@ struct Number *number;
 struct Character *character;
 struct String *string;
 
-char *get_token_name(int token);
+
 char *get_integer_type(enum integer_type type);
 
     /* Figure out whether we're using stdin/stdout or file in/file out. */
@@ -200,89 +200,6 @@ while (0 != token) {
 }
 
 #include <string.h>
-
-
-/*
- * get_token_name 
- *   Get the name of a token returned by yylex()
- *
- * Parameters:
- *   token - int - the token returned by yylex()
- * 
- * Return: A pointer to the zero-terminated the token name.
- * Side effects: none
- *
- */
-char *get_token_name(int token) {
-    switch (token) {
-    #define CASE_FOR(token) case token: return #token
-        CASE_FOR(CHAR_CONSTANT);
-        CASE_FOR(STRING_CONSTANT);
-        CASE_FOR(NUMBER_CONSTANT);
-        CASE_FOR(IDENTIFIER);
-        CASE_FOR(CHAR);
-        CASE_FOR(CONTINUE);
-        CASE_FOR(DO);
-        CASE_FOR(ELSE);
-        CASE_FOR(FOR);
-        CASE_FOR(GOTO);
-        CASE_FOR(IF);
-        CASE_FOR(INT);
-        CASE_FOR(LONG);
-        CASE_FOR(RETURN);
-        CASE_FOR(SHORT);
-        CASE_FOR(SIGNED);
-        CASE_FOR(UNSIGNED);
-        CASE_FOR(BREAK);
-        CASE_FOR(VOID);
-        CASE_FOR(WHILE);
-        CASE_FOR(LOGICAL_NOT);
-        CASE_FOR(REMAINDER);
-        CASE_FOR(BITWISE_XOR);
-        CASE_FOR(AMPERSAND);
-        CASE_FOR(ASTERISK);
-        CASE_FOR(MINUS);
-        CASE_FOR(PLUS);
-        CASE_FOR(ASSIGN);
-        CASE_FOR(BITWISE_NOT);
-        CASE_FOR(BITWISE_OR);
-        CASE_FOR(LESS_THAN);
-        CASE_FOR(GREATER_THAN);
-        CASE_FOR(DIVIDE);
-        CASE_FOR(TERNARY_CONDITIONAL);
-        CASE_FOR(LEFT_PAREN);
-        CASE_FOR(RIGHT_PAREN);
-        CASE_FOR(LEFT_BRACKET);
-        CASE_FOR(RIGHT_BRACKET);
-        CASE_FOR(LEFT_BRACE);
-        CASE_FOR(RIGHT_BRACE);
-        CASE_FOR(COMMA);
-        CASE_FOR(SEMICOLON);
-        CASE_FOR(COLON);
-        CASE_FOR(ADD_ASSIGN);
-        CASE_FOR(SUBTRACT_ASSIGN);
-        CASE_FOR(MULTIPLY_ASSIGN);
-        CASE_FOR(DIVIDE_ASSIGN);
-        CASE_FOR(REMAINDER_ASSIGN);
-        CASE_FOR(BITWISE_LSHIFT_ASSIGN);
-        CASE_FOR(BITWISE_RSHIFT_ASSIGN);
-        CASE_FOR(BITWISE_AND_ASSIGN);
-        CASE_FOR(BITWISE_XOR_ASSSIGN);
-        CASE_FOR(BITWISE_OR_ASSIGN);
-        CASE_FOR(INCREMENT);
-        CASE_FOR(DECREMENT);
-        CASE_FOR(BITWISE_LSHIFT);
-        CASE_FOR(BITWISE_RSHIFT);
-        CASE_FOR(LESS_THAN_EQUAL);
-        CASE_FOR(GREATER_THAN_EQUAL);
-        CASE_FOR(EQUAL);
-        CASE_FOR(NOT_EQUAL);
-        CASE_FOR(LOGICAL_AND);
-        CASE_FOR(LOGICAL_OR);
-    #undef CASE_FOR
-        default: return "";
-  }
-}
 
 /*
  * get_integer_type

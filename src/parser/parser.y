@@ -67,14 +67,18 @@ postfix_expr : primary_expr
     | postfix_expr DECREMENT 
     ;
 
-primary_expr : IDENTIFIER 
+primary_expr : IDENTIFIER
+        { $$ = create_data_node( IDENTIFIER, yylval ); }
     | constant
     | LEFT_PAREN expr RIGHT_PAREN
     ;
 
 constant : CHAR_CONSTANT
+        { $$ = create_data_node( CHAR_CONSTANT, yylval ); }
     | STRING_CONSTANT
+        { $$ = create_data_node( STRING_CONSTANT, yylval ); }
     | NUMBER_CONSTANT
+        { $$ = create_data_node( NUMBER_CONSTANT, yylval ); }
     ;
 
 subscript_expr: postfix_expr LEFT_BRACKET expr RIGHT_BRACKET
@@ -192,6 +196,35 @@ void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
+
+void *create_data_node(enum node_type n_type, void *data) {
+    DataNode *n;
+    util_emalloc((void **) &n, sizeof(DataNode));
+    n->n_type = n_type;
+    /* populate the data field, accounting for the type of data */
+    switch (n_type) {
+        case IDENTIFIER:
+            n->data.str = strdup( ((struct String *) data)->str );
+            break;
+        case STRING_CONSTANT:
+            printf("cd\n");
+            n->data.str = strdup( ((struct String *) data)->str );
+            break;
+        case NUMBER_CONSTANT:
+            n->data.num = ((struct Number *) data)->value;
+            break;
+        case CHAR_CONSTANT:
+            n->data.ch = ((struct Character *) data)->c;
+            break;
+        default:
+            handle_parser_error(PE_INVALID_DATA_TYPE,
+                                get_token_name((int) n_type), yylineno);
+            free(n);
+            return NULL;
+    }
+    return (void *) n;
+}
+
 void *create_type_spec_node(enum data_type type) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
@@ -224,5 +257,30 @@ char *get_type_name(enum data_type type) {
             return "*";
         default:
             return "";
+    }
+}
+
+/*
+ * handle_parser_error
+ * Purpose:
+ *      Handle an error caught in the calling method.
+ * Parameters:
+ *      e - the error value.
+ *      data - string that will be inserted into the message printed to stderr
+ *      line - line number causing error, if applicable (e.g. from input source)
+ * Returns:
+ *      None
+ * Side effects:
+ *      May terminate program depending on error type
+ */
+void handle_parser_error(enum parser_error e, char *data, int line) {
+    switch (e) {
+        case PE_SUCCESS:
+            return;
+        case PE_INVALID_DATA_TYPE:
+            error(0, 0, "line %d: invalid data type: %s", line, data);
+            return;
+        default:
+            return;
     }
 }
