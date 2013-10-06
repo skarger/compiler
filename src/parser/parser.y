@@ -80,7 +80,8 @@ constant : CHAR_CONSTANT
 subscript_expr: postfix_expr LEFT_BRACKET expr RIGHT_BRACKET
     ;
 
-function_call : postfix_expr LEFT_PAREN expr RIGHT_PAREN
+function_call : postfix_expr LEFT_PAREN RIGHT_PAREN
+    | postfix_expr LEFT_PAREN expr RIGHT_PAREN
     ;
 
 expr : expr COMMA assignment_expr
@@ -105,9 +106,8 @@ assignment_op : ASSIGN
     ;
 
 /* type name and children */
-type_name : type_specifier abstract_declarator
-        { pretty_print($1); }
-        { pretty_print($2); }
+type_name : type_specifier
+    | type_specifier abstract_declarator
     ;
 
 type_specifier : integer_type_specifier
@@ -155,25 +155,29 @@ character_type_specifier : CHAR
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_type_spec_node(VOID_T); }
+    {  $$ = create_type_spec_node((enum data_type) VOID); }
 
 
 abstract_declarator : pointer
     | pointer direct_abstract_declarator
+    | direct_abstract_declarator
     ;
 
 pointer : ASTERISK
-        {  $$ = create_type_spec_node(POINTER_T); }
+        {  $$ = create_type_spec_node(POINTER); }
     | ASTERISK pointer
         { 
-            Node *n = (Node *) create_type_spec_node(POINTER_T);
+            Node *n = (Node *) create_type_spec_node(POINTER);
             n->right = $2;
             $$ = n;
         }
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
-    | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET 
+    | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
+    | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
+    | LEFT_BRACKET conditional_expr RIGHT_BRACKET
+    | LEFT_BRACKET RIGHT_BRACKET
     ;
 
 
@@ -214,9 +218,9 @@ void pretty_print(Node *n) {
 
 char *get_type_name(enum data_type type) {
     switch (type) {
-        case VOID_T:
+        case VOID:
             return "void";
-        case POINTER_T:
+        case POINTER:
             return "*";
         default:
             return "";

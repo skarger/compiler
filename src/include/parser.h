@@ -2,9 +2,14 @@ enum node_type {
     TYPE_SPECIFIER
 };
 
+/*
+ * types that are not covered by token types
+ * for example we have an AMPERSAND token, but since it's overloaded we need
+ * more specific meanings here that the parser will uncover
+ * conversely we already have a VOID token so we do not need to copy it here
+ */
 enum data_type {
-    VOID_T,
-    POINTER_T
+    POINTER
 };
 
 struct Node {
