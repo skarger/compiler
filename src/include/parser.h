@@ -5,7 +5,10 @@
 enum node_type {
     TYPE_NAME,
     TYPE_SPECIFIER,
-    POINTER
+    POINTER,
+    ABSTRACT_DECLARATOR,
+    PAREN_DIR_ABS_DECL,
+    BRACKET_DIR_ABS_DECL
 };
 
 /* A given Node in the parse tree may have links to child Nodes */
@@ -34,6 +37,7 @@ typedef int ChildIndex;
  * MAX_ITEMS limits the number of data fields a Node may have.
  */
 #define MAX_ITEMS 3
+
 
 /* Because different Node types have a variety of data fields, when processing
  * a specific Node type we need a way to refer to fields specific to that type
@@ -85,6 +89,7 @@ enum parser_error {
 void pretty_print(Node *n);
 void traverse_data_node(void *np);
 void traverse_node(void *np);
+void traverse_direct_abstract_declarator(Node *n);
 
 /* node creation */
 void *create_data_node(enum node_type, void *);

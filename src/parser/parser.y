@@ -15,7 +15,7 @@ void yyerror(char *s);
 
 %}
 
-%start  conditional_expr
+%start  translation_unit
 
 %token UNRECOGNIZED CHAR_CONSTANT STRING_CONSTANT NUMBER_CONSTANT IDENTIFIER
 %token BREAK CHAR CONTINUE DO ELSE FOR GOTO IF INT
@@ -38,13 +38,16 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 
-conditional_expr : cast_expr
-        { printf("parsed conditional_expr!\n"); }
+translation_unit : conditional_expr
+    | translation_unit conditional_expr
     ;
 
-cast_expr : /* empty */
-    | unary_expr
+conditional_expr : cast_expr SEMICOLON { printf("\n"); }
+    ;
+
+cast_expr : unary_expr
     | LEFT_PAREN type_name RIGHT_PAREN cast_expr
+        { traverse_node($2); }
     ;
 
 /* unary_expr and children */
@@ -68,9 +71,9 @@ postfix_expr : primary_expr
     ;
 
 primary_expr : IDENTIFIER
-        { $$ = create_data_node( IDENTIFIER, yylval ); traverse_data_node($$); }
+        { $$ = create_data_node( IDENTIFIER, yylval ); }
     | constant
-        { $$ = $1; traverse_data_node($$); }
+        { $$ = $1; }
     | LEFT_PAREN expr RIGHT_PAREN
     ;
 
@@ -111,14 +114,13 @@ assignment_op : ASSIGN
     ;
 
 /* type name and children */
-type_name : type_specifier { traverse_node($$); }
+type_name : type_specifier
     | type_specifier abstract_declarator
         {
             Node *n = create_zero_item_node(TYPE_NAME);
             append_child(n, (Node *) $1, LEFT);
             append_child(n, (Node *) $2, RIGHT);
             $$ = n;
-            traverse_node($$);
         }
     ;
 
@@ -176,8 +178,14 @@ void_type_specifier : VOID
     {  $$ = create_one_item_node(TYPE_SPECIFIER, VOID); }
 
 
-abstract_declarator : pointer
-    | pointer direct_abstract_declarator
+abstract_declarator : pointer direct_abstract_declarator
+        {
+            Node *n = create_zero_item_node(ABSTRACT_DECLARATOR);
+            append_child(n, (Node *) $1, LEFT);
+            append_child(n, (Node *) $2, RIGHT);
+            $$ = n;
+        }
+    | pointer
     | direct_abstract_declarator
     ;
 
@@ -192,10 +200,32 @@ pointer : ASTERISK
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
+        {
+            Node *n = create_zero_item_node(PAREN_DIR_ABS_DECL);
+            n->children[LEFT] = $2;
+            $$ = n;
+        }
     | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
+        {
+            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            n->children[LEFT] = $1;
+            n->children[RIGHT] = $3;
+            $$ = n;
+        }
     | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
+        {
+            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            n->children[LEFT] = $1;
+            $$ = n;
+        }
     | LEFT_BRACKET conditional_expr RIGHT_BRACKET
+        {
+            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            n->children[RIGHT] = $3;
+            $$ = n;
+        }
     | LEFT_BRACKET RIGHT_BRACKET
+        { $$ = create_zero_item_node(BRACKET_DIR_ABS_DECL); }
     ;
 
 
@@ -309,16 +339,47 @@ void traverse_node(void *np) {
         case TYPE_NAME:
             traverse_node(n->children[LEFT]);
             printf(" ");
-            if ( n->children[RIGHT] != NULL ) {
-                traverse_node(n->children[RIGHT]);
-            }
+            traverse_node(n->children[RIGHT]);
+            break;
+        case ABSTRACT_DECLARATOR:
+            traverse_node(n->children[LEFT]);
+            traverse_node(n->children[RIGHT]);
+            break;
+        case PAREN_DIR_ABS_DECL:
+        case BRACKET_DIR_ABS_DECL:
+            traverse_direct_abstract_declarator(n);
+            break;
+        case IDENTIFIER:
+        case CHAR_CONSTANT:
+        case NUMBER_CONSTANT:
+        case STRING_CONSTANT:
+            traverse_data_node(n);
             break;
         default:
-            error(1, 0, "unknown node type");
+            printf("\nwarning: node type not recognized\n");
             break;
     }
 }
 
+
+
+void traverse_direct_abstract_declarator(Node *n) {
+    switch (n->n_type) {
+        case PAREN_DIR_ABS_DECL:
+            printf("(");
+            traverse_node(n->children[LEFT]);
+            printf(")");
+            break;
+        case BRACKET_DIR_ABS_DECL:
+            traverse_node(n->children[LEFT]);
+            printf("[");
+            traverse_node(n->children[RIGHT]);
+            printf("]");
+            break;
+        default:
+            break;
+    }
+}
 
 void pretty_print(Node *n) {
     switch (n->n_type) {

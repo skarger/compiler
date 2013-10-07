@@ -1,0 +1,7 @@
+(int) x;
+(char *) x;
+(short ***) x;
+(long []) x;
+(long (*)[10;]) x;
+(long (*)[x;]) x;
+
