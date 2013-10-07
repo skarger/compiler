@@ -8,7 +8,8 @@ enum node_type {
     POINTER,
     ABSTRACT_DECLARATOR,
     PAREN_DIR_ABS_DECL,
-    BRACKET_DIR_ABS_DECL
+    BRACKET_DIR_ABS_DECL,
+    BINARY_EXPR
 };
 
 /* A given Node in the parse tree may have links to child Nodes */
@@ -43,6 +44,7 @@ typedef int ChildIndex;
  * a specific Node type we need a way to refer to fields specific to that type
  */
 #define TYPE 0
+#define BINARY_OP 0
 
 
 /*
@@ -101,4 +103,6 @@ void *create_node(enum node_type nt);
 void append_child(Node *n, Node *child, ChildIndex chidx);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
+char *get_operator_value(int op);
 void handle_parser_error(enum parser_error e, char *data, int line);
+

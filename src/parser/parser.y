@@ -36,13 +36,14 @@ void yyerror(char *s);
 %left  '*'  '/'  '%'
 %left  UMINUS      /*  supplies  precedence  for  unary  minus  */
 
+
 %%      /*  beginning  of  rules  section  */
 
-translation_unit : conditional_expr
+translation_unit : conditional_expr SEMICOLON { printf("\n"); }
     | translation_unit conditional_expr
     ;
 
-conditional_expr : cast_expr SEMICOLON { printf("\n"); }
+conditional_expr : cast_expr
     ;
 
 cast_expr : unary_expr
@@ -92,12 +93,28 @@ function_call : postfix_expr LEFT_PAREN RIGHT_PAREN
     | postfix_expr LEFT_PAREN expr RIGHT_PAREN
     ;
 
-expr : expr COMMA assignment_expr
+expr : comma_expr { traverse_node($$); }
+    ;
+
+comma_expr : expr COMMA assignment_expr
+    {
+        Node *n = create_one_item_node(BINARY_EXPR, COMMA);
+        n->children[LEFT] = $1;
+        n->children[RIGHT] = $3;
+        $$ = n;
+    }
     | assignment_expr
     ;
 
 assignment_expr : conditional_expr
     | unary_expr assignment_op assignment_expr
+        {
+            /* TODO this does not work, need to figure out how to get the op val */
+            Node *n = create_one_item_node(BINARY_EXPR, $2);
+            n->children[LEFT] = $1;
+            n->children[RIGHT] = $3;
+            $$ = n;
+        }
     ;
 
 assignment_op : ASSIGN
@@ -355,6 +372,11 @@ void traverse_node(void *np) {
         case STRING_CONSTANT:
             traverse_data_node(n);
             break;
+        case BINARY_EXPR:
+            printf("BE\n");
+            traverse_node(n->children[LEFT]);
+            printf(" %s ", get_operator_value(n->data.symbols[BINARY_OP]));
+            traverse_node(n->children[RIGHT]);
         default:
             printf("\nwarning: node type not recognized\n");
             break;
@@ -382,17 +404,7 @@ void traverse_direct_abstract_declarator(Node *n) {
 }
 
 void pretty_print(Node *n) {
-    switch (n->n_type) {
-        case TYPE_SPECIFIER:
-            printf("%s ", get_type_name(n->data.symbols[TYPE]));
-            if (n->children[RIGHT] != NULL) {
-                pretty_print(n->children[RIGHT]);
-            }
-            break;
-        default:
-            error(1, 0, "unknown node type");
-            break;
-    }
+    traverse_node(n);
 }
 
 char *get_type_name(enum data_type type) {
@@ -419,6 +431,17 @@ char *get_type_name(enum data_type type) {
             return "";
     }
 }
+
+char *get_operator_value(int op) {
+    switch (op) {
+        case ASSIGN:
+            return "=";
+        default:
+            printf("op not recognized\n");
+            return "";
+    }
+}
+
 
 /*
  * handle_parser_error
