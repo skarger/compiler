@@ -111,8 +111,15 @@ assignment_op : ASSIGN
     ;
 
 /* type name and children */
-type_name : type_specifier
+type_name : type_specifier { traverse_node($$); }
     | type_specifier abstract_declarator
+        {
+            Node *n = create_zero_item_node(TYPE_NAME);
+            append_child(n, (Node *) $1, LEFT);
+            append_child(n, (Node *) $2, RIGHT);
+            $$ = n;
+            traverse_node($$);
+        }
     ;
 
 type_specifier : integer_type_specifier
@@ -160,10 +167,10 @@ character_type_specifier : CHAR
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_one_item_node(TYPE_SPECIFIER, (int) VOID); traverse_node($$);}
+    {  $$ = create_one_item_node(TYPE_SPECIFIER, (int) VOID); }
 
 
-abstract_declarator : pointer { traverse_node($1); }
+abstract_declarator : pointer
     | pointer direct_abstract_declarator
     | direct_abstract_declarator
     ;
@@ -257,7 +264,7 @@ void *create_node(enum node_type nt) {
 }
 
 void initialize_children(Node *n) {
-    int i;
+    ChildIndex i;
     for (i = 0; i < MAX_CHILDREN; i++) {
         n->children[i] = NULL;
     }
@@ -276,6 +283,10 @@ void *create_one_item_node(enum node_type nt, int item1) {
     return (void *) n;
 }
 
+void append_child(Node *n, Node *child, ChildIndex chidx) {
+    n->children[chidx] = child;
+}
+
 void traverse_node(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -288,6 +299,13 @@ void traverse_node(void *np) {
             break;
         case TYPE_SPECIFIER:
             printf("%s", get_type_name(n->data.symbols[TYPE]));
+            break;
+        case TYPE_NAME:
+            traverse_node(n->children[LEFT]);
+            printf(" ");
+            if ( n->children[RIGHT] != NULL ) {
+                traverse_node(n->children[RIGHT]);
+            }
             break;
         default:
             error(1, 0, "unknown node type");

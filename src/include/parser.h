@@ -3,6 +3,7 @@
  * semantic value that the parser ascertains.
  */
 enum node_type {
+    TYPE_NAME,
     TYPE_SPECIFIER,
     POINTER
 };
@@ -10,6 +11,8 @@ enum node_type {
 /* A given Node in the parse tree may have links to child Nodes */
 /* MAX_CHILDREN allows enough links for any possible production */
 #define MAX_CHILDREN 5
+
+typedef int ChildIndex;
 
 /* Common cases are for a Node to have one or two children
  * Based on the grammar of a given production, its children are naturally
@@ -22,6 +25,7 @@ enum node_type {
  */
 #define LEFT 0
 #define RIGHT 1
+
 
 /* A Node, in addition to having links to its children, can contain data fields.
  * Examples:
@@ -99,6 +103,7 @@ void *create_one_item_node(enum node_type nt, int item1);
 
 /* helpers */
 void *create_node(enum node_type nt); 
+void append_child(Node *n, Node *child, ChildIndex chidx);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
 void handle_parser_error(enum parser_error e, char *data, int line);
