@@ -40,16 +40,6 @@ typedef int ChildIndex;
  */
 #define TYPE 0
 
-/*
- * types that are not covered by token types
- * for example we have tokens for UNSIGNED, LONG, and INT
- * but we need a data type of UNSIGNED_LONG_INT.
- * Conversely we already have a VOID token so we do not need to copy it here.
- */
-enum data_type {
-    UNSIGNED_LONG_INT
-};
-
 
 /*
  * Storage for literal data. Applies to identifiers and constants.

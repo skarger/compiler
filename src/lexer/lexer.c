@@ -49,7 +49,7 @@ struct Character *character;
 struct String *string;
 
 
-char *get_integer_type(enum integer_type type);
+char *get_integer_type(enum data_type type);
 
     /* Figure out whether we're using stdin/stdout or file in/file out. */
     if (argc < 2 || !strcmp("-", argv[1])) {
@@ -206,13 +206,13 @@ while (0 != token) {
  *   Get the string name of an integer type returned by yylex()
  *
  * Parameters:
- *   type - enum integer_type - the type of an integral constant found by yylex()
+ *   type - enum data_type - the type of an integral constant found by yylex()
  * 
  * Return: A pointer to the zero-terminated the type name.
  * Side effects: none
  *
  */
-char *get_integer_type(enum integer_type type) {
+char *get_integer_type(enum data_type type) {
     switch (type) {
     #define CASE_FOR(token) case token: return #token
         CASE_FOR(OVERFLOW);

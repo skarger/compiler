@@ -132,11 +132,11 @@ integer_type_specifier : signed_type_specifier
     ;
 
 signed_type_specifier : signed_short_int
-        { printf("signed short int\n"); }
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_SHORT); }
     | signed_int
-        { printf("signed int\n"); }
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_INT); }
     | signed_long_int
-        { printf("signed long int\n"); }
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_LONG); }
     ;
 
 signed_short_int : SHORT
@@ -157,17 +157,23 @@ signed_long_int: LONG
     ;
 
 unsigned_type_specifier : UNSIGNED SHORT INT
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_SHORT); }
     | UNSIGNED INT
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_INT); }
     | UNSIGNED LONG INT
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_LONG); }
     ;
 
 character_type_specifier : CHAR
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_CHAR); }
     | SIGNED CHAR
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_CHAR); }
     | UNSIGNED CHAR
+        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_CHAR); }
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_one_item_node(TYPE_SPECIFIER, (int) VOID); }
+    {  $$ = create_one_item_node(TYPE_SPECIFIER, VOID); }
 
 
 abstract_declarator : pointer
@@ -176,10 +182,10 @@ abstract_declarator : pointer
     ;
 
 pointer : ASTERISK
-        {  $$ = create_zero_item_node((int) POINTER); }
+        {  $$ = create_zero_item_node(POINTER); }
     | ASTERISK pointer
         {
-            Node *n = (Node *) create_zero_item_node((int) POINTER);
+            Node *n = (Node *) create_zero_item_node(POINTER);
             n->children[RIGHT] = $2;
             $$ = n;
         }
@@ -225,7 +231,7 @@ void *create_data_node(enum node_type n_type, void *data) {
             break;
         default:
             handle_parser_error(PE_INVALID_DATA_TYPE,
-                                get_token_name((int) n_type), yylineno);
+                                get_token_name(n_type), yylineno);
             free(n);
             return NULL;
     }
@@ -251,7 +257,7 @@ void traverse_data_node(void *np) {
             break;
         default:
             handle_parser_error(PE_INVALID_DATA_TYPE,
-                                get_token_name((int) n->n_type), yylineno);
+                                get_token_name(n->n_type), yylineno);
             break;
         }
 }
@@ -332,6 +338,22 @@ char *get_type_name(enum data_type type) {
     switch (type) {
         case VOID:
             return "void";
+        case SIGNED_CHAR:
+            return "char";
+        case UNSIGNED_CHAR:
+            return "unsigned char";
+        case SIGNED_SHORT:
+            return "short";
+        case UNSIGNED_SHORT:
+            return "unsigned short";
+        case SIGNED_INT:
+            return "int";
+        case UNSIGNED_INT:
+            return "unsigned int";
+        case SIGNED_LONG:
+            return "long";
+        case UNSIGNED_LONG:
+            return "unsigned long";
         default:
             return "";
     }

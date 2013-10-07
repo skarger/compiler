@@ -37,14 +37,16 @@ enum lexer_error {
     E_INTEGER_OVERFLOW = -11
 };
 
-enum integer_type {
-    OVERFLOW,
+enum data_type {
+    SIGNED_CHAR,
+    UNSIGNED_CHAR,
     SIGNED_SHORT,
     UNSIGNED_SHORT,
     SIGNED_INT,
     UNSIGNED_INT,
     SIGNED_LONG,
-    UNSIGNED_LONG
+    UNSIGNED_LONG,
+    OVERFLOW
 };
 
 struct Character {
@@ -60,7 +62,7 @@ struct String {
 
 struct Number {
     unsigned long value;
-    enum integer_type type;
+    enum data_type type;
 };
 
 struct Character *create_character(char c);
