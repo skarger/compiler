@@ -52,34 +52,45 @@ conditional_expr : logical_or_expr
 
 logical_or_expr : logical_and_expr
     | logical_or_expr LOGICAL_OR logical_and_expr
+        { $$ = create_node(BINARY_EXPR, LOGICAL_OR, $1, $3); }
     ;
 
 logical_and_expr : bitwise_or_expr
     | logical_and_expr LOGICAL_AND bitwise_or_expr
+        { $$ = create_node(BINARY_EXPR, LOGICAL_AND, $1, $3); }
     ;
 
 bitwise_or_expr : bitwise_xor_expr
     | bitwise_or_expr BITWISE_OR bitwise_xor_expr
+        { $$ = create_node(BINARY_EXPR, BITWISE_OR, $1, $3); }
     ;
 
 bitwise_xor_expr : bitwise_and_expr
     | bitwise_xor_expr BITWISE_XOR bitwise_and_expr
+        { $$ = create_node(BINARY_EXPR, BITWISE_XOR, $1, $3); }
     ;
 
 bitwise_and_expr : equality_expr
     | bitwise_and_expr AMPERSAND equality_expr
+        { $$ = create_node(BINARY_EXPR, AMPERSAND, $1, $3); }
     ;
 
 equality_expr : relational_expr
     | equality_expr EQUAL relational_expr
+        { $$ = create_node(BINARY_EXPR, EQUAL, $1, $3); }
     | equality_expr NOT_EQUAL relational_expr
+        { $$ = create_node(BINARY_EXPR, NOT_EQUAL, $1, $3); }
     ;
 
 relational_expr : shift_expr
     | relational_expr LESS_THAN shift_expr
+        { $$ = create_node(BINARY_EXPR, LESS_THAN, $1, $3); }
     | relational_expr LESS_THAN_EQUAL shift_expr
+        { $$ = create_node(BINARY_EXPR, LESS_THAN_EQUAL, $1, $3); }
     | relational_expr GREATER_THAN shift_expr
+        { $$ = create_node(BINARY_EXPR, GREATER_THAN, $1, $3); }
     | relational_expr GREATER_THAN_EQUAL shift_expr
+        { $$ = create_node(BINARY_EXPR, GREATER_THAN_EQUAL, $1, $3); }
     ;
 
 shift_expr : additive_expr
@@ -650,6 +661,34 @@ char *get_operator_value(int op) {
             return "&";
         case ASTERISK:
             return "*";
+        case LOGICAL_OR:
+            return "||";
+        case LOGICAL_AND:
+            return "&&";
+        case BITWISE_OR:
+            return "|";
+        case BITWISE_XOR:
+            return "^";
+        case EQUAL:
+            return "==";
+        case NOT_EQUAL:
+            return "!=";
+        case LESS_THAN:
+            return "<";
+        case LESS_THAN_EQUAL:
+            return "<=";
+        case GREATER_THAN:
+            return ">";
+        case GREATER_THAN_EQUAL:
+            return ">=";
+        case BITWISE_LSHIFT:
+            return "<<";
+        case BITWISE_RSHIFT:
+            return ">>";
+        case DIVIDE:
+            return "/";
+        case REMAINDER:
+            return "%";
         default:
             printf("op not recognized\n");
             return "";
