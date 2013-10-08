@@ -9,7 +9,8 @@ enum node_type {
     ABSTRACT_DECLARATOR,
     PAREN_DIR_ABS_DECL,
     BRACKET_DIR_ABS_DECL,
-    BINARY_EXPR
+    BINARY_EXPR,
+    SUBSCRIPT_EXPR
 };
 
 typedef struct Node Node;
@@ -39,6 +40,11 @@ union NodeChildren {
         Node *left;
         Node *right;
     } bin_expr;
+
+    struct {
+        Node *pstf_expr;
+        Node *expr;
+    } subs_expr;
 
     struct {
         Node *right;
@@ -106,10 +112,10 @@ void *create_node(enum node_type nt, ...);
 void *create_data_node(enum node_type, void *);
 void *create_zero_item_node(enum node_type nt);
 void *create_one_item_node(enum node_type nt, int item1);
-void *create_binary_expr_node(int op, void *left, void *right);
 
 /* helpers */
 void *construct_node(enum node_type nt);
+void *append_two_children(Node *n, Node *child1, Node *child2);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
 char *get_operator_value(int op);
