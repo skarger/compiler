@@ -97,6 +97,7 @@ void traverse_direct_abstract_declarator(Node *n);
 void *create_data_node(enum node_type, void *);
 void *create_zero_item_node(enum node_type nt);
 void *create_one_item_node(enum node_type nt, int item1);
+void *create_binary_expr_node(int op, void *left, void *right);
 
 /* helpers */
 void *create_node(enum node_type nt); 

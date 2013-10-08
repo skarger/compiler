@@ -96,38 +96,36 @@ function_call : postfix_expr LEFT_PAREN RIGHT_PAREN
 expr : comma_expr { traverse_node($$); }
     ;
 
-comma_expr : expr COMMA assignment_expr
+comma_expr : assignment_expr
+    | comma_expr COMMA assignment_expr
     {
-        Node *n = create_one_item_node(BINARY_EXPR, COMMA);
-        n->children[LEFT] = $1;
-        n->children[RIGHT] = $3;
-        $$ = n;
+         $$ = create_binary_expr_node(COMMA, $1, $3);
     }
-    | assignment_expr
     ;
 
 assignment_expr : conditional_expr
-    | unary_expr assignment_op assignment_expr
-        {
-            /* TODO this does not work, need to figure out how to get the op val */
-            Node *n = create_one_item_node(BINARY_EXPR, $2);
-            n->children[LEFT] = $1;
-            n->children[RIGHT] = $3;
-            $$ = n;
-        }
-    ;
-
-assignment_op : ASSIGN
-    | ADD_ASSIGN
-    | SUBTRACT_ASSIGN
-    | MULTIPLY_ASSIGN
-    | DIVIDE_ASSIGN
-    | REMAINDER_ASSIGN
-    | BITWISE_LSHIFT_ASSIGN
-    | BITWISE_RSHIFT_ASSIGN
-    | BITWISE_AND_ASSIGN
-    | BITWISE_XOR_ASSSIGN
-    | BITWISE_OR_ASSIGN
+    | unary_expr ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(ASSIGN, $1, $3); }
+    | unary_expr ADD_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(ADD_ASSIGN, $1, $3); }
+    | unary_expr SUBTRACT_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(SUBTRACT_ASSIGN, $1, $3); }
+    | unary_expr MULTIPLY_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(MULTIPLY_ASSIGN, $1, $3); }
+    | unary_expr DIVIDE_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(DIVIDE_ASSIGN, $1, $3); }
+    | unary_expr REMAINDER_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(REMAINDER_ASSIGN, $1, $3); }
+    | unary_expr BITWISE_LSHIFT_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(BITWISE_LSHIFT_ASSIGN, $1, $3); }
+    | unary_expr BITWISE_RSHIFT_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(BITWISE_RSHIFT_ASSIGN, $1, $3); }
+    | unary_expr BITWISE_AND_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(BITWISE_AND_ASSIGN, $1, $3); }
+    | unary_expr BITWISE_XOR_ASSSIGN assignment_expr
+        { $$ = create_binary_expr_node(BITWISE_XOR_ASSSIGN, $1, $3); }
+    | unary_expr BITWISE_OR_ASSIGN assignment_expr
+        { $$ = create_binary_expr_node(BITWISE_OR_ASSIGN, $1, $3); }
     ;
 
 /* type name and children */
@@ -238,7 +236,7 @@ direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
     | LEFT_BRACKET conditional_expr RIGHT_BRACKET
         {
             Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
-            n->children[RIGHT] = $3;
+            n->children[RIGHT] = $2;
             $$ = n;
         }
     | LEFT_BRACKET RIGHT_BRACKET
@@ -340,6 +338,14 @@ void append_child(Node *n, Node *child, ChildIndex chidx) {
     n->children[chidx] = child;
 }
 
+void *create_binary_expr_node(int op, void *left, void *right) {
+    Node *n = create_one_item_node(BINARY_EXPR, op);
+    append_child(n, (Node *) left, LEFT);
+    append_child(n, (Node *) right, RIGHT);
+    return (void *) n;
+}
+
+
 void traverse_node(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -373,12 +379,12 @@ void traverse_node(void *np) {
             traverse_data_node(n);
             break;
         case BINARY_EXPR:
-            printf("BE\n");
             traverse_node(n->children[LEFT]);
             printf(" %s ", get_operator_value(n->data.symbols[BINARY_OP]));
             traverse_node(n->children[RIGHT]);
+            break;
         default:
-            printf("\nwarning: node type not recognized\n");
+            printf("\nwarning: node type not recognized: %d\n", n->n_type);
             break;
     }
 }
@@ -436,6 +442,28 @@ char *get_operator_value(int op) {
     switch (op) {
         case ASSIGN:
             return "=";
+        case ADD_ASSIGN:
+            return "+=";
+        case SUBTRACT_ASSIGN:
+            return "-=";
+        case MULTIPLY_ASSIGN:
+            return "*=";
+        case DIVIDE_ASSIGN:
+            return "/=";
+        case REMAINDER_ASSIGN:
+            return "%=";
+        case BITWISE_LSHIFT_ASSIGN:
+            return "<<=";
+        case BITWISE_RSHIFT_ASSIGN:
+            return ">>=";
+        case BITWISE_AND_ASSIGN:
+            return "&=";
+        case BITWISE_XOR_ASSSIGN:
+            return "^=";
+        case BITWISE_OR_ASSIGN:
+            return "|=";
+        case COMMA:
+            return ",";
         default:
             printf("op not recognized\n");
             return "";
