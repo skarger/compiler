@@ -40,11 +40,13 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 
-translation_unit : conditional_expr SEMICOLON { printf("\n"); }
-    | translation_unit conditional_expr SEMICOLON { printf("\n"); }
+translation_unit : conditional_expr SEMICOLON
+        { traverse_node($1); printf("\n"); }
+    | translation_unit conditional_expr SEMICOLON
+        { traverse_node($2); printf("\n"); }
     ;
 
-conditional_expr : cast_expr {  traverse_node($$); }
+conditional_expr : cast_expr
     ;
 
 cast_expr : unary_expr
@@ -99,7 +101,7 @@ function_call : postfix_expr LEFT_PAREN RIGHT_PAREN
         { $$ = create_node(FUNCTION_CALL, $1, $3); }
     ;
 
-expr : comma_expr { traverse_node($$); }
+expr : comma_expr
     ;
 
 comma_expr : assignment_expr
@@ -288,8 +290,8 @@ void *create_node(enum node_type nt, ...) {
 void *append_two_children(Node *n, Node *child1, Node *child2) {
     switch (n->n_type) {
         case BINARY_EXPR:
-            n->children.bin_expr.left = child1;
-            n->children.bin_expr.right = child2;
+            n->children.bin_op.left = child1;
+            n->children.bin_op.right = child2;
             break;
         case CAST_EXPR:
             n->children.cast_expr.type_name = child1;
@@ -328,8 +330,8 @@ void *append_two_children(Node *n, Node *child1, Node *child2) {
 void initialize_children(Node *n) {
     switch (n->n_type) {
         case BINARY_EXPR:
-            n->children.bin_expr.left = NULL;
-            n->children.bin_expr.right = NULL;
+            n->children.bin_op.left = NULL;
+            n->children.bin_op.right = NULL;
             break;
         case CAST_EXPR:
             n->children.cast_expr.type_name = NULL;
@@ -397,9 +399,9 @@ void traverse_node(void *np) {
             traverse_node(n->children.cast_expr.cast_expr);
             break;
         case BINARY_EXPR:
-            traverse_node(n->children.bin_expr.left);
+            traverse_node(n->children.bin_op.left);
             printf(" %s ", get_operator_value(n->data.symbols[BINARY_OP]));
-            traverse_node(n->children.bin_expr.right);
+            traverse_node(n->children.bin_op.right);
             break;
         case TYPE_NAME:
             traverse_node(n->children.type_name.type_spec);

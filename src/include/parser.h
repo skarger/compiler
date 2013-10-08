@@ -12,6 +12,7 @@ enum node_type {
     BRACKET_DIR_ABS_DECL,
     BINARY_EXPR,
     CAST_EXPR,
+    UNARY_EXPR,
     SUBSCRIPT_EXPR,
     FUNCTION_CALL,
     POSTFIX_INCREMENT,
@@ -50,7 +51,7 @@ union NodeChildren {
     struct {
         Node *left;
         Node *right;
-    } bin_expr;
+    } bin_op;
 
     struct {
         Node *pstf_expr;
