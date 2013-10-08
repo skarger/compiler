@@ -256,58 +256,6 @@ void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
-
-void *create_data_node(enum node_type n_type, void *data) {
-    Node *n;
-    util_emalloc((void **) &n, sizeof(Node));
-    n->n_type = n_type;
-    /* populate the data field, accounting for the type of data */
-    switch (n_type) {
-        case IDENTIFIER:
-            n->data.values.str = strdup( ((struct String *) data)->str );
-            break;
-        case STRING_CONSTANT:
-            n->data.values.str = strdup( ((struct String *) data)->str );
-            break;
-        case NUMBER_CONSTANT:
-            n->data.values.num = ((struct Number *) data)->value;
-            break;
-        case CHAR_CONSTANT:
-            n->data.values.ch = ((struct Character *) data)->c;
-            break;
-        default:
-            handle_parser_error(PE_INVALID_DATA_TYPE,
-                                get_token_name(n_type), yylineno);
-            free(n);
-            return NULL;
-    }
-    return (void *) n;
-}
-
-void traverse_data_node(void *np) {
-    Node *n = (Node *) np;
-    switch (n->n_type) {
-        case IDENTIFIER:
-            printf("%s", n->data.values.str);
-            break;
-        case STRING_CONSTANT:
-            /* TODO: replace special characters, e.g. replace newline with \n */
-            printf("\"%s\"", n->data.values.str);
-            break;
-        case NUMBER_CONSTANT:
-            printf("%d", n->data.values.num);
-            break;
-        case CHAR_CONSTANT:
-            /* TODO: replace special characters, e.g. replace null with \0 */
-            printf("'%c'", n->data.values.ch);
-            break;
-        default:
-            handle_parser_error(PE_INVALID_DATA_TYPE,
-                                get_token_name(n->n_type), yylineno);
-            break;
-        }
-}
-
 void *create_node(enum node_type nt, ...) {
     Node *n = construct_node(nt);
     initialize_children(n);
@@ -358,25 +306,12 @@ void initialize_children(Node *n) {
     }
 }
 
-void *create_zero_item_node(enum node_type nt) {
-    Node *n = construct_node(nt);
-    initialize_children(n);
-    return (void *) n;
-}
-
-void *create_one_item_node(enum node_type nt, int item1) {
-    Node *n = construct_node(nt);
-    n->data.symbols[0] = item1;
-    initialize_children(n);
-    return (void *) n;
-}
-
 void append_child(Node *n, Node *child, ChildIndex chidx) {
     n->children[chidx] = child;
 }
 
 void *create_binary_expr_node(int op, void *left, void *right) {
-    Node *n = create_one_item_node(BINARY_EXPR, op);
+    Node *n = create_node(BINARY_EXPR, op);
     append_child(n, (Node *) left, LEFT);
     append_child(n, (Node *) right, RIGHT);
     return (void *) n;
@@ -426,7 +361,29 @@ void traverse_node(void *np) {
     }
 }
 
-
+void traverse_data_node(void *np) {
+    Node *n = (Node *) np;
+    switch (n->n_type) {
+        case IDENTIFIER:
+            printf("%s", n->data.values.str);
+            break;
+        case STRING_CONSTANT:
+            /* TODO: replace special characters, e.g. replace newline with \n */
+            printf("\"%s\"", n->data.values.str);
+            break;
+        case NUMBER_CONSTANT:
+            printf("%d", n->data.values.num);
+            break;
+        case CHAR_CONSTANT:
+            /* TODO: replace special characters, e.g. replace null with \0 */
+            printf("'%c'", n->data.values.ch);
+            break;
+        default:
+            handle_parser_error(PE_INVALID_DATA_TYPE,
+                                get_token_name(n->n_type), yylineno);
+            break;
+        }
+}
 
 void traverse_direct_abstract_declarator(Node *n) {
     switch (n->n_type) {
