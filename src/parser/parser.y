@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "src/include/lexer.h"
 #include "src/include/parser.h"
@@ -72,18 +73,18 @@ postfix_expr : primary_expr
     ;
 
 primary_expr : IDENTIFIER
-        { $$ = create_data_node( IDENTIFIER, yylval ); }
+        { $$ = create_node( IDENTIFIER, yylval ); }
     | constant
         { $$ = $1; }
     | LEFT_PAREN expr RIGHT_PAREN
     ;
 
 constant : CHAR_CONSTANT
-        { $$ = create_data_node( CHAR_CONSTANT, yylval ); }
+        { $$ = create_node( CHAR_CONSTANT, yylval ); }
     | STRING_CONSTANT
-        { $$ = create_data_node( STRING_CONSTANT, yylval ); }
+        { $$ = create_node( STRING_CONSTANT, yylval ); }
     | NUMBER_CONSTANT
-        { $$ = create_data_node( NUMBER_CONSTANT, yylval ); }
+        { $$ = create_node( NUMBER_CONSTANT, yylval ); }
     ;
 
 subscript_expr: postfix_expr LEFT_BRACKET expr RIGHT_BRACKET
@@ -132,7 +133,7 @@ assignment_expr : conditional_expr
 type_name : type_specifier
     | type_specifier abstract_declarator
         {
-            Node *n = create_zero_item_node(TYPE_NAME);
+            Node *n = create_node(TYPE_NAME);
             append_child(n, (Node *) $1, LEFT);
             append_child(n, (Node *) $2, RIGHT);
             $$ = n;
@@ -149,11 +150,11 @@ integer_type_specifier : signed_type_specifier
     ;
 
 signed_type_specifier : signed_short_int
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_SHORT); }
+        {  $$ = create_node(TYPE_SPECIFIER, SIGNED_SHORT); }
     | signed_int
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_INT); }
+        {  $$ = create_node(TYPE_SPECIFIER, SIGNED_INT); }
     | signed_long_int
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_LONG); }
+        {  $$ = create_node(TYPE_SPECIFIER, SIGNED_LONG); }
     ;
 
 signed_short_int : SHORT
@@ -174,28 +175,28 @@ signed_long_int: LONG
     ;
 
 unsigned_type_specifier : UNSIGNED SHORT INT
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_SHORT); }
+        {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_SHORT); }
     | UNSIGNED INT
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_INT); }
+        {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_INT); }
     | UNSIGNED LONG INT
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_LONG); }
+        {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_LONG); }
     ;
 
 character_type_specifier : CHAR
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_CHAR); }
+        {  $$ = create_node(TYPE_SPECIFIER, SIGNED_CHAR); }
     | SIGNED CHAR
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, SIGNED_CHAR); }
+        {  $$ = create_node(TYPE_SPECIFIER, SIGNED_CHAR); }
     | UNSIGNED CHAR
-        {  $$ = create_one_item_node(TYPE_SPECIFIER, UNSIGNED_CHAR); }
+        {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_CHAR); }
     ;
 
 void_type_specifier : VOID
-    {  $$ = create_one_item_node(TYPE_SPECIFIER, VOID); }
+    {  $$ = create_node(TYPE_SPECIFIER, VOID); }
 
 
 abstract_declarator : pointer direct_abstract_declarator
         {
-            Node *n = create_zero_item_node(ABSTRACT_DECLARATOR);
+            Node *n = create_node(ABSTRACT_DECLARATOR);
             append_child(n, (Node *) $1, LEFT);
             append_child(n, (Node *) $2, RIGHT);
             $$ = n;
@@ -205,10 +206,10 @@ abstract_declarator : pointer direct_abstract_declarator
     ;
 
 pointer : ASTERISK
-        {  $$ = create_zero_item_node(POINTER); }
+        {  $$ = create_node(POINTER); }
     | ASTERISK pointer
         {
-            Node *n = (Node *) create_zero_item_node(POINTER);
+            Node *n = (Node *) create_node(POINTER);
             n->children[RIGHT] = $2;
             $$ = n;
         }
@@ -216,31 +217,31 @@ pointer : ASTERISK
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
         {
-            Node *n = create_zero_item_node(PAREN_DIR_ABS_DECL);
+            Node *n = create_node(PAREN_DIR_ABS_DECL);
             n->children[LEFT] = $2;
             $$ = n;
         }
     | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
         {
-            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            Node *n = create_node(BRACKET_DIR_ABS_DECL);
             n->children[LEFT] = $1;
             n->children[RIGHT] = $3;
             $$ = n;
         }
     | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
         {
-            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            Node *n = create_node(BRACKET_DIR_ABS_DECL);
             n->children[LEFT] = $1;
             $$ = n;
         }
     | LEFT_BRACKET conditional_expr RIGHT_BRACKET
         {
-            Node *n = create_zero_item_node(BRACKET_DIR_ABS_DECL);
+            Node *n = create_node(BRACKET_DIR_ABS_DECL);
             n->children[RIGHT] = $2;
             $$ = n;
         }
     | LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_zero_item_node(BRACKET_DIR_ABS_DECL); }
+        { $$ = create_node(BRACKET_DIR_ABS_DECL); }
     ;
 
 
@@ -307,7 +308,43 @@ void traverse_data_node(void *np) {
         }
 }
 
-void *create_node(enum node_type nt) {
+void *create_node(enum node_type nt, ...) {
+    Node *n = construct_node(nt);
+    initialize_children(n);
+    va_list ap;
+    va_start(ap, nt);
+    switch (nt) {
+        case PAREN_DIR_ABS_DECL:
+        case BRACKET_DIR_ABS_DECL:
+        case ABSTRACT_DECLARATOR:
+        case TYPE_NAME:
+        case POINTER:
+            break;
+        case TYPE_SPECIFIER:
+            n->data.symbols[TYPE] = va_arg(ap, int);
+            break;
+        /* for identifiers and constants yylval should have been passed in */
+        case IDENTIFIER:
+            n->data.values.str =
+                strdup( ((struct String *) va_arg(ap, YYSTYPE))->str );
+            break;
+        case NUMBER_CONSTANT:
+            n->data.values.num = ((struct Number *) va_arg(ap, YYSTYPE))->value;
+            break;
+        case CHAR_CONSTANT:
+            n->data.values.ch = ((struct Character *) va_arg(ap, YYSTYPE))->c;
+            break;
+        default:
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE, "create_node",
+                                yylineno);
+            return;
+    }
+    va_end(ap);
+
+    return (void *) n;
+}
+
+void *construct_node(enum node_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
@@ -322,13 +359,13 @@ void initialize_children(Node *n) {
 }
 
 void *create_zero_item_node(enum node_type nt) {
-    Node *n = create_node(nt);
+    Node *n = construct_node(nt);
     initialize_children(n);
     return (void *) n;
 }
 
 void *create_one_item_node(enum node_type nt, int item1) {
-    Node *n = create_node(nt);
+    Node *n = construct_node(nt);
     n->data.symbols[0] = item1;
     initialize_children(n);
     return (void *) n;
@@ -490,6 +527,9 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             return;
         case PE_INVALID_DATA_TYPE:
             error(0, 0, "line %d: invalid data type: %s", line, data);
+            return;
+        case PE_UNRECOGNIZED_NODE_TYPE:
+            error(0, 0, "line %d: %s: unrecognized node type", line, data);
             return;
         default:
             return;

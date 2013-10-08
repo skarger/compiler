@@ -81,7 +81,8 @@ typedef struct Node Node;
  */
 enum parser_error {
     PE_SUCCESS = 0,
-    PE_INVALID_DATA_TYPE = -1
+    PE_INVALID_DATA_TYPE = -1,
+    PE_UNRECOGNIZED_NODE_TYPE = -2
 };
 
 
@@ -94,13 +95,14 @@ void traverse_node(void *np);
 void traverse_direct_abstract_declarator(Node *n);
 
 /* node creation */
+void *create_node(enum node_type nt, ...);
 void *create_data_node(enum node_type, void *);
 void *create_zero_item_node(enum node_type nt);
 void *create_one_item_node(enum node_type nt, int item1);
 void *create_binary_expr_node(int op, void *left, void *right);
 
 /* helpers */
-void *create_node(enum node_type nt); 
+void *construct_node(enum node_type nt);
 void append_child(Node *n, Node *child, ChildIndex chidx);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
