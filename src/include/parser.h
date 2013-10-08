@@ -12,7 +12,10 @@ enum node_type {
     BRACKET_DIR_ABS_DECL,
     BINARY_EXPR,
     CAST_EXPR,
-    SUBSCRIPT_EXPR
+    SUBSCRIPT_EXPR,
+    FUNCTION_CALL,
+    POSTFIX_INCREMENT,
+    POSTFIX_DECREMENT,
 };
 
 typedef struct Node Node;
@@ -31,6 +34,8 @@ typedef struct Node Node;
  */
 #define TYPE 0
 #define BINARY_OP 0
+#define UNARY_OP 0
+#define POSTFIX_OP 0
 
 
 /*
@@ -39,9 +44,18 @@ typedef struct Node Node;
  */
 union NodeChildren {
     struct {
+        Node *operand;
+    } unary_op;
+
+    struct {
         Node *left;
         Node *right;
     } bin_expr;
+
+    struct {
+        Node *pstf_expr;
+        Node *expr_list;
+    } function_call;
 
     struct {
         Node *type_name;

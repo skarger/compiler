@@ -41,15 +41,15 @@ void yyerror(char *s);
 %%      /*  beginning  of  rules  section  */
 
 translation_unit : conditional_expr SEMICOLON { printf("\n"); }
-    | translation_unit conditional_expr
+    | translation_unit conditional_expr SEMICOLON { printf("\n"); }
     ;
 
-conditional_expr : cast_expr
+conditional_expr : cast_expr {  traverse_node($$); }
     ;
 
 cast_expr : unary_expr
     | LEFT_PAREN type_name RIGHT_PAREN cast_expr
-        { $$ = create_node(CAST_EXPR, $2, $4); traverse_node($$); }
+        { $$ = create_node(CAST_EXPR, $2, $4); }
     ;
 
 /* unary_expr and children */
@@ -69,7 +69,9 @@ postfix_expr : primary_expr
     | subscript_expr
     | function_call
     | postfix_expr INCREMENT
-    | postfix_expr DECREMENT 
+        { $$ = create_node(POSTFIX_INCREMENT, INCREMENT, $1); }
+    | postfix_expr DECREMENT
+        { $$ = create_node(POSTFIX_DECREMENT, DECREMENT, $1); }
     ;
 
 primary_expr : IDENTIFIER
@@ -92,7 +94,9 @@ subscript_expr: postfix_expr LEFT_BRACKET expr RIGHT_BRACKET
     ;
 
 function_call : postfix_expr LEFT_PAREN RIGHT_PAREN
-    | postfix_expr LEFT_PAREN expr RIGHT_PAREN
+        { $$ = create_node(FUNCTION_CALL, $1, NULL); }
+    | postfix_expr LEFT_PAREN comma_expr RIGHT_PAREN
+        { $$ = create_node(FUNCTION_CALL, $1, $3); }
     ;
 
 expr : comma_expr { traverse_node($$); }
@@ -100,9 +104,7 @@ expr : comma_expr { traverse_node($$); }
 
 comma_expr : assignment_expr
     | comma_expr COMMA assignment_expr
-    {
-         $$ = create_node(BINARY_EXPR, COMMA, $1, $3);
-    }
+    { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
     ;
 
 assignment_expr : conditional_expr
@@ -238,6 +240,7 @@ void *create_node(enum node_type nt, ...) {
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case FUNCTION_CALL:
         case CAST_EXPR:
         case TYPE_NAME:
         case ABSTRACT_DECLARATOR:
@@ -245,6 +248,11 @@ void *create_node(enum node_type nt, ...) {
         case SUBSCRIPT_EXPR:
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
+            break;
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+            n->data.symbols[POSTFIX_OP] = va_arg(ap, int);
+            n->children.unary_op.operand = va_arg(ap, Node *);
             break;
         case TYPE_SPECIFIER:
             n->data.symbols[TYPE] = va_arg(ap, int);
@@ -291,6 +299,10 @@ void *append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.subs_expr.pstf_expr = child1;
             n->children.subs_expr.expr = child2;
             break;
+        case FUNCTION_CALL:
+            n->children.function_call.pstf_expr = child1;
+            n->children.function_call.expr_list = child2;
+            break;
         case ABSTRACT_DECLARATOR:
             n->children.abs_decl.ptr = child1;
             n->children.abs_decl.dir_abs_decl = child2;
@@ -326,6 +338,14 @@ void initialize_children(Node *n) {
         case SUBSCRIPT_EXPR:
             n->children.subs_expr.pstf_expr = NULL;
             n->children.subs_expr.expr = NULL;
+            break;
+        case FUNCTION_CALL:
+            n->children.function_call.pstf_expr = NULL;
+            n->children.function_call.expr_list = NULL;
+            break;
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+            n->children.unary_op.operand = NULL;
             break;
         case POINTER:
             n->children.ptr.right = NULL;
@@ -406,6 +426,17 @@ void traverse_node(void *np) {
             printf("[");
             traverse_node(n->children.subs_expr.expr);
             printf("]");
+            break;
+        case FUNCTION_CALL:
+            traverse_node(n->children.function_call.pstf_expr);
+            printf("(");
+            traverse_node(n->children.function_call.expr_list);
+            printf(")");
+            break;
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+            traverse_node(n->children.unary_op.operand);
+            printf("%s ", get_operator_value(n->data.symbols[POSTFIX_OP]));
             break;
         case IDENTIFIER:
         case CHAR_CONSTANT:
@@ -516,6 +547,10 @@ char *get_operator_value(int op) {
             return "|=";
         case COMMA:
             return ",";
+        case INCREMENT:
+            return "++";
+        case DECREMENT:
+            return "--";
         default:
             printf("op not recognized\n");
             return "";
