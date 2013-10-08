@@ -13,6 +13,7 @@ enum node_type {
     BINARY_EXPR,
     CAST_EXPR,
     UNARY_EXPR,
+    PREFIX_EXPR,
     SUBSCRIPT_EXPR,
     FUNCTION_CALL,
     POSTFIX_INCREMENT,
@@ -34,9 +35,7 @@ typedef struct Node Node;
  * a specific Node type we need a way to refer to fields specific to that type
  */
 #define TYPE 0
-#define BINARY_OP 0
-#define UNARY_OP 0
-#define POSTFIX_OP 0
+#define OPERATOR 0
 
 
 /*

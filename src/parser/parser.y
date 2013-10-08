@@ -57,13 +57,21 @@ cast_expr : unary_expr
 /* unary_expr and children */
 unary_expr : postfix_expr
     | MINUS cast_expr
+        { $$ = create_node(UNARY_EXPR, MINUS, $2); }
     | PLUS cast_expr
+        { $$ = create_node(UNARY_EXPR, PLUS, $2); }
     | LOGICAL_NOT cast_expr
+        { $$ = create_node(UNARY_EXPR, LOGICAL_NOT, $2); }
     | BITWISE_NOT cast_expr
+        { $$ = create_node(UNARY_EXPR, BITWISE_NOT, $2); }
     | AMPERSAND cast_expr
+        { $$ = create_node(UNARY_EXPR, AMPERSAND, $2); }
     | ASTERISK cast_expr
+        { $$ = create_node(UNARY_EXPR, ASTERISK, $2); }
     | INCREMENT unary_expr
+        { $$ = create_node(PREFIX_EXPR, INCREMENT, $2); }
     | DECREMENT unary_expr
+        { $$ = create_node(PREFIX_EXPR, DECREMENT, $2); }
     ;
 
 /* postfix_expr and children */
@@ -238,7 +246,7 @@ void *create_node(enum node_type nt, ...) {
     va_start(ap, nt);
     switch (nt) {
         case BINARY_EXPR:
-            n->data.symbols[BINARY_OP] = va_arg(ap, int);
+            n->data.symbols[OPERATOR] = va_arg(ap, int);
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
@@ -251,9 +259,11 @@ void *create_node(enum node_type nt, ...) {
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
         case POSTFIX_INCREMENT:
         case POSTFIX_DECREMENT:
-            n->data.symbols[POSTFIX_OP] = va_arg(ap, int);
+            n->data.symbols[OPERATOR] = va_arg(ap, int);
             n->children.unary_op.operand = va_arg(ap, Node *);
             break;
         case TYPE_SPECIFIER:
@@ -345,6 +355,8 @@ void initialize_children(Node *n) {
             n->children.function_call.pstf_expr = NULL;
             n->children.function_call.expr_list = NULL;
             break;
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
         case POSTFIX_INCREMENT:
         case POSTFIX_DECREMENT:
             n->children.unary_op.operand = NULL;
@@ -400,7 +412,7 @@ void traverse_node(void *np) {
             break;
         case BINARY_EXPR:
             traverse_node(n->children.bin_op.left);
-            printf(" %s ", get_operator_value(n->data.symbols[BINARY_OP]));
+            printf(" %s ", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.bin_op.right);
             break;
         case TYPE_NAME:
@@ -435,10 +447,15 @@ void traverse_node(void *np) {
             traverse_node(n->children.function_call.expr_list);
             printf(")");
             break;
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+            printf("%s", get_operator_value(n->data.symbols[OPERATOR]));
+            traverse_node(n->children.unary_op.operand);
+            break;
         case POSTFIX_INCREMENT:
         case POSTFIX_DECREMENT:
             traverse_node(n->children.unary_op.operand);
-            printf("%s ", get_operator_value(n->data.symbols[POSTFIX_OP]));
+            printf("%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
         case IDENTIFIER:
         case CHAR_CONSTANT:
@@ -553,6 +570,18 @@ char *get_operator_value(int op) {
             return "++";
         case DECREMENT:
             return "--";
+        case MINUS:
+            return "-";
+        case PLUS:
+            return "+";
+        case LOGICAL_NOT:
+            return "!";
+        case BITWISE_NOT:
+            return "~";
+        case AMPERSAND:
+            return "&";
+        case ASTERISK:
+            return "*";
         default:
             printf("op not recognized\n");
             return "";
