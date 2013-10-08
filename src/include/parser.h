@@ -12,24 +12,7 @@ enum node_type {
     BINARY_EXPR
 };
 
-/* A given Node in the parse tree may have links to child Nodes */
-/* MAX_CHILDREN allows enough links for any possible production */
-#define MAX_CHILDREN 5
-
-typedef int ChildIndex;
-
-/* Common cases are for a Node to have one or two children
- * Based on the grammar of a given production, its children are naturally
- * thought of as left or right children. For example in this production:
-    pointer : *
-              * pointer
- *
- * When matching the second case we create a POINTER Node for the left asterisk,
- * and set that Node's RIGHT child to the result of parsing the right pointer.
- */
-#define LEFT 0
-#define RIGHT 1
-
+typedef struct Node Node;
 
 /* A Node, in addition to having links to its children, can contain data fields.
  * Examples:
@@ -48,21 +31,46 @@ typedef int ChildIndex;
 
 
 /*
- * Storage for literal data. Applies to identifiers and constants.
- * IDENTIFIER, CHAR_CONSTANT, NUMBER_CONSTANT, STRING_CONSTANT
+ * Depending on node type, a Node has various numbers of children.
+ * They also have different names implied by the grammar.
  */
-union LiteralData {
-    char ch;
-    unsigned long num;
-    char *str;
+union NodeChildren {
+    struct {
+        Node *left;
+        Node *right;
+    } bin_expr;
+
+    struct {
+        Node *right;
+    } ptr;
+
+    struct {
+        Node *type_spec;
+        Node *abs_decl;
+    } type_name;
+
+    struct {
+        Node *ptr;
+        Node *dir_abs_decl;
+    } abs_decl;
+
+    struct {
+        Node *abs_decl;
+        Node *dir_abs_decl;
+        Node *cond_expr;
+    } dir_abs_decl;
 };
 
-/* A Node may fields with a symbolic (int or enum) representation or
- * fields with literal data, e.g. a string value.
+/*
+ * A Node may contain various types of data fields.
  */
 union NodeData {
+    /* fields with a symbolic (int or enum) representation */
     int symbols[MAX_ITEMS];
-    union LiteralData values;
+    /* Storage for literal data. Applies to identifiers and constants. */
+    char ch;           /* CHAR_CONSTANT */
+    unsigned long num; /* NUMBER_CONSTANT */
+    char *str;         /* IDENTIFIER, STRING_CONSTANT */
 };
 
 /*
@@ -72,9 +80,8 @@ union NodeData {
 struct Node {
     enum node_type n_type;
     union NodeData data;
-    struct Node *children[MAX_CHILDREN];
+    union NodeChildren children;
 };
-typedef struct Node Node;
 
 /*
  * Errors that are caught in the parsing step.
@@ -103,7 +110,6 @@ void *create_binary_expr_node(int op, void *left, void *right);
 
 /* helpers */
 void *construct_node(enum node_type nt);
-void append_child(Node *n, Node *child, ChildIndex chidx);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
 char *get_operator_value(int op);
