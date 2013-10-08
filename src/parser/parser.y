@@ -46,7 +46,56 @@ translation_unit : conditional_expr SEMICOLON
         { traverse_node($2); printf("\n"); }
     ;
 
-conditional_expr : cast_expr
+conditional_expr : logical_or_expr
+    | logical_or_expr TERNARY_CONDITIONAL expr COLON conditional_expr
+    ;
+
+logical_or_expr : logical_and_expr
+    | logical_or_expr LOGICAL_OR logical_and_expr
+    ;
+
+logical_and_expr : bitwise_or_expr
+    | logical_and_expr LOGICAL_AND bitwise_or_expr
+    ;
+
+bitwise_or_expr : bitwise_xor_expr
+    | bitwise_or_expr BITWISE_OR bitwise_xor_expr
+    ;
+
+bitwise_xor_expr : bitwise_and_expr
+    | bitwise_xor_expr BITWISE_XOR bitwise_and_expr
+    ;
+
+bitwise_and_expr : equality_expr
+    | bitwise_and_expr AMPERSAND equality_expr
+    ;
+
+equality_expr : relational_expr
+    | equality_expr EQUAL relational_expr
+    | equality_expr NOT_EQUAL relational_expr
+    ;
+
+relational_expr : shift_expr
+    | relational_expr LESS_THAN shift_expr
+    | relational_expr LESS_THAN_EQUAL shift_expr
+    | relational_expr GREATER_THAN shift_expr
+    | relational_expr GREATER_THAN_EQUAL shift_expr
+    ;
+
+shift_expr : additive_expr
+    | shift_expr BITWISE_LSHIFT additive_expr
+    | shift_expr BITWISE_RSHIFT additive_expr
+    ;
+
+additive_expr : multiplicative_expr
+    | additive_expr PLUS multiplicative_expr
+    | additive_expr MINUS multiplicative_expr
+    ;
+
+multiplicative_expr : cast_expr
+    | multiplicative_expr ASTERISK cast_expr
+    | multiplicative_expr DIVIDE cast_expr
+    | multiplicative_expr REMAINDER cast_expr
     ;
 
 cast_expr : unary_expr
@@ -238,6 +287,25 @@ void yyerror(char *s) {
   fprintf(stderr, "%s\n", s);
 }
 
+/*
+ * create_node
+ * Purpose: Create a new node for the parse tree.
+ * Parameters:
+ *      nt - the node type of the node to be created. The created Node
+ *          will have n_type set to nt. Also create_node uses nt
+ *          to decide how to parse the rest of the parameters.
+ *      ... - variable argument list depending on node type. The pattern is
+ *          to first pass data values that will become fields in the created
+ *          Node, and then to pass references to the node's children.
+ *
+ *          Example: for a binary additive expression the call looks like
+ *          create_node(BINARY_EXPR, PLUS, left operand, right operand);
+ *          This call will set the node's OPERATOR data field to PLUS and its
+ *          children to left operand and right operand. Order matters.
+ *
+ * Returns: A reference to the created node
+ * Side effects: Allocates and sets heap storage
+ */
 void *create_node(enum node_type nt, ...) {
     Node *n = construct_node(nt);
     Node *child1, *child2;
