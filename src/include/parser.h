@@ -1,3 +1,4 @@
+#define DEBUG
 /* Nodes have a type corresponding to the grammar. Sometimes the type is
  * equivalent to a lexical token, but often the type has a higher-level
  * semantic value that the parser ascertains.
@@ -10,6 +11,7 @@ enum node_type {
     PAREN_DIR_ABS_DECL,
     BRACKET_DIR_ABS_DECL,
     BINARY_EXPR,
+    CAST_EXPR,
     SUBSCRIPT_EXPR
 };
 
@@ -40,6 +42,11 @@ union NodeChildren {
         Node *left;
         Node *right;
     } bin_expr;
+
+    struct {
+        Node *type_name;
+        Node *cast_expr;
+    } cast_expr;
 
     struct {
         Node *pstf_expr;

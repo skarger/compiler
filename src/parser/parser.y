@@ -49,8 +49,7 @@ conditional_expr : cast_expr
 
 cast_expr : unary_expr
     | LEFT_PAREN type_name RIGHT_PAREN cast_expr
-        { traverse_node($2); }
-        { traverse_node($4); }
+        { $$ = create_node(CAST_EXPR, $2, $4); traverse_node($$); }
     ;
 
 /* unary_expr and children */
@@ -198,42 +197,21 @@ abstract_declarator : pointer direct_abstract_declarator
     ;
 
 pointer : ASTERISK
-        {  $$ = create_node(POINTER); }
+        {  $$ = create_node(POINTER, NULL); }
     | ASTERISK pointer
-        {
-            Node *n = (Node *) create_node(POINTER);
-            n->children.ptr.right = (Node *) $2;
-            $$ = n;
-        }
+        { $$ = create_node(POINTER, $2); }
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
-        {
-            Node *n = create_node(PAREN_DIR_ABS_DECL);
-            n->children.dir_abs_decl.abs_decl = (Node *) $2;
-            $$ = n;
-        }
+        { Node *n = create_node(PAREN_DIR_ABS_DECL, $2); }
     | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        {
-            Node *n = create_node(BRACKET_DIR_ABS_DECL);
-            n->children.dir_abs_decl.dir_abs_decl = (Node *) $1;
-            n->children.dir_abs_decl.cond_expr = (Node *) $3;
-            $$ = n;
-        }
+        { $$ = create_node(BRACKET_DIR_ABS_DECL, $1, $3); }
     | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
-        {
-            Node *n = create_node(BRACKET_DIR_ABS_DECL);
-            n->children.dir_abs_decl.dir_abs_decl = (Node *) $1;
-            $$ = n;
-        }
+        { $$ = create_node(BRACKET_DIR_ABS_DECL, $1, NULL); }
     | LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        {
-            Node *n = create_node(BRACKET_DIR_ABS_DECL);
-            n->children.dir_abs_decl.cond_expr = (Node *) $2;
-            $$ = n;
-        }
+        { $$ = create_node(BRACKET_DIR_ABS_DECL, NULL, $2); }
     | LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(BRACKET_DIR_ABS_DECL); }
+        { $$ = create_node(BRACKET_DIR_ABS_DECL, NULL, NULL); }
     ;
 
 
@@ -255,23 +233,27 @@ void *create_node(enum node_type nt, ...) {
     va_list ap;
     va_start(ap, nt);
     switch (nt) {
-        case PAREN_DIR_ABS_DECL:
-        case BRACKET_DIR_ABS_DECL:
-        case POINTER:
-            break;
-        case TYPE_SPECIFIER:
-            n->data.symbols[TYPE] = va_arg(ap, int);
-            break;
         case BINARY_EXPR:
             n->data.symbols[BINARY_OP] = va_arg(ap, int);
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case CAST_EXPR:
         case TYPE_NAME:
         case ABSTRACT_DECLARATOR:
+        case BRACKET_DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
+            break;
+        case TYPE_SPECIFIER:
+            n->data.symbols[TYPE] = va_arg(ap, int);
+            break;
+        case POINTER:
+            n->children.ptr.right = va_arg(ap, Node *);
+            break;
+        case PAREN_DIR_ABS_DECL:
+            n->children.dir_abs_decl.abs_decl = va_arg(ap, Node *);
             break;
         /* for identifiers and constants yylval should have been passed in */
         case IDENTIFIER:
@@ -301,6 +283,10 @@ void *append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.bin_expr.left = child1;
             n->children.bin_expr.right = child2;
             break;
+        case CAST_EXPR:
+            n->children.cast_expr.type_name = child1;
+            n->children.cast_expr.cast_expr = child2;
+            break;
         case SUBSCRIPT_EXPR:
             n->children.subs_expr.pstf_expr = child1;
             n->children.subs_expr.expr = child2;
@@ -309,10 +295,18 @@ void *append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.abs_decl.ptr = child1;
             n->children.abs_decl.dir_abs_decl = child2;
             break;
+        case BRACKET_DIR_ABS_DECL:
+            n->children.dir_abs_decl.dir_abs_decl = (Node *) child1;
+            n->children.dir_abs_decl.cond_expr = (Node *) child2;
+            break;
         case TYPE_NAME:
             n->children.type_name.type_spec = child1;
             n->children.type_name.abs_decl = child2;
+            break;
         default:
+            #ifdef DEBUG
+                printf("nt %d", n->n_type);
+            #endif
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
                                 "append_two_children", yylineno);
     }
@@ -324,6 +318,10 @@ void initialize_children(Node *n) {
         case BINARY_EXPR:
             n->children.bin_expr.left = NULL;
             n->children.bin_expr.right = NULL;
+            break;
+        case CAST_EXPR:
+            n->children.cast_expr.type_name = NULL;
+            n->children.cast_expr.cast_expr = NULL;
             break;
         case SUBSCRIPT_EXPR:
             n->children.subs_expr.pstf_expr = NULL;
@@ -372,6 +370,12 @@ void traverse_node(void *np) {
         return;
     }
     switch (n->n_type) {
+        case CAST_EXPR:
+            printf("(");
+            traverse_node(n->children.cast_expr.type_name);
+            printf(") ");
+            traverse_node(n->children.cast_expr.cast_expr);
+            break;
         case BINARY_EXPR:
             traverse_node(n->children.bin_expr.left);
             printf(" %s ", get_operator_value(n->data.symbols[BINARY_OP]));
