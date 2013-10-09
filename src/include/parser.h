@@ -1,23 +1,27 @@
 #define DEBUG
+
+
+
 /* Nodes have a type corresponding to the grammar. Sometimes the type is
  * equivalent to a lexical token, but often the type has a higher-level
  * semantic value that the parser ascertains.
  */
 enum node_type {
-    TYPE_NAME,
-    TYPE_SPECIFIER,
-    POINTER,
-    ABSTRACT_DECLARATOR,
-    PAREN_DIR_ABS_DECL,
-    BRACKET_DIR_ABS_DECL,
+    IF_THEN_ELSE,
     BINARY_EXPR,
     CAST_EXPR,
+    TYPE_NAME,
+    TYPE_SPECIFIER,
+    ABSTRACT_DECLARATOR,
+    POINTER,
+    PAREN_DIR_ABS_DECL,
+    BRACKET_DIR_ABS_DECL,
     UNARY_EXPR,
     PREFIX_EXPR,
     SUBSCRIPT_EXPR,
     FUNCTION_CALL,
     POSTFIX_INCREMENT,
-    POSTFIX_DECREMENT,
+    POSTFIX_DECREMENT
 };
 
 typedef struct Node Node;
@@ -37,12 +41,17 @@ typedef struct Node Node;
 #define TYPE 0
 #define OPERATOR 0
 
-
 /*
  * Depending on node type, a Node has various numbers of children.
  * They also have different names implied by the grammar.
  */
 union NodeChildren {
+    struct {
+        Node *cond;
+        Node *val_if_true;
+        Node *val_if_false;
+    } if_then_else;
+
     struct {
         Node *operand;
     } unary_op;
@@ -136,7 +145,8 @@ void *create_one_item_node(enum node_type nt, int item1);
 
 /* helpers */
 void *construct_node(enum node_type nt);
-void *append_two_children(Node *n, Node *child1, Node *child2);
+void append_two_children(Node *n, Node *child1, Node *child2);
+void append_three_children(Node *n, Node *child1, Node *child2, Node *child3);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
 char *get_operator_value(int op);

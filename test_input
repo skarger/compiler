@@ -1,8 +1,24 @@
+a ? b : c;
+i || j;
+i && j;
+h | k;
+y | z;
+q ^ r;
+w == e;
+w != r;
+h < i;
+h <= i;
+h > i;
+j >= o;
+b << s;
+b >> s;
+x * y;
+c/d;
+10            %3;
 (int) x;
 (char *) x;
 (short ***) x;
 (long []) x;
 (int *) a[i = 2];
-(long (*)[10]) x;
 (long (*)[x]) x;
-
+(long (*)[10]) x;

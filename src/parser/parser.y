@@ -31,12 +31,6 @@ void yyerror(char *s);
 %token INCREMENT DECREMENT BITWISE_LSHIFT BITWISE_RSHIFT
 %token LESS_THAN_EQUAL GREATER_THAN_EQUAL EQUAL NOT_EQUAL LOGICAL_AND LOGICAL_OR
 
-%left  '|'
-%left  '&'
-%left  '+'  '-'
-%left  '*'  '/'  '%'
-%left  UMINUS      /*  supplies  precedence  for  unary  minus  */
-
 
 %%      /*  beginning  of  rules  section  */
 
@@ -48,6 +42,7 @@ translation_unit : conditional_expr SEMICOLON
 
 conditional_expr : logical_or_expr
     | logical_or_expr TERNARY_CONDITIONAL expr COLON conditional_expr
+        { $$ = create_node(IF_THEN_ELSE, $1, $3, $5); }
     ;
 
 logical_or_expr : logical_and_expr
@@ -95,18 +90,25 @@ relational_expr : shift_expr
 
 shift_expr : additive_expr
     | shift_expr BITWISE_LSHIFT additive_expr
+        { $$ = create_node(BINARY_EXPR, BITWISE_LSHIFT, $1, $3); }
     | shift_expr BITWISE_RSHIFT additive_expr
+        { $$ = create_node(BINARY_EXPR, BITWISE_RSHIFT, $1, $3); }
     ;
 
 additive_expr : multiplicative_expr
     | additive_expr PLUS multiplicative_expr
+        { $$ = create_node(BINARY_EXPR, PLUS, $1, $3); }
     | additive_expr MINUS multiplicative_expr
+        { $$ = create_node(BINARY_EXPR, MINUS, $1, $3); }
     ;
 
 multiplicative_expr : cast_expr
     | multiplicative_expr ASTERISK cast_expr
+        { $$ = create_node(BINARY_EXPR, ASTERISK, $1, $3); }
     | multiplicative_expr DIVIDE cast_expr
+        { $$ = create_node(BINARY_EXPR, DIVIDE, $1, $3); }
     | multiplicative_expr REMAINDER cast_expr
+        { $$ = create_node(BINARY_EXPR, REMAINDER, $1, $3); }
     ;
 
 cast_expr : unary_expr
@@ -275,7 +277,7 @@ pointer : ASTERISK
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
-        { Node *n = create_node(PAREN_DIR_ABS_DECL, $2); }
+        { $$ = create_node(PAREN_DIR_ABS_DECL, $2); }
     | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
         { $$ = create_node(BRACKET_DIR_ABS_DECL, $1, $3); }
     | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
@@ -319,11 +321,17 @@ void yyerror(char *s) {
  */
 void *create_node(enum node_type nt, ...) {
     Node *n = construct_node(nt);
-    Node *child1, *child2;
+    Node *child1, *child2, *child3;
     initialize_children(n);
     va_list ap;
     va_start(ap, nt);
     switch (nt) {
+        case IF_THEN_ELSE:
+            child1 = va_arg(ap, Node *);
+            child2 = va_arg(ap, Node *);
+            child3 = va_arg(ap, Node *);
+            append_three_children(n, child1, child2, child3);
+            break;
         case BINARY_EXPR:
             n->data.symbols[OPERATOR] = va_arg(ap, int);
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
@@ -376,7 +384,7 @@ void *create_node(enum node_type nt, ...) {
     return (void *) n;
 }
 
-void *append_two_children(Node *n, Node *child1, Node *child2) {
+void append_two_children(Node *n, Node *child1, Node *child2) {
     switch (n->n_type) {
         case BINARY_EXPR:
             n->children.bin_op.left = child1;
@@ -413,11 +421,30 @@ void *append_two_children(Node *n, Node *child1, Node *child2) {
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
                                 "append_two_children", yylineno);
     }
-    return (void *) n;
+}
+
+void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
+    switch (n->n_type) {
+        case IF_THEN_ELSE:
+            n->children.if_then_else.cond = child1;
+            n->children.if_then_else.val_if_true = child2;
+            n->children.if_then_else.val_if_false = child3;
+            break;
+        default:
+            #ifdef DEBUG
+                printf("nt %d", n->n_type);
+            #endif
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "append_two_children", yylineno);
+    }
 }
 
 void initialize_children(Node *n) {
     switch (n->n_type) {
+        case IF_THEN_ELSE:
+            n->children.if_then_else.cond = NULL;
+            n->children.if_then_else.val_if_true = NULL;
+            n->children.if_then_else.val_if_false = NULL;
         case BINARY_EXPR:
             n->children.bin_op.left = NULL;
             n->children.bin_op.right = NULL;
@@ -483,6 +510,13 @@ void traverse_node(void *np) {
         return;
     }
     switch (n->n_type) {
+        case IF_THEN_ELSE:
+            traverse_node(n->children.if_then_else.cond);
+            printf(" ? ");
+            traverse_node(n->children.if_then_else.val_if_true);
+            printf(" : ");
+            traverse_node(n->children.if_then_else.val_if_false);
+            break;
         case CAST_EXPR:
             printf("(");
             traverse_node(n->children.cast_expr.type_name);
