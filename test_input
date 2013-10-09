@@ -22,3 +22,6 @@ c/d;
 (int *) a[i = 2];
 (long (*)[x]) x;
 (long (*)[10]) x;
+int i;
+char p;
+char *p;

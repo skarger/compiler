@@ -34,10 +34,91 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 
-translation_unit : conditional_expr SEMICOLON
+translation_unit : top_level_decl
         { traverse_node($1); printf("\n"); }
-    | translation_unit conditional_expr SEMICOLON
+    | translation_unit top_level_decl
         { traverse_node($2); printf("\n"); }
+    ;
+
+top_level_decl : decl
+    | function_definition
+    ;
+
+decl : type_specifier initialized_declarator_list SEMICOLON
+        { $$ = create_node(DECL, $1, $2); }
+    ;
+
+function_definition : function_def_specifier compound_statement
+    ;
+
+function_def_specifier : declarator
+    | type_specifier declarator
+    ;
+
+statement : compound_statement
+    ;
+
+/*expression_statement
+    | labeled_statement
+    | compound_statement
+    | conditional_statement
+    | iterative_statement
+    | break_statement
+    | continue_statement
+    | return_statement
+    | goto_statement
+    | null_statement 
+    ;
+*/
+
+compound_statement : LEFT_BRACE RIGHT_BRACE
+    | LEFT_BRACE declaration_or_statement_list RIGHT_BRACE
+    ;
+
+declaration_or_statement_list : declaration_or_statement
+    | declaration_or_statement_list declaration_or_statement
+    ;
+
+declaration_or_statement : decl
+    | statement
+    ;
+
+initialized_declarator_list : declarator
+    | initialized_declarator_list COMMA declarator
+    ;
+
+declarator : pointer_declarator
+    | direct_declarator
+    ;
+
+pointer_declarator : pointer direct_declarator
+        { $$ = create_node(POINTER_DECLARATOR, $1, $2);  }
+    ;
+
+direct_declarator : simple_declarator
+    | LEFT_PAREN declarator RIGHT_PAREN
+    | function_declarator
+    | array_declarator
+    ;
+
+simple_declarator : IDENTIFIER
+        { $$ = create_node( IDENTIFIER, yylval ); }
+    ;
+
+function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
+    ;
+
+parameter_list : parameter_decl
+    | parameter_list COMMA parameter_decl
+    ;
+
+parameter_decl : type_specifier declarator
+    | type_specifier abstract_declarator
+    | type_specifier
+    ;
+
+array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
+    | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
     ;
 
 conditional_expr : logical_or_expr
@@ -326,6 +407,10 @@ void *create_node(enum node_type nt, ...) {
     va_list ap;
     va_start(ap, nt);
     switch (nt) {
+        case DECL:
+            child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
+            append_two_children(n, child1, child2);
+            break;
         case IF_THEN_ELSE:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
@@ -337,6 +422,7 @@ void *create_node(enum node_type nt, ...) {
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
         case TYPE_NAME:
@@ -386,6 +472,14 @@ void *create_node(enum node_type nt, ...) {
 
 void append_two_children(Node *n, Node *child1, Node *child2) {
     switch (n->n_type) {
+        case DECL:
+            n->children.decl.type_spec = child1;
+            n->children.decl.init_decl_ls = child2;
+            break;
+        case POINTER_DECLARATOR:
+            n->children.ptr_decl.ptr = child1;
+            n->children.ptr_decl.dir_decl = child2;
+            break;
         case BINARY_EXPR:
             n->children.bin_op.left = child1;
             n->children.bin_op.right = child2;
@@ -416,7 +510,7 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
             break;
         default:
             #ifdef DEBUG
-                printf("nt %d", n->n_type);
+                printf("nt %d ", n->n_type);
             #endif
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
                                 "append_two_children", yylineno);
@@ -435,12 +529,20 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
                 printf("nt %d", n->n_type);
             #endif
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_two_children", yylineno);
+                                "append_three_children", yylineno);
     }
 }
 
 void initialize_children(Node *n) {
     switch (n->n_type) {
+        case DECL:
+            n->children.decl.type_spec = NULL;
+            n->children.decl.init_decl_ls = NULL;
+            break;
+        case POINTER_DECLARATOR:
+            n->children.ptr_decl.ptr = NULL;
+            n->children.ptr_decl.dir_decl = NULL;
+            break;
         case IF_THEN_ELSE:
             n->children.if_then_else.cond = NULL;
             n->children.if_then_else.val_if_true = NULL;
@@ -510,6 +612,17 @@ void traverse_node(void *np) {
         return;
     }
     switch (n->n_type) {
+        case DECL:
+            traverse_node(n->children.decl.type_spec);
+            printf(" ");
+            traverse_node(n->children.decl.init_decl_ls);
+            break;
+        case POINTER_DECLARATOR:
+            printf("(");
+            traverse_node(n->children.ptr_decl.ptr);
+            traverse_node(n->children.ptr_decl.dir_decl);
+            printf(")");
+            break;
         case IF_THEN_ELSE:
             traverse_node(n->children.if_then_else.cond);
             printf(" ? ");

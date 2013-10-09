@@ -7,6 +7,8 @@
  * semantic value that the parser ascertains.
  */
 enum node_type {
+    DECL,
+    POINTER_DECLARATOR,
     IF_THEN_ELSE,
     BINARY_EXPR,
     CAST_EXPR,
@@ -46,6 +48,16 @@ typedef struct Node Node;
  * They also have different names implied by the grammar.
  */
 union NodeChildren {
+    struct {
+        Node *type_spec;
+        Node *init_decl_ls;
+    } decl;
+
+    struct {
+        Node *ptr;
+        Node *dir_decl;
+    } ptr_decl;
+
     struct {
         Node *cond;
         Node *val_if_true;
