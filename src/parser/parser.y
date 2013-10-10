@@ -33,7 +33,6 @@ void yyerror(char *s);
 
 
 %%      /*  beginning  of  rules  section  */
-
 translation_unit : top_level_decl
         { traverse_node($1); printf("\n"); }
     | translation_unit top_level_decl
@@ -44,22 +43,29 @@ top_level_decl : decl
     | function_definition
     ;
 
-decl : type_specifier initialized_declarator_list SEMICOLON
-        { $$ = create_node(DECL, $1, $2); }
-    ;
 
 function_definition : function_def_specifier compound_statement
+        { $$ = create_node(FUNCTION_DEFINITION, $1, $2); }
     ;
 
 function_def_specifier : declarator
+        { yyerror("return type missing from function specifier"), yyerrok; }
     | type_specifier declarator
+        { $$ = create_node(FUNCTION_DEF_SPECIFIER, $1, $2); }
     ;
 
-statement : compound_statement
+statement : expr SEMICOLON
+        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
+    | labeled_statement
+    | compound_statement
+    ;
+
+labeled_statement : identifier COLON statement
+        { create_node(LABELED_STATEMENT, $1, $3); }
     ;
 
 /*expression_statement
-    | labeled_statement
+
     | compound_statement
     | conditional_statement
     | iterative_statement
@@ -67,24 +73,32 @@ statement : compound_statement
     | continue_statement
     | return_statement
     | goto_statement
-    | null_statement 
+    | null_statement
     ;
 */
 
 compound_statement : LEFT_BRACE RIGHT_BRACE
+        { $$ = create_node(COMPOUND_STATEMENT, NULL); }
     | LEFT_BRACE declaration_or_statement_list RIGHT_BRACE
+        { $$ = create_node(COMPOUND_STATEMENT, $2); }
     ;
 
 declaration_or_statement_list : declaration_or_statement
     | declaration_or_statement_list declaration_or_statement
+        { $$ = create_node(DECL_OR_STMT_LIST, $1, $2); }
     ;
 
 declaration_or_statement : decl
     | statement
     ;
 
+decl : type_specifier initialized_declarator_list SEMICOLON
+        { $$ = create_node(DECL, $1, $2); }
+    ;
+
 initialized_declarator_list : declarator
     | initialized_declarator_list COMMA declarator
+        { $$ = create_node(INIT_DECL_LIST, $1, $3); }
     ;
 
 declarator : pointer_declarator
@@ -97,11 +111,15 @@ pointer_declarator : pointer direct_declarator
 
 direct_declarator : simple_declarator
     | LEFT_PAREN declarator RIGHT_PAREN
+        { $$ = create_node(PAREN_DIR_DECL, $2); }
     | function_declarator
     | array_declarator
     ;
 
-simple_declarator : IDENTIFIER
+simple_declarator : identifier
+    ;
+
+identifier : IDENTIFIER
         { $$ = create_node( IDENTIFIER, yylval ); }
     ;
 
@@ -378,7 +396,7 @@ main() {
 }
 
 void yyerror(char *s) {
-  fprintf(stderr, "%s\n", s);
+  fprintf(stderr, "error: line %d: %s\n", yylineno, s);
 }
 
 /*
@@ -407,9 +425,14 @@ void *create_node(enum node_type nt, ...) {
     va_list ap;
     va_start(ap, nt);
     switch (nt) {
-        case DECL:
-            child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
-            append_two_children(n, child1, child2);
+        case PAREN_DIR_DECL:
+            n->children.paren_dir_decl.decl = va_arg(ap, Node *);
+            break;
+        case EXPRESSION_STATEMENT:
+            n->children.expr_stmt.expr = va_arg(ap, Node *);
+            break;
+        case COMPOUND_STATEMENT:
+            n->children.cmpd_stmt.decl_or_stmt_ls = va_arg(ap, Node *);
             break;
         case IF_THEN_ELSE:
             child1 = va_arg(ap, Node *);
@@ -422,6 +445,12 @@ void *create_node(enum node_type nt, ...) {
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case DECL_OR_STMT_LIST:
+        case INIT_DECL_LIST:
+        case FUNCTION_DEFINITION:
+        case FUNCTION_DEF_SPECIFIER:
+        case DECL:
+        case LABELED_STATEMENT:
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
@@ -472,9 +501,29 @@ void *create_node(enum node_type nt, ...) {
 
 void append_two_children(Node *n, Node *child1, Node *child2) {
     switch (n->n_type) {
+        case FUNCTION_DEFINITION:
+            n->children.func_def.func_def_spec = child1;
+            n->children.func_def.cmpd_stmt = child2;
+            break;
+        case FUNCTION_DEF_SPECIFIER:
+            n->children.func_def_spec.type_spec = child1;
+            n->children.func_def_spec.decl = child2;
+            break;
+        case DECL_OR_STMT_LIST:
+            n->children.decl_stmt_ls.decl_stmt_ls = child1;
+            n->children.decl_stmt_ls.decl_stmt = child2;
+            break;
+        case INIT_DECL_LIST:
+            n->children.init_decl_ls.init_decl_ls = child1;
+            n->children.init_decl_ls.decl = child2;
+            break;
         case DECL:
             n->children.decl.type_spec = child1;
             n->children.decl.init_decl_ls = child2;
+            break;
+        case LABELED_STATEMENT:
+            n->children.lab_stmt.label = child1;
+            n->children.lab_stmt.stmt = child2;
             break;
         case POINTER_DECLARATOR:
             n->children.ptr_decl.ptr = child1;
@@ -535,9 +584,38 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
 
 void initialize_children(Node *n) {
     switch (n->n_type) {
+        case FUNCTION_DEFINITION:
+            n->children.func_def.func_def_spec = NULL;
+            n->children.func_def.cmpd_stmt = NULL;
+            break;
+        case FUNCTION_DEF_SPECIFIER:
+            n->children.func_def_spec.type_spec = NULL;
+            n->children.func_def_spec.decl = NULL;
+            break;
+        case DECL_OR_STMT_LIST:
+            n->children.decl_stmt_ls.decl_stmt_ls = NULL;
+            n->children.decl_stmt_ls.decl_stmt = NULL;
+            break;
+        case INIT_DECL_LIST:
+            n->children.init_decl_ls.init_decl_ls = NULL;
+            n->children.init_decl_ls.decl = NULL;
+            break;
         case DECL:
             n->children.decl.type_spec = NULL;
             n->children.decl.init_decl_ls = NULL;
+            break;
+        case PAREN_DIR_DECL:
+            n->children.paren_dir_decl.decl = NULL;
+            break;
+        case EXPRESSION_STATEMENT:
+            n->children.expr_stmt.expr = NULL;
+            break;
+        case LABELED_STATEMENT:
+            n->children.lab_stmt.label = NULL;
+            n->children.lab_stmt.stmt = NULL;
+            break;
+        case COMPOUND_STATEMENT:
+            n->children.cmpd_stmt.decl_or_stmt_ls = NULL;
             break;
         case POINTER_DECLARATOR:
             n->children.ptr_decl.ptr = NULL;
@@ -612,10 +690,49 @@ void traverse_node(void *np) {
         return;
     }
     switch (n->n_type) {
+        case FUNCTION_DEFINITION:
+            traverse_node(n->children.func_def.func_def_spec);
+            traverse_node(n->children.func_def.cmpd_stmt);
+            break;
+        case FUNCTION_DEF_SPECIFIER:
+            traverse_node(n->children.func_def_spec.type_spec);
+            printf(" ");
+            traverse_node(n->children.func_def_spec.decl);
+            break;
+        case DECL_OR_STMT_LIST:
+            traverse_node(n->children.decl_stmt_ls.decl_stmt_ls);
+            printf("\n");
+            traverse_node(n->children.decl_stmt_ls.decl_stmt);
+            break;
+        case INIT_DECL_LIST:
+            traverse_node(n->children.init_decl_ls.init_decl_ls);
+            printf(", ");
+            traverse_node(n->children.init_decl_ls.decl);
+            break;
         case DECL:
             traverse_node(n->children.decl.type_spec);
             printf(" ");
             traverse_node(n->children.decl.init_decl_ls);
+            printf(";");
+            break;
+        case PAREN_DIR_DECL:
+            printf("(");
+            traverse_node(n->children.paren_dir_decl.decl);
+            printf(")");
+            break;
+        case EXPRESSION_STATEMENT:
+            traverse_node(n->children.expr_stmt.expr);
+            printf(";");
+            break;
+        case LABELED_STATEMENT:
+            traverse_node(n->children.lab_stmt.label);
+            printf(" : ");
+            traverse_node(n->children.lab_stmt.stmt);
+            break;
+        case COMPOUND_STATEMENT:
+            printf("\n{\n");
+            traverse_node(n->children.cmpd_stmt.decl_or_stmt_ls);
+            printf("\n}\n");
             break;
         case POINTER_DECLARATOR:
             printf("(");

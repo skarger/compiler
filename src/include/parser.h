@@ -7,7 +7,15 @@
  * semantic value that the parser ascertains.
  */
 enum node_type {
+    FUNCTION_DEFINITION,
+    FUNCTION_DEF_SPECIFIER,
+    DECL_OR_STMT_LIST,
+    INIT_DECL_LIST,
     DECL,
+    PAREN_DIR_DECL,
+    EXPRESSION_STATEMENT,
+    LABELED_STATEMENT,
+    COMPOUND_STATEMENT,
     POINTER_DECLARATOR,
     IF_THEN_ELSE,
     BINARY_EXPR,
@@ -49,9 +57,46 @@ typedef struct Node Node;
  */
 union NodeChildren {
     struct {
+        Node *func_def_spec;
+        Node *cmpd_stmt;
+    } func_def;
+
+    struct {
+        Node *type_spec;
+        Node *decl;
+    } func_def_spec;
+
+    struct {
+        Node *decl_stmt_ls;
+        Node *decl_stmt;
+    } decl_stmt_ls;
+
+    struct {
         Node *type_spec;
         Node *init_decl_ls;
     } decl;
+
+    struct {
+        Node *decl;
+    } paren_dir_decl;
+
+    struct {
+        Node *expr;
+    } expr_stmt;
+
+    struct {
+        Node *label;
+        Node *stmt;
+    } lab_stmt;
+
+    struct {
+        Node *decl_or_stmt_ls;
+    } cmpd_stmt;
+
+    struct {
+        Node *init_decl_ls;
+        Node *decl;
+    } init_decl_ls;
 
     struct {
         Node *ptr;
