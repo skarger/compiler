@@ -19,6 +19,7 @@ enum node_type {
     LABELED_STATEMENT,
     COMPOUND_STATEMENT,
     POINTER_DECLARATOR,
+    IF_THEN,
     IF_THEN_ELSE,
     BINARY_EXPR,
     CAST_EXPR,
@@ -118,6 +119,11 @@ union NodeChildren {
     struct {
         Node *cond;
         Node *val_if_true;
+    } if_then;
+
+    struct {
+        Node *cond;
+        Node *val_if_true;
         Node *val_if_false;
     } if_then_else;
 
@@ -202,9 +208,10 @@ enum parser_error {
 
 /* tree traversal */
 void pretty_print(Node *n);
-void traverse_data_node(void *np);
 void traverse_node(void *np);
+void traverse_data_node(void *np);
 void traverse_direct_abstract_declarator(Node *n);
+void traverse_conditional_statement(void *np);
 
 /* node creation */
 void *create_node(enum node_type nt, ...);

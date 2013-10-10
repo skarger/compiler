@@ -54,7 +54,36 @@ function_def_specifier : declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     ;
 
-statement : expr SEMICOLON
+/* statement : expr SEMICOLON
+        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
+    | labeled_statement
+    | compound_statement
+    | conditional_statement
+    ;
+*/
+
+/*
+conditional_statement : matched_statement
+    | open_statement
+    ;
+*/
+
+statement : matched_statement
+    | open_statement
+    ;
+
+matched_statement : IF LEFT_PAREN expr RIGHT_PAREN matched_statement ELSE matched_statement
+        { $$ = create_node(IF_THEN_ELSE, $3, $5, $7); }
+    | other_statement
+    ;
+
+open_statement : IF LEFT_PAREN expr RIGHT_PAREN statement
+        { $$ = create_node(IF_THEN, $3, $5); }
+    | IF LEFT_PAREN expr RIGHT_PAREN matched_statement ELSE open_statement
+        { $$ = create_node(IF_THEN_ELSE, $3, $5, $7); }
+    ;
+
+other_statement : expr SEMICOLON
         { $$ = create_node(EXPRESSION_STATEMENT, $1); }
     | labeled_statement
     | compound_statement
@@ -64,9 +93,8 @@ labeled_statement : identifier COLON statement
         { create_node(LABELED_STATEMENT, $1, $3); }
     ;
 
-/*expression_statement
 
-    | compound_statement
+/*
     | conditional_statement
     | iterative_statement
     | break_statement
@@ -458,6 +486,7 @@ void *create_node(enum node_type nt, ...) {
         case DECL:
         case FUNCTION_DECL:
         case ARRAY_DECL:
+        case IF_THEN:
         case LABELED_STATEMENT:
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
@@ -536,6 +565,10 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
         case LABELED_STATEMENT:
             n->children.lab_stmt.label = child1;
             n->children.lab_stmt.stmt = child2;
+            break;
+        case IF_THEN:
+            n->children.if_then_else.cond = child1;
+            n->children.if_then_else.val_if_true = child2;
             break;
         case POINTER_DECLARATOR:
             n->children.ptr_decl.ptr = child1;
@@ -645,10 +678,15 @@ void initialize_children(Node *n) {
             n->children.ptr_decl.ptr = NULL;
             n->children.ptr_decl.dir_decl = NULL;
             break;
+        case IF_THEN:
+            n->children.if_then_else.cond = NULL;
+            n->children.if_then_else.val_if_true = NULL;
+            break;
         case IF_THEN_ELSE:
             n->children.if_then_else.cond = NULL;
             n->children.if_then_else.val_if_true = NULL;
             n->children.if_then_else.val_if_false = NULL;
+            break;
         case BINARY_EXPR:
             n->children.bin_op.left = NULL;
             n->children.bin_op.right = NULL;
@@ -770,18 +808,14 @@ void traverse_node(void *np) {
             traverse_node(n->children.cmpd_stmt.decl_or_stmt_ls);
             printf("\n}\n");
             break;
+        case IF_THEN:
+        case IF_THEN_ELSE:
+            traverse_conditional_statement(n);
         case POINTER_DECLARATOR:
             printf("(");
             traverse_node(n->children.ptr_decl.ptr);
             traverse_node(n->children.ptr_decl.dir_decl);
             printf(")");
-            break;
-        case IF_THEN_ELSE:
-            traverse_node(n->children.if_then_else.cond);
-            printf(" ? ");
-            traverse_node(n->children.if_then_else.val_if_true);
-            printf(" : ");
-            traverse_node(n->children.if_then_else.val_if_false);
             break;
         case CAST_EXPR:
             printf("(");
@@ -841,6 +875,34 @@ void traverse_node(void *np) {
         case NUMBER_CONSTANT:
         case STRING_CONSTANT:
             traverse_data_node(n);
+            break;
+        default:
+            printf("\nwarning: node type not recognized: %d\n", n->n_type);
+            break;
+    }
+}
+
+void traverse_conditional_statement(void *np) {
+    Node *n = (Node *) np;
+    if (n == NULL) {
+        return;
+    }
+    switch (n->n_type) {
+        case IF_THEN:
+            printf("if ( ");
+            traverse_node(n->children.if_then_else.cond);
+            printf(" ) {\n");
+            traverse_node(n->children.if_then_else.val_if_true);
+            printf("\n}");
+            break;
+        case IF_THEN_ELSE:
+            printf("if ( ");
+            traverse_node(n->children.if_then_else.cond);
+            printf(" ) {\n");
+            traverse_node(n->children.if_then_else.val_if_true);
+            printf("\n} else {");
+            traverse_node(n->children.if_then_else.val_if_false);
+            printf("\n}");
             break;
         default:
             printf("\nwarning: node type not recognized: %d\n", n->n_type);
