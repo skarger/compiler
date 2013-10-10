@@ -8,11 +8,13 @@
  */
 enum node_type {
     FUNCTION_DEFINITION,
-    FUNCTION_DEF_SPECIFIER,
+    TYPE_SPEC_DECL,
     DECL_OR_STMT_LIST,
     INIT_DECL_LIST,
     DECL,
     PAREN_DIR_DECL,
+    FUNCTION_DECL,
+    ARRAY_DECL,
     EXPRESSION_STATEMENT,
     LABELED_STATEMENT,
     COMPOUND_STATEMENT,
@@ -20,7 +22,7 @@ enum node_type {
     IF_THEN_ELSE,
     BINARY_EXPR,
     CAST_EXPR,
-    TYPE_NAME,
+    TYPE_SPEC_ABS_DECL,
     TYPE_SPECIFIER,
     ABSTRACT_DECLARATOR,
     POINTER,
@@ -64,7 +66,7 @@ union NodeChildren {
     struct {
         Node *type_spec;
         Node *decl;
-    } func_def_spec;
+    } type_spec_decl;
 
     struct {
         Node *decl_stmt_ls;
@@ -79,6 +81,16 @@ union NodeChildren {
     struct {
         Node *decl;
     } paren_dir_decl;
+
+    struct {
+        Node *dir_decl;
+        Node *param_ls;
+    } func_decl;
+
+    struct {
+        Node *dir_decl;
+        Node *cond_expr;
+    } array_decl;
 
     struct {
         Node *expr;
@@ -140,7 +152,7 @@ union NodeChildren {
     struct {
         Node *type_spec;
         Node *abs_decl;
-    } type_name;
+    } type_spec_abs_decl;
 
     struct {
         Node *ptr;

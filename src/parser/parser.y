@@ -51,7 +51,7 @@ function_definition : function_def_specifier compound_statement
 function_def_specifier : declarator
         { yyerror("return type missing from function specifier"), yyerrok; }
     | type_specifier declarator
-        { $$ = create_node(FUNCTION_DEF_SPECIFIER, $1, $2); }
+        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     ;
 
 statement : expr SEMICOLON
@@ -124,19 +124,25 @@ identifier : IDENTIFIER
     ;
 
 function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
+        { $$ = create_node(FUNCTION_DECL, $1, $3); }
     ;
 
 parameter_list : parameter_decl
     | parameter_list COMMA parameter_decl
+        { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
     ;
 
 parameter_decl : type_specifier declarator
+        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     | type_specifier abstract_declarator
+        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
     | type_specifier
     ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
+        { $$ = create_node(ARRAY_DECL, $1, NULL); }
     | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
+        { $$ = create_node(ARRAY_DECL, $1, $3); }
     ;
 
 conditional_expr : logical_or_expr
@@ -306,7 +312,7 @@ assignment_expr : conditional_expr
 /* type name and children */
 type_name : type_specifier
     | type_specifier abstract_declarator
-        { $$ = create_node(TYPE_NAME, $1, $2); }
+        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
     ;
 
 type_specifier : integer_type_specifier
@@ -448,13 +454,15 @@ void *create_node(enum node_type nt, ...) {
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
-        case FUNCTION_DEF_SPECIFIER:
+        case TYPE_SPEC_DECL:
         case DECL:
+        case FUNCTION_DECL:
+        case ARRAY_DECL:
         case LABELED_STATEMENT:
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
-        case TYPE_NAME:
+        case TYPE_SPEC_ABS_DECL:
         case ABSTRACT_DECLARATOR:
         case BRACKET_DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
@@ -505,9 +513,9 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.func_def.func_def_spec = child1;
             n->children.func_def.cmpd_stmt = child2;
             break;
-        case FUNCTION_DEF_SPECIFIER:
-            n->children.func_def_spec.type_spec = child1;
-            n->children.func_def_spec.decl = child2;
+        case TYPE_SPEC_DECL:
+            n->children.type_spec_decl.type_spec = child1;
+            n->children.type_spec_decl.decl = child2;
             break;
         case DECL_OR_STMT_LIST:
             n->children.decl_stmt_ls.decl_stmt_ls = child1;
@@ -520,6 +528,10 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
         case DECL:
             n->children.decl.type_spec = child1;
             n->children.decl.init_decl_ls = child2;
+            break;
+        case FUNCTION_DECL:
+            n->children.func_decl.dir_decl = child1;
+            n->children.func_decl.param_ls = child2;
             break;
         case LABELED_STATEMENT:
             n->children.lab_stmt.label = child1;
@@ -549,13 +561,17 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.abs_decl.ptr = child1;
             n->children.abs_decl.dir_abs_decl = child2;
             break;
+        case ARRAY_DECL:
+            n->children.array_decl.dir_decl = (Node *) child1;
+            n->children.array_decl.cond_expr = (Node *) child2;
+            break;
         case BRACKET_DIR_ABS_DECL:
             n->children.dir_abs_decl.dir_abs_decl = (Node *) child1;
             n->children.dir_abs_decl.cond_expr = (Node *) child2;
             break;
-        case TYPE_NAME:
-            n->children.type_name.type_spec = child1;
-            n->children.type_name.abs_decl = child2;
+        case TYPE_SPEC_ABS_DECL:
+            n->children.type_spec_abs_decl.type_spec = child1;
+            n->children.type_spec_abs_decl.abs_decl = child2;
             break;
         default:
             #ifdef DEBUG
@@ -588,9 +604,9 @@ void initialize_children(Node *n) {
             n->children.func_def.func_def_spec = NULL;
             n->children.func_def.cmpd_stmt = NULL;
             break;
-        case FUNCTION_DEF_SPECIFIER:
-            n->children.func_def_spec.type_spec = NULL;
-            n->children.func_def_spec.decl = NULL;
+        case TYPE_SPEC_DECL:
+            n->children.type_spec_decl.type_spec = NULL;
+            n->children.type_spec_decl.decl = NULL;
             break;
         case DECL_OR_STMT_LIST:
             n->children.decl_stmt_ls.decl_stmt_ls = NULL;
@@ -606,6 +622,14 @@ void initialize_children(Node *n) {
             break;
         case PAREN_DIR_DECL:
             n->children.paren_dir_decl.decl = NULL;
+            break;
+        case FUNCTION_DECL:
+            n->children.func_decl.dir_decl = NULL;
+            n->children.func_decl.param_ls = NULL;
+            break;
+        case ARRAY_DECL:
+            n->children.array_decl.dir_decl = NULL;
+            n->children.array_decl.cond_expr = NULL;
             break;
         case EXPRESSION_STATEMENT:
             n->children.expr_stmt.expr = NULL;
@@ -650,9 +674,9 @@ void initialize_children(Node *n) {
         case POINTER:
             n->children.ptr.right = NULL;
             break;
-        case TYPE_NAME:
-            n->children.type_name.type_spec = NULL;
-            n->children.type_name.abs_decl = NULL;
+        case TYPE_SPEC_ABS_DECL:
+            n->children.type_spec_abs_decl.type_spec = NULL;
+            n->children.type_spec_abs_decl.abs_decl = NULL;
             break;
         case ABSTRACT_DECLARATOR:
             n->children.abs_decl.ptr = NULL;
@@ -694,10 +718,10 @@ void traverse_node(void *np) {
             traverse_node(n->children.func_def.func_def_spec);
             traverse_node(n->children.func_def.cmpd_stmt);
             break;
-        case FUNCTION_DEF_SPECIFIER:
-            traverse_node(n->children.func_def_spec.type_spec);
+        case TYPE_SPEC_DECL:
+            traverse_node(n->children.type_spec_decl.type_spec);
             printf(" ");
-            traverse_node(n->children.func_def_spec.decl);
+            traverse_node(n->children.type_spec_decl.decl);
             break;
         case DECL_OR_STMT_LIST:
             traverse_node(n->children.decl_stmt_ls.decl_stmt_ls);
@@ -719,6 +743,18 @@ void traverse_node(void *np) {
             printf("(");
             traverse_node(n->children.paren_dir_decl.decl);
             printf(")");
+            break;
+        case FUNCTION_DECL:
+            traverse_node(n->children.func_decl.dir_decl);
+            printf("(");
+            traverse_node(n->children.func_decl.param_ls);
+            printf(")");
+            break;
+        case ARRAY_DECL:
+            traverse_node(n->children.array_decl.dir_decl);
+            printf("[");
+            traverse_node(n->children.array_decl.cond_expr);
+            printf("]");
             break;
         case EXPRESSION_STATEMENT:
             traverse_node(n->children.expr_stmt.expr);
@@ -758,10 +794,10 @@ void traverse_node(void *np) {
             printf(" %s ", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.bin_op.right);
             break;
-        case TYPE_NAME:
-            traverse_node(n->children.type_name.type_spec);
+        case TYPE_SPEC_ABS_DECL:
+            traverse_node(n->children.type_spec_abs_decl.type_spec);
             printf(" ");
-            traverse_node(n->children.type_name.abs_decl);
+            traverse_node(n->children.type_spec_abs_decl.abs_decl);
             break;
         case TYPE_SPECIFIER:
             printf("%s", get_type_name(n->data.symbols[TYPE]));

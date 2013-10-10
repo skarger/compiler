@@ -25,3 +25,16 @@ c/d;
 int i;
 char p;
 char *p;
+f { int i; }
+int f { int i; int j; }
+int f { char c, d; }
+int f { ( i ); }
+int f { int ( i ); }
+int f { char g ( void ); }
+int f { char g ( int a[10] ); }
+int f { char g ( int *a[10] ); }
+int f { char g ( int (*) ); }
+int f { char g ( int [] ); }
+int f { char g ( int[10] ); }
+int f { char g ( int a, int b ); }
+int main { char a[(void *) ++x], b[y || z]; }
