@@ -68,10 +68,27 @@ decl : type_specifier initialized_declarator_list SEMICOLON
         { $$ = create_node(DECL, $1, $2); }
     ;
 
-initialized_declarator_list : declarator
-    | initialized_declarator_list COMMA declarator
+initialized_declarator_list : initialized_declarator
+    | initialized_declarator_list COMMA initialized_declarator
         { $$ = create_node(INIT_DECL_LIST, $1, $3); }
     ;
+
+/* initializer productions created for error checking */
+initialized_declarator : declarator
+    | declarator ASSIGN initializer
+        { yyerror("initializers are not allowed in a definition"), yyerrok; }
+    ;
+
+initializer : assignment_expr
+    | LEFT_BRACE initializer_list COMMA RIGHT_BRACE
+    | LEFT_BRACE initializer_list RIGHT_BRACE
+    ;
+
+initializer_list : initializer
+    | initializer_list COMMA initializer
+    ;
+/* end initializer productions */
+
 
 declarator : pointer_declarator
     | direct_declarator
@@ -559,7 +576,8 @@ void *create_node(enum node_type nt, ...) {
             n->data.ch = ((struct Character *) va_arg(ap, YYSTYPE))->c;
             break;
         default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE, "create_node",
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "create_node",
                                 yylineno);
             free(n);
             return NULL;
@@ -648,11 +666,10 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.type_spec_abs_decl.abs_decl = child2;
             break;
         default:
-            #ifdef DEBUG
-                printf("nt %d ", n->n_type);
-            #endif
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_two_children", yylineno);
+                                "append_two_children",
+                                yylineno);
+            break;
     }
 }
 
@@ -664,11 +681,10 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
             n->children.if_then_else.val_if_false = child3;
             break;
         default:
-            #ifdef DEBUG
-                printf("nt %d", n->n_type);
-            #endif
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_three_children", yylineno);
+                                "append_three_children",
+                                yylineno);
+            break;
     }
 }
 
@@ -683,7 +699,9 @@ void append_four_children(Node *n, Node *child1, Node *child2,
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_four_children", yylineno);
+                                "append_four_children",
+                                yylineno);
+            break;
     }
 }
 
@@ -812,6 +830,7 @@ void initialize_children(Node *n) {
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"initialize_children",
                                 yylineno);
+            break;
     }
 }
 
@@ -979,7 +998,8 @@ void traverse_node(void *np) {
             traverse_data_node(n);
             break;
         default:
-            printf("\nwarning: node type not recognized: %d\n", n->n_type);
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"traverse_node",
+                                yylineno);
             break;
     }
 }
@@ -1014,7 +1034,9 @@ void traverse_iterative_statement(void *np) {
             traverse_node(n->children.for_stmt.stmt);
             break;
         default:
-            printf("\nwarning: node type not recognized: %d\n", n->n_type);
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "traverse_iterative_statement",
+                                yylineno);
             break;
     }
 }
@@ -1041,7 +1063,9 @@ void traverse_conditional_statement(void *np) {
             traverse_node(n->children.if_then_else.val_if_false);
             break;
         default:
-            printf("\nwarning: node type not recognized: %d\n", n->n_type);
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "traverse_conditional_statement",
+                                yylineno);
             break;
     }
 }
@@ -1084,6 +1108,9 @@ void traverse_direct_abstract_declarator(Node *n) {
             printf("]");
             break;
         default:
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "traverse_direct_abstract_declarator",
+                                yylineno);
             break;
     }
 }
@@ -1215,7 +1242,9 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             error(0, 0, "line %d: invalid data type: %s", line, data);
             return;
         case PE_UNRECOGNIZED_NODE_TYPE:
+            #ifdef DEBUG
             error(0, 0, "line %d: %s: unrecognized node type", line, data);
+            #endif
             return;
         default:
             return;

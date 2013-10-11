@@ -1,7 +1,5 @@
 #define DEBUG
 
-
-
 /* Nodes have a type corresponding to the grammar. Sometimes the type is
  * equivalent to a lexical token, but often the type has a higher-level
  * semantic value that the parser ascertains.
