@@ -62,19 +62,9 @@ statement : matched_statement
     | open_statement
     ;
 
-
 matched_statement : IF LEFT_PAREN expr RIGHT_PAREN matched_statement ELSE matched_statement
         { $$ = create_node(IF_THEN_ELSE, $3, $5, $7); }
     | other_matched_statement
-    ;
-
-
-other_matched_statement : expr SEMICOLON
-        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
-    | compound_statement
-    | do_statement
-    | break_statement
-    | return_statement
     ;
 
 open_statement : IF LEFT_PAREN expr RIGHT_PAREN statement
@@ -84,11 +74,25 @@ open_statement : IF LEFT_PAREN expr RIGHT_PAREN statement
     | other_open_statement
     ;
 
+other_matched_statement : expr SEMICOLON
+        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
+    | compound_statement
+    | do_statement
+    | BREAK SEMICOLON
+        { $$ = create_node(BREAK_STATEMENT); }
+    | CONTINUE SEMICOLON
+        { $$ = create_node(CONTINUE_STATEMENT); }
+    | return_statement
+    | GOTO identifier SEMICOLON
+        { $$ = create_node(GOTO_STATEMENT, $2); }
+    | SEMICOLON
+        { $$ = create_node(NULL_STATEMENT); }
+    ;
+
 other_open_statement: labeled_statement
     | while_statement
     | for_statement
     ;
-
 
 labeled_statement : identifier COLON statement
         { create_node(LABELED_STATEMENT, $1, $3); }
@@ -106,22 +110,11 @@ for_statement : FOR LEFT_PAREN expr SEMICOLON expr SEMICOLON expr RIGHT_PAREN st
         { $$ = create_node(FOR_STATEMENT, $3, $5, $7, $9); }
     ;
 
-break_statement : BREAK SEMICOLON
-        { $$ = create_node(BREAK_STATEMENT); }
-    ;
-
 return_statement : RETURN SEMICOLON
         { $$ = create_node(RETURN_STATEMENT, NULL); }
     | RETURN expr SEMICOLON
         { $$ = create_node(RETURN_STATEMENT, $2); }
     ;
-
-/*
-    | continue_statement
-    | goto_statement
-    | null_statement
-    ;
-*/
 
 compound_statement : LEFT_BRACE RIGHT_BRACE
         { $$ = create_node(COMPOUND_STATEMENT, NULL); }
@@ -500,9 +493,14 @@ void *create_node(enum node_type nt, ...) {
             append_four_children(n, child1, child2, child3, child4);
             break;
         case BREAK_STATEMENT:
+        case CONTINUE_STATEMENT:
+        case NULL_STATEMENT:
             break;
         case RETURN_STATEMENT:
             n->children.return_stmt.expr = va_arg(ap, Node *);
+            break;
+        case GOTO_STATEMENT:
+            n->children.goto_stmt.id = va_arg(ap, Node *);
             break;
         case BINARY_EXPR:
             n->data.symbols[OPERATOR] = va_arg(ap, int);
@@ -754,9 +752,14 @@ void initialize_children(Node *n) {
             n->children.for_stmt.stmt = NULL;
             break;
         case BREAK_STATEMENT:
+        case CONTINUE_STATEMENT:
+        case NULL_STATEMENT:
             break;
         case RETURN_STATEMENT:
             n->children.return_stmt.expr = NULL;
+            break;
+        case GOTO_STATEMENT:
+            n->children.goto_stmt.id = NULL;
             break;
         case BINARY_EXPR:
             n->children.bin_op.left = NULL;
@@ -891,9 +894,20 @@ void traverse_node(void *np) {
         case BREAK_STATEMENT:
             printf("break;");
             break;
+        case CONTINUE_STATEMENT:
+            printf("continue;");
+            break;
         case RETURN_STATEMENT:
             printf("return ");
             traverse_node(n->children.return_stmt.expr);
+            printf(";");
+            break;
+        case GOTO_STATEMENT:
+            printf("goto ");
+            traverse_node(n->children.goto_stmt.id);
+            printf(";");
+            break;
+        case NULL_STATEMENT:
             printf(";");
             break;
         case POINTER_DECLARATOR:

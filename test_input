@@ -69,3 +69,16 @@ return;
 int main {
 return 0;
 }
+
+int main {
+goto x;
+}
+
+int main {
+continue;
+}
+
+int main {
+;
+}
+

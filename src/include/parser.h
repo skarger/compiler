@@ -25,7 +25,10 @@ enum node_type {
     DO_STATEMENT,
     FOR_STATEMENT,
     BREAK_STATEMENT,
+    CONTINUE_STATEMENT,
     RETURN_STATEMENT,
+    GOTO_STATEMENT,
+    NULL_STATEMENT,
     BINARY_EXPR,
     CAST_EXPR,
     TYPE_SPEC_ABS_DECL,
@@ -105,6 +108,10 @@ union NodeChildren {
     struct {
         Node *expr;
     } return_stmt;
+
+    struct {
+        Node *id;
+    } goto_stmt;
 
     struct {
         Node *label;
