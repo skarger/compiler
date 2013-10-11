@@ -54,52 +54,70 @@ function_def_specifier : declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     ;
 
-/* statement : expr SEMICOLON
-        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
-    | labeled_statement
-    | compound_statement
-    | conditional_statement
-    ;
-*/
-
 /*
-conditional_statement : matched_statement
-    | open_statement
-    ;
-*/
-
+ * statement, matched_statement, and open_statement productions
+ * paraphrased from Aho, Lam, Sethi, Ullman, page 212.
+ */
 statement : matched_statement
     | open_statement
     ;
 
+
 matched_statement : IF LEFT_PAREN expr RIGHT_PAREN matched_statement ELSE matched_statement
         { $$ = create_node(IF_THEN_ELSE, $3, $5, $7); }
-    | other_statement
+    | other_matched_statement
+    ;
+
+
+other_matched_statement : expr SEMICOLON
+        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
+    | compound_statement
+    | do_statement
+    | break_statement
+    | return_statement
     ;
 
 open_statement : IF LEFT_PAREN expr RIGHT_PAREN statement
         { $$ = create_node(IF_THEN, $3, $5); }
     | IF LEFT_PAREN expr RIGHT_PAREN matched_statement ELSE open_statement
         { $$ = create_node(IF_THEN_ELSE, $3, $5, $7); }
+    | other_open_statement
     ;
 
-other_statement : expr SEMICOLON
-        { $$ = create_node(EXPRESSION_STATEMENT, $1); }
-    | labeled_statement
-    | compound_statement
+other_open_statement: labeled_statement
+    | while_statement
+    | for_statement
     ;
+
 
 labeled_statement : identifier COLON statement
         { create_node(LABELED_STATEMENT, $1, $3); }
     ;
 
+while_statement : WHILE LEFT_PAREN expr RIGHT_PAREN statement
+        { $$ = create_node(WHILE_STATEMENT, $3, $5); }
+    ;
+
+do_statement : DO statement WHILE LEFT_PAREN expr RIGHT_PAREN SEMICOLON
+        { $$ = create_node(DO_STATEMENT, $2, $5); }
+    ;
+
+for_statement : FOR LEFT_PAREN expr SEMICOLON expr SEMICOLON expr RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, $3, $5, $7, $9); }
+    ;
+
+break_statement : BREAK SEMICOLON
+        { $$ = create_node(BREAK_STATEMENT); }
+    ;
+
+return_statement : RETURN SEMICOLON
+        { $$ = create_node(RETURN_STATEMENT, NULL); }
+    | RETURN expr SEMICOLON
+        { $$ = create_node(RETURN_STATEMENT, $2); }
+    ;
 
 /*
-    | conditional_statement
-    | iterative_statement
-    | break_statement
     | continue_statement
-    | return_statement
     | goto_statement
     | null_statement
     ;
@@ -454,7 +472,7 @@ void yyerror(char *s) {
  */
 void *create_node(enum node_type nt, ...) {
     Node *n = construct_node(nt);
-    Node *child1, *child2, *child3;
+    Node *child1, *child2, *child3, *child4;
     initialize_children(n);
     va_list ap;
     va_start(ap, nt);
@@ -474,6 +492,18 @@ void *create_node(enum node_type nt, ...) {
             child3 = va_arg(ap, Node *);
             append_three_children(n, child1, child2, child3);
             break;
+        case FOR_STATEMENT:
+            child1 = va_arg(ap, Node *);
+            child2 = va_arg(ap, Node *);
+            child3 = va_arg(ap, Node *);
+            child4 = va_arg(ap, Node *);
+            append_four_children(n, child1, child2, child3, child4);
+            break;
+        case BREAK_STATEMENT:
+            break;
+        case RETURN_STATEMENT:
+            n->children.return_stmt.expr = va_arg(ap, Node *);
+            break;
         case BINARY_EXPR:
             n->data.symbols[OPERATOR] = va_arg(ap, int);
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
@@ -488,6 +518,8 @@ void *create_node(enum node_type nt, ...) {
         case ARRAY_DECL:
         case IF_THEN:
         case LABELED_STATEMENT:
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
@@ -570,6 +602,14 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
             n->children.if_then_else.cond = child1;
             n->children.if_then_else.val_if_true = child2;
             break;
+        case WHILE_STATEMENT:
+            n->children.while_do.expr = child1;
+            n->children.while_do.stmt = child2;
+            break;
+        case DO_STATEMENT:
+            n->children.while_do.stmt = child1;
+            n->children.while_do.expr = child2;
+            break;
         case POINTER_DECLARATOR:
             n->children.ptr_decl.ptr = child1;
             n->children.ptr_decl.dir_decl = child2;
@@ -631,6 +671,21 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
     }
 }
 
+void append_four_children(Node *n, Node *child1, Node *child2,
+    Node *child3, Node *child4) {
+    switch (n->n_type) {
+        case FOR_STATEMENT:
+            n->children.for_stmt.init = child1;
+            n->children.for_stmt.cond = child2;
+            n->children.for_stmt.loop = child3;
+            n->children.for_stmt.stmt = child4;
+            break;
+        default:
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "append_four_children", yylineno);
+    }
+}
+
 void initialize_children(Node *n) {
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
@@ -686,6 +741,22 @@ void initialize_children(Node *n) {
             n->children.if_then_else.cond = NULL;
             n->children.if_then_else.val_if_true = NULL;
             n->children.if_then_else.val_if_false = NULL;
+            break;
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
+            n->children.while_do.expr = NULL;
+            n->children.while_do.stmt = NULL;
+            break;
+        case FOR_STATEMENT:
+            n->children.for_stmt.init = NULL;
+            n->children.for_stmt.cond = NULL;
+            n->children.for_stmt.loop = NULL;
+            n->children.for_stmt.stmt = NULL;
+            break;
+        case BREAK_STATEMENT:
+            break;
+        case RETURN_STATEMENT:
+            n->children.return_stmt.expr = NULL;
             break;
         case BINARY_EXPR:
             n->children.bin_op.left = NULL;
@@ -811,6 +882,20 @@ void traverse_node(void *np) {
         case IF_THEN:
         case IF_THEN_ELSE:
             traverse_conditional_statement(n);
+            break;
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
+        case FOR_STATEMENT:
+            traverse_iterative_statement(n);
+            break;
+        case BREAK_STATEMENT:
+            printf("break;");
+            break;
+        case RETURN_STATEMENT:
+            printf("return ");
+            traverse_node(n->children.return_stmt.expr);
+            printf(";");
+            break;
         case POINTER_DECLARATOR:
             printf("(");
             traverse_node(n->children.ptr_decl.ptr);
@@ -882,6 +967,41 @@ void traverse_node(void *np) {
     }
 }
 
+void traverse_iterative_statement(void *np) {
+    Node *n = (Node *) np;
+    if (n == NULL) {
+        return;
+    }
+    switch (n->n_type) {
+        case WHILE_STATEMENT:
+            printf("while ( ");
+            traverse_node(n->children.while_do.expr);
+            printf(" ) ");
+            traverse_node(n->children.while_do.stmt);
+            break;
+        case DO_STATEMENT:
+            printf("do ");
+            traverse_node(n->children.while_do.stmt);
+            printf(" while ( ");
+            traverse_node(n->children.while_do.expr);
+            printf(" );");
+            break;
+        case FOR_STATEMENT:
+            printf("for ( ");
+            traverse_node(n->children.for_stmt.init);
+            printf("; ");
+            traverse_node(n->children.for_stmt.cond);
+            printf("; ");
+            traverse_node(n->children.for_stmt.loop);
+            printf(" ) ");
+            traverse_node(n->children.for_stmt.stmt);
+            break;
+        default:
+            printf("\nwarning: node type not recognized: %d\n", n->n_type);
+            break;
+    }
+}
+
 void traverse_conditional_statement(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -891,18 +1011,17 @@ void traverse_conditional_statement(void *np) {
         case IF_THEN:
             printf("if ( ");
             traverse_node(n->children.if_then_else.cond);
-            printf(" ) {\n");
+            printf(" ) ");
             traverse_node(n->children.if_then_else.val_if_true);
-            printf("\n}");
+            printf("");
             break;
         case IF_THEN_ELSE:
             printf("if ( ");
             traverse_node(n->children.if_then_else.cond);
-            printf(" ) {\n");
+            printf(" ) ");
             traverse_node(n->children.if_then_else.val_if_true);
-            printf("\n} else {");
+            printf(" else ");
             traverse_node(n->children.if_then_else.val_if_false);
-            printf("\n}");
             break;
         default:
             printf("\nwarning: node type not recognized: %d\n", n->n_type);

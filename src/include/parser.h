@@ -21,6 +21,11 @@ enum node_type {
     POINTER_DECLARATOR,
     IF_THEN,
     IF_THEN_ELSE,
+    WHILE_STATEMENT,
+    DO_STATEMENT,
+    FOR_STATEMENT,
+    BREAK_STATEMENT,
+    RETURN_STATEMENT,
     BINARY_EXPR,
     CAST_EXPR,
     TYPE_SPEC_ABS_DECL,
@@ -98,6 +103,10 @@ union NodeChildren {
     } expr_stmt;
 
     struct {
+        Node *expr;
+    } return_stmt;
+
+    struct {
         Node *label;
         Node *stmt;
     } lab_stmt;
@@ -105,6 +114,18 @@ union NodeChildren {
     struct {
         Node *decl_or_stmt_ls;
     } cmpd_stmt;
+
+    struct {
+        Node *expr;
+        Node *stmt;
+    } while_do;
+
+    struct {
+        Node *init;
+        Node *cond;
+        Node *loop;
+        Node *stmt;
+    } for_stmt;
 
     struct {
         Node *init_decl_ls;
@@ -212,6 +233,7 @@ void traverse_node(void *np);
 void traverse_data_node(void *np);
 void traverse_direct_abstract_declarator(Node *n);
 void traverse_conditional_statement(void *np);
+void traverse_iterative_statement(void *np);
 
 /* node creation */
 void *create_node(enum node_type nt, ...);
@@ -223,6 +245,8 @@ void *create_one_item_node(enum node_type nt, int item1);
 void *construct_node(enum node_type nt);
 void append_two_children(Node *n, Node *child1, Node *child2);
 void append_three_children(Node *n, Node *child1, Node *child2, Node *child3);
+void append_four_children(Node *n, Node *child1, Node *child2,
+    Node *child3, Node *child4);
 void initialize_children(Node *n);
 char *get_type_name(enum data_type type);
 char *get_operator_value(int op);

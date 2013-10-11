@@ -38,3 +38,34 @@ int f { char g ( int [] ); }
 int f { char g ( int[10] ); }
 int f { char g ( int a, int b ); }
 int main { char a[(void *) ++x], b[y || z]; }
+
+int main {
+  a ? b : c;
+}
+
+int main {
+while ( i > 0 ) i--;
+}
+
+int main {
+for ( i = 1; i < len; i++ )
+j++;
+}
+
+int main {
+do i++;
+while ( i < 5 );
+}
+
+int main {
+break;
+}
+
+int main
+{
+return;
+}
+
+int main {
+return 0;
+}
