@@ -54,7 +54,71 @@ function_def_specifier : declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     ;
 
+declaration_or_statement_list : declaration_or_statement
+    | declaration_or_statement_list declaration_or_statement
+        { $$ = create_node(DECL_OR_STMT_LIST, $1, $2); }
+    ;
+
+declaration_or_statement : decl
+    | statement
+    ;
+
+/* decl and close children */
+decl : type_specifier initialized_declarator_list SEMICOLON
+        { $$ = create_node(DECL, $1, $2); }
+    ;
+
+initialized_declarator_list : declarator
+    | initialized_declarator_list COMMA declarator
+        { $$ = create_node(INIT_DECL_LIST, $1, $3); }
+    ;
+
+declarator : pointer_declarator
+    | direct_declarator
+    ;
+
+pointer_declarator : pointer direct_declarator
+        { $$ = create_node(POINTER_DECLARATOR, $1, $2);  }
+    ;
+
+direct_declarator : simple_declarator
+    | LEFT_PAREN declarator RIGHT_PAREN
+        { $$ = create_node(PAREN_DIR_DECL, $2); }
+    | function_declarator
+    | array_declarator
+    ;
+
+simple_declarator : identifier
+    ;
+
+identifier : IDENTIFIER
+        { $$ = create_node( IDENTIFIER, yylval ); }
+    ;
+
+function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
+        { $$ = create_node(FUNCTION_DECL, $1, $3); }
+    ;
+
+parameter_list : parameter_decl
+    | parameter_list COMMA parameter_decl
+        { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
+    ;
+
+parameter_decl : type_specifier declarator
+        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+    | type_specifier abstract_declarator
+        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+    | type_specifier
+    ;
+
+array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
+        { $$ = create_node(ARRAY_DECL, $1, NULL); }
+    | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
+        { $$ = create_node(ARRAY_DECL, $1, $3); }
+    ;
+
 /*
+ * statement and close children
  * statement, matched_statement, and open_statement productions
  * paraphrased from Aho, Lam, Sethi, Ullman, page 212.
  */
@@ -122,68 +186,7 @@ compound_statement : LEFT_BRACE RIGHT_BRACE
         { $$ = create_node(COMPOUND_STATEMENT, $2); }
     ;
 
-declaration_or_statement_list : declaration_or_statement
-    | declaration_or_statement_list declaration_or_statement
-        { $$ = create_node(DECL_OR_STMT_LIST, $1, $2); }
-    ;
-
-declaration_or_statement : decl
-    | statement
-    ;
-
-decl : type_specifier initialized_declarator_list SEMICOLON
-        { $$ = create_node(DECL, $1, $2); }
-    ;
-
-initialized_declarator_list : declarator
-    | initialized_declarator_list COMMA declarator
-        { $$ = create_node(INIT_DECL_LIST, $1, $3); }
-    ;
-
-declarator : pointer_declarator
-    | direct_declarator
-    ;
-
-pointer_declarator : pointer direct_declarator
-        { $$ = create_node(POINTER_DECLARATOR, $1, $2);  }
-    ;
-
-direct_declarator : simple_declarator
-    | LEFT_PAREN declarator RIGHT_PAREN
-        { $$ = create_node(PAREN_DIR_DECL, $2); }
-    | function_declarator
-    | array_declarator
-    ;
-
-simple_declarator : identifier
-    ;
-
-identifier : IDENTIFIER
-        { $$ = create_node( IDENTIFIER, yylval ); }
-    ;
-
-function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
-        { $$ = create_node(FUNCTION_DECL, $1, $3); }
-    ;
-
-parameter_list : parameter_decl
-    | parameter_list COMMA parameter_decl
-        { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
-    ;
-
-parameter_decl : type_specifier declarator
-        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
-    | type_specifier abstract_declarator
-        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
-    | type_specifier
-    ;
-
-array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(ARRAY_DECL, $1, NULL); }
-    | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        { $$ = create_node(ARRAY_DECL, $1, $3); }
-    ;
-
+/* conditional_expr and close children */
 conditional_expr : logical_or_expr
     | logical_or_expr TERNARY_CONDITIONAL expr COLON conditional_expr
         { $$ = create_node(IF_THEN_ELSE, $1, $3, $5); }
@@ -407,7 +410,7 @@ character_type_specifier : CHAR
 void_type_specifier : VOID
     {  $$ = create_node(TYPE_SPECIFIER, VOID); }
 
-
+/* abstract_declarator and close children */
 abstract_declarator : pointer direct_abstract_declarator
         { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2);  }
     | pointer
