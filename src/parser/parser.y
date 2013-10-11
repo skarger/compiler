@@ -48,24 +48,23 @@ function_definition : function_def_specifier compound_statement
         { $$ = create_node(FUNCTION_DEFINITION, $1, $2); }
     ;
 
-function_def_specifier : declarator
-        { yyerror("return type missing from function specifier"), yyerrok; }
-    | type_specifier declarator
+function_def_specifier : function_declarator
+        { yyerror("return type missing from function specifier"); yyerrok; }
+    | type_specifier function_declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
-    ;
-
-declaration_or_statement_list : declaration_or_statement
-    | declaration_or_statement_list declaration_or_statement
-        { $$ = create_node(DECL_OR_STMT_LIST, $1, $2); }
-    ;
-
-declaration_or_statement : decl
-    | statement
+    | type_specifier non_function_declarator
+        { yyerror("invalid function declarator"); yyerrok; }
     ;
 
 /* decl and close children */
 decl : type_specifier initialized_declarator_list SEMICOLON
-        { $$ = create_node(DECL, $1, $2); }
+        {
+            Node *n = $1;
+            if (n->data.symbols[TYPE] == VOID) {
+                { yyerror("void declaration not permitted"); yyerrok; }
+            }
+            $$ = create_node(DECL, $1, $2);
+        }
     ;
 
 initialized_declarator_list : initialized_declarator
@@ -76,7 +75,7 @@ initialized_declarator_list : initialized_declarator
 /* initializer productions created for error checking */
 initialized_declarator : declarator
     | declarator ASSIGN initializer
-        { yyerror("initializers are not allowed in a definition"), yyerrok; }
+        { yyerror("initializers are not allowed in a definition"); yyerrok; }
     ;
 
 initializer : assignment_expr
@@ -114,22 +113,55 @@ identifier : IDENTIFIER
 
 function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
         { $$ = create_node(FUNCTION_DECL, $1, $3); }
+    | direct_declarator LEFT_PAREN RIGHT_PAREN
+        { yyerror("function must have a parameter list, even if it is (void)"); yyerrok; }
     ;
 
-parameter_list : parameter_decl
+/* non_function_declarator exists for error checking */
+non_function_declarator : simple_declarator
+    | LEFT_PAREN declarator RIGHT_PAREN
+        { $$ = create_node(PAREN_DIR_DECL, $2); }
+    | array_declarator
+    ;
+
+parameter_list : void_type_specifier
+    | parameter_decl
     | parameter_list COMMA parameter_decl
         { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
     ;
 
+/*
+simpler parameter_decl production without error checking:
 parameter_decl : type_specifier declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     | type_specifier abstract_declarator
         { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
     | type_specifier
     ;
+*/
+parameter_decl : integer_type_specifier declarator
+        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+    | integer_type_specifier abstract_declarator
+        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+    | integer_type_specifier
+    | void_type_specifier declarator
+        {
+            yyerror("void may not appear with any other function parameters"); yyerrok;
+            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+        }
+    | void_type_specifier abstract_declarator
+        {
+            yyerror("void may not appear with any other function parameters"); yyerrok;
+            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+        }
+    ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(ARRAY_DECL, $1, NULL); }
+        {
+            yyerror("variable declared without definition: array must have "
+                    "dimension specified"); yyerrok;
+            $$ = create_node(ARRAY_DECL, $1, NULL);
+        }
     | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
         { $$ = create_node(ARRAY_DECL, $1, $3); }
     ;
@@ -201,6 +233,15 @@ compound_statement : LEFT_BRACE RIGHT_BRACE
         { $$ = create_node(COMPOUND_STATEMENT, NULL); }
     | LEFT_BRACE declaration_or_statement_list RIGHT_BRACE
         { $$ = create_node(COMPOUND_STATEMENT, $2); }
+    ;
+
+declaration_or_statement_list : declaration_or_statement
+    | declaration_or_statement_list declaration_or_statement
+        { $$ = create_node(DECL_OR_STMT_LIST, $1, $2); }
+    ;
+
+declaration_or_statement : decl
+    | statement
     ;
 
 /* conditional_expr and close children */
@@ -369,9 +410,13 @@ assignment_expr : conditional_expr
     ;
 
 /* type name and children */
-type_name : type_specifier
-    | type_specifier abstract_declarator
+type_name : integer_type_specifier
+    | integer_type_specifier abstract_declarator
         { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+    | void_type_specifier
+        { yyerror("void may not be used in a cast expression"); yyerrok; }
+    | void_type_specifier abstract_declarator
+        { yyerror("void may not be used in a cast expression"); yyerrok; }
     ;
 
 type_specifier : integer_type_specifier

@@ -82,3 +82,14 @@ int main {
 ;
 }
 
+int main
+{
+/* should error */
+int arr[];
+}
+
+int main
+{
+char (*p);
+p = (int []) arr;
+}
