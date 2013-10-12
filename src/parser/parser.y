@@ -506,8 +506,38 @@ direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
 %%      /*  start  of  programs  */
 #include "lex.yy.c"
 
-main() {
-  return yyparse();
+static FILE *output;
+int main(int argc, char *argv[]) {
+    extern FILE *yyin;
+    FILE *input;
+
+    int rv;
+
+    /* Figure out whether we're using stdin/stdout or file in/file out. */
+    if (argc < 2 || !strcmp("-", argv[1])) {
+        input = stdin;
+    } else {
+        input = fopen(argv[1], "r");
+    }
+
+    if (argc < 3 || !strcmp("-", argv[2])) {
+        output = stdout;
+    } else {
+        output = fopen(argv[2], "w");
+    }
+
+    yyin = input;
+
+    rv = yyparse();
+
+    if (output != stdout) {
+        fclose(output);
+    }
+    if (input != stdin) {
+        fclose(input);
+    }
+
+    return rv;
 }
 
 void yyerror(char *s) {
@@ -908,7 +938,7 @@ void traverse_node(void *np) {
         return;
     }
     if (parenthesize(n->n_type)) {
-        printf("(");
+        fprintf(output, "(");
     }
 
     switch (n->n_type) {
@@ -918,53 +948,53 @@ void traverse_node(void *np) {
             break;
         case TYPE_SPEC_DECL:
             traverse_node(n->children.type_spec_decl.type_spec);
-            printf(" ");
+            fprintf(output, " ");
             traverse_node(n->children.type_spec_decl.decl);
             break;
         case DECL_OR_STMT_LIST:
             traverse_node(n->children.decl_stmt_ls.decl_stmt_ls);
-            printf("\n");
+            fprintf(output, "\n");
             traverse_node(n->children.decl_stmt_ls.decl_stmt);
             break;
         case INIT_DECL_LIST:
             traverse_node(n->children.init_decl_ls.init_decl_ls);
-            printf(", ");
+            fprintf(output, ", ");
             traverse_node(n->children.init_decl_ls.decl);
             break;
         case DECL:
             traverse_node(n->children.decl.type_spec);
-            printf(" ");
+            fprintf(output, " ");
             traverse_node(n->children.decl.init_decl_ls);
-            printf(";");
+            fprintf(output, ";");
             break;
         case PAREN_DIR_DECL:
             traverse_node(n->children.paren_dir_decl.decl);
             break;
         case FUNCTION_DECL:
             traverse_node(n->children.func_decl.dir_decl);
-            printf("(");
+            fprintf(output, "(");
             traverse_node(n->children.func_decl.param_ls);
-            printf(")");
+            fprintf(output, ")");
             break;
         case ARRAY_DECL:
             traverse_node(n->children.array_decl.dir_decl);
-            printf("[");
+            fprintf(output, "[");
             traverse_node(n->children.array_decl.cond_expr);
-            printf("]");
+            fprintf(output, "]");
             break;
         case EXPRESSION_STATEMENT:
             traverse_node(n->children.expr_stmt.expr);
-            printf(";");
+            fprintf(output, ";");
             break;
         case LABELED_STATEMENT:
             traverse_node(n->children.lab_stmt.label);
-            printf(" : ");
+            fprintf(output, " : ");
             traverse_node(n->children.lab_stmt.stmt);
             break;
         case COMPOUND_STATEMENT:
-            printf("\n{\n");
+            fprintf(output, "\n{\n");
             traverse_node(n->children.cmpd_stmt.decl_or_stmt_ls);
-            printf("\n}\n");
+            fprintf(output, "\n}\n");
             break;
         case IF_THEN:
         case IF_THEN_ELSE:
@@ -976,23 +1006,23 @@ void traverse_node(void *np) {
             traverse_iterative_statement(n);
             break;
         case BREAK_STATEMENT:
-            printf("break;");
+            fprintf(output, "break;");
             break;
         case CONTINUE_STATEMENT:
-            printf("continue;");
+            fprintf(output, "continue;");
             break;
         case RETURN_STATEMENT:
-            printf("return ");
+            fprintf(output, "return ");
             traverse_node(n->children.return_stmt.expr);
-            printf(";");
+            fprintf(output, ";");
             break;
         case GOTO_STATEMENT:
-            printf("goto ");
+            fprintf(output, "goto ");
             traverse_node(n->children.goto_stmt.id);
-            printf(";");
+            fprintf(output, ";");
             break;
         case NULL_STATEMENT:
-            printf(";");
+            fprintf(output, ";");
             break;
         case POINTER_DECLARATOR:
             traverse_node(n->children.ptr_decl.ptr);
@@ -1000,29 +1030,29 @@ void traverse_node(void *np) {
             break;
         case CONDITIONAL_EXPR:
             traverse_node(n->children.if_then_else.cond);
-            printf(" ? ");
+            fprintf(output, " ? ");
             traverse_node(n->children.if_then_else.val_if_true);
-            printf(" : ");
+            fprintf(output, " : ");
             traverse_node(n->children.if_then_else.val_if_false);
             break;
         case CAST_EXPR:
-            printf("(");
+            fprintf(output, "(");
             traverse_node(n->children.cast_expr.type_name);
-            printf(") ");
+            fprintf(output, ") ");
             traverse_node(n->children.cast_expr.cast_expr);
             break;
         case BINARY_EXPR:
             traverse_node(n->children.bin_op.left);
-            printf(" %s ", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.bin_op.right);
             break;
         case TYPE_SPEC_ABS_DECL:
             traverse_node(n->children.type_spec_abs_decl.type_spec);
-            printf(" ");
+            fprintf(output, " ");
             traverse_node(n->children.type_spec_abs_decl.abs_decl);
             break;
         case TYPE_SPECIFIER:
-            printf("%s", get_type_spec(n->data.symbols[TYPE]));
+            fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE]));
             break;
         case ABSTRACT_DECLARATOR:
             traverse_node(n->children.abs_decl.ptr);
@@ -1040,25 +1070,25 @@ void traverse_node(void *np) {
             break;
         case SUBSCRIPT_EXPR:
             traverse_node(n->children.subs_expr.pstf_expr);
-            printf("[");
+            fprintf(output, "[");
             traverse_node(n->children.subs_expr.expr);
-            printf("]");
+            fprintf(output, "]");
             break;
         case FUNCTION_CALL:
             traverse_node(n->children.function_call.pstf_expr);
-            printf("(");
+            fprintf(output, "(");
             traverse_node(n->children.function_call.expr_list);
-            printf(")");
+            fprintf(output, ")");
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
-            printf("%s", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.unary_op.operand);
             break;
         case POSTFIX_INCREMENT:
         case POSTFIX_DECREMENT:
             traverse_node(n->children.unary_op.operand);
-            printf("%s", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
         case IDENTIFIER:
         case CHAR_CONSTANT:
@@ -1073,7 +1103,7 @@ void traverse_node(void *np) {
     }
 
     if (parenthesize(n->n_type)) {
-        printf(")");
+        fprintf(output, ")");
     }
 }
 
@@ -1084,26 +1114,26 @@ void traverse_iterative_statement(void *np) {
     }
     switch (n->n_type) {
         case WHILE_STATEMENT:
-            printf("while ( ");
+            fprintf(output, "while ( ");
             traverse_node(n->children.while_do.expr);
-            printf(" ) ");
+            fprintf(output, " ) ");
             traverse_node(n->children.while_do.stmt);
             break;
         case DO_STATEMENT:
-            printf("do ");
+            fprintf(output, "do ");
             traverse_node(n->children.while_do.stmt);
-            printf(" while ( ");
+            fprintf(output, " while ( ");
             traverse_node(n->children.while_do.expr);
-            printf(" );");
+            fprintf(output, " );");
             break;
         case FOR_STATEMENT:
-            printf("for ( ");
+            fprintf(output, "for ( ");
             traverse_node(n->children.for_stmt.init);
-            printf("; ");
+            fprintf(output, "; ");
             traverse_node(n->children.for_stmt.cond);
-            printf("; ");
+            fprintf(output, "; ");
             traverse_node(n->children.for_stmt.loop);
-            printf(" ) ");
+            fprintf(output, " ) ");
             traverse_node(n->children.for_stmt.stmt);
             break;
         default:
@@ -1121,18 +1151,18 @@ void traverse_conditional_statement(void *np) {
     }
     switch (n->n_type) {
         case IF_THEN:
-            printf("if ( ");
+            fprintf(output, "if ( ");
             traverse_node(n->children.if_then_else.cond);
-            printf(" ) ");
+            fprintf(output, " ) ");
             traverse_node(n->children.if_then_else.val_if_true);
-            printf("");
+            fprintf(output, "");
             break;
         case IF_THEN_ELSE:
-            printf("if ( ");
+            fprintf(output, "if ( ");
             traverse_node(n->children.if_then_else.cond);
-            printf(" ) ");
+            fprintf(output, " ) ");
             traverse_node(n->children.if_then_else.val_if_true);
-            printf(" else ");
+            fprintf(output, " else ");
             traverse_node(n->children.if_then_else.val_if_false);
             break;
         default:
@@ -1147,18 +1177,18 @@ void traverse_data_node(void *np) {
     Node *n = (Node *) np;
     switch (n->n_type) {
         case IDENTIFIER:
-            printf("%s", n->data.str);
+            fprintf(output, "%s", n->data.str);
             break;
         case STRING_CONSTANT:
             /* TODO: replace special characters, e.g. replace newline with \n */
-            printf("\"%s\"", n->data.str);
+            fprintf(output, "\"%s\"", n->data.str);
             break;
         case NUMBER_CONSTANT:
-            printf("%d", n->data.num);
+            fprintf(output, "%d", n->data.num);
             break;
         case CHAR_CONSTANT:
             /* TODO: replace special characters, e.g. replace null with \0 */
-            printf("'%c'", n->data.ch);
+            fprintf(output, "'%c'", n->data.ch);
             break;
         default:
             handle_parser_error(PE_INVALID_DATA_TYPE,
@@ -1174,9 +1204,9 @@ void traverse_direct_abstract_declarator(Node *n) {
             break;
         case BRACKET_DIR_ABS_DECL:
             traverse_node(n->children.dir_abs_decl.dir_abs_decl);
-            printf("[");
+            fprintf(output, "[");
             traverse_node(n->children.dir_abs_decl.cond_expr);
-            printf("]");
+            fprintf(output, "]");
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
@@ -1220,7 +1250,7 @@ void print_pointers(Node *n) {
         return;
     }
     do {
-        printf("*");
+        fprintf(output, "*");
         n = n->children.ptr.right;
     } while (n != NULL && n->n_type == POINTER);
 }
