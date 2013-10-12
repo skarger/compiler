@@ -27,6 +27,7 @@ enum node_type {
     RETURN_STATEMENT,
     GOTO_STATEMENT,
     NULL_STATEMENT,
+    CONDITIONAL_EXPR,
     BINARY_EXPR,
     CAST_EXPR,
     TYPE_SPEC_ABS_DECL,
@@ -253,7 +254,9 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3);
 void append_four_children(Node *n, Node *child1, Node *child2,
     Node *child3, Node *child4);
 void initialize_children(Node *n);
-char *get_type_name(enum data_type type);
+char *get_type_spec(enum data_type type);
 char *get_operator_value(int op);
 void handle_parser_error(enum parser_error e, char *data, int line);
+int parenthesize(enum node_type nt);
+void print_pointers(Node *n);
 

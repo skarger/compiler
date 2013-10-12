@@ -34,26 +34,30 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 translation_unit : top_level_decl
-        { traverse_node($1); printf("\n"); }
+        { pretty_print($1); printf("\n"); }
     | translation_unit top_level_decl
-        { traverse_node($2); printf("\n"); }
+        { pretty_print($2); printf("\n"); }
     ;
 
 top_level_decl : decl
     | function_definition
     ;
 
-
 function_definition : function_def_specifier compound_statement
         { $$ = create_node(FUNCTION_DEFINITION, $1, $2); }
     ;
 
-function_def_specifier : function_declarator
+function_def_specifier : declarator
         { yyerror("return type missing from function specifier"); yyerrok; }
     | type_specifier function_declarator
         { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+    | type_specifier parenthesized_declarator
+        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
     | type_specifier non_function_declarator
-        { yyerror("invalid function declarator"); yyerrok; }
+        {
+            yyerror("invalid function declarator"); yyerrok;
+            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+        }
     ;
 
 /* decl and close children */
@@ -98,13 +102,16 @@ pointer_declarator : pointer direct_declarator
     ;
 
 direct_declarator : simple_declarator
-    | LEFT_PAREN declarator RIGHT_PAREN
-        { $$ = create_node(PAREN_DIR_DECL, $2); }
+    | parenthesized_declarator
     | function_declarator
     | array_declarator
     ;
 
 simple_declarator : identifier
+    ;
+
+parenthesized_declarator : LEFT_PAREN declarator RIGHT_PAREN
+        { $$ = create_node(PAREN_DIR_DECL, $2); }
     ;
 
 identifier : IDENTIFIER
@@ -119,8 +126,6 @@ function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
 
 /* non_function_declarator exists for error checking */
 non_function_declarator : simple_declarator
-    | LEFT_PAREN declarator RIGHT_PAREN
-        { $$ = create_node(PAREN_DIR_DECL, $2); }
     | array_declarator
     ;
 
@@ -247,7 +252,7 @@ declaration_or_statement : decl
 /* conditional_expr and close children */
 conditional_expr : logical_or_expr
     | logical_or_expr TERNARY_CONDITIONAL expr COLON conditional_expr
-        { $$ = create_node(IF_THEN_ELSE, $1, $3, $5); }
+        { $$ = create_node(CONDITIONAL_EXPR, $1, $3, $5); }
     ;
 
 logical_or_expr : logical_and_expr
@@ -545,6 +550,7 @@ void *create_node(enum node_type nt, ...) {
             n->children.cmpd_stmt.decl_or_stmt_ls = va_arg(ap, Node *);
             break;
         case IF_THEN_ELSE:
+        case CONDITIONAL_EXPR:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
             child3 = va_arg(ap, Node *);
@@ -619,6 +625,9 @@ void *create_node(enum node_type nt, ...) {
             break;
         case CHAR_CONSTANT:
             n->data.ch = ((struct Character *) va_arg(ap, YYSTYPE))->c;
+            break;
+        case STRING_CONSTANT:
+            n->data.str = ((struct String *) va_arg(ap, YYSTYPE))->str;
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
@@ -721,6 +730,7 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
 void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
     switch (n->n_type) {
         case IF_THEN_ELSE:
+        case CONDITIONAL_EXPR:
             n->children.if_then_else.cond = child1;
             n->children.if_then_else.val_if_true = child2;
             n->children.if_then_else.val_if_false = child3;
@@ -801,6 +811,7 @@ void initialize_children(Node *n) {
             n->children.if_then_else.cond = NULL;
             n->children.if_then_else.val_if_true = NULL;
             break;
+        case CONDITIONAL_EXPR:
         case IF_THEN_ELSE:
             n->children.if_then_else.cond = NULL;
             n->children.if_then_else.val_if_true = NULL;
@@ -887,11 +898,19 @@ void *construct_node(enum node_type nt) {
 }
 
 
+void pretty_print(Node *n) {
+    traverse_node(n);
+}
+
 void traverse_node(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
     }
+    if (parenthesize(n->n_type)) {
+        printf("(");
+    }
+
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
             traverse_node(n->children.func_def.func_def_spec);
@@ -919,9 +938,7 @@ void traverse_node(void *np) {
             printf(";");
             break;
         case PAREN_DIR_DECL:
-            printf("(");
             traverse_node(n->children.paren_dir_decl.decl);
-            printf(")");
             break;
         case FUNCTION_DECL:
             traverse_node(n->children.func_decl.dir_decl);
@@ -978,10 +995,15 @@ void traverse_node(void *np) {
             printf(";");
             break;
         case POINTER_DECLARATOR:
-            printf("(");
             traverse_node(n->children.ptr_decl.ptr);
             traverse_node(n->children.ptr_decl.dir_decl);
-            printf(")");
+            break;
+        case CONDITIONAL_EXPR:
+            traverse_node(n->children.if_then_else.cond);
+            printf(" ? ");
+            traverse_node(n->children.if_then_else.val_if_true);
+            printf(" : ");
+            traverse_node(n->children.if_then_else.val_if_false);
             break;
         case CAST_EXPR:
             printf("(");
@@ -1000,15 +1022,17 @@ void traverse_node(void *np) {
             traverse_node(n->children.type_spec_abs_decl.abs_decl);
             break;
         case TYPE_SPECIFIER:
-            printf("%s", get_type_name(n->data.symbols[TYPE]));
+            printf("%s", get_type_spec(n->data.symbols[TYPE]));
             break;
         case ABSTRACT_DECLARATOR:
             traverse_node(n->children.abs_decl.ptr);
             traverse_node(n->children.abs_decl.dir_abs_decl);
             break;
         case POINTER:
-            printf("*");
-            traverse_node((void *) n->children.ptr.right);
+            /* special case: pointers should be parenthesized, but when there */
+            /* are nested pointers there should just be one set of ()         */
+            /* surrounding the group                                          */
+            print_pointers(n);
             break;
         case PAREN_DIR_ABS_DECL:
         case BRACKET_DIR_ABS_DECL:
@@ -1046,6 +1070,10 @@ void traverse_node(void *np) {
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"traverse_node",
                                 yylineno);
             break;
+    }
+
+    if (parenthesize(n->n_type)) {
+        printf(")");
     }
 }
 
@@ -1142,9 +1170,7 @@ void traverse_data_node(void *np) {
 void traverse_direct_abstract_declarator(Node *n) {
     switch (n->n_type) {
         case PAREN_DIR_ABS_DECL:
-            printf("(");
             traverse_node(n->children.dir_abs_decl.abs_decl);
-            printf(")");
             break;
         case BRACKET_DIR_ABS_DECL:
             traverse_node(n->children.dir_abs_decl.dir_abs_decl);
@@ -1160,11 +1186,46 @@ void traverse_direct_abstract_declarator(Node *n) {
     }
 }
 
-void pretty_print(Node *n) {
-    traverse_node(n);
+int parenthesize(enum node_type nt) {
+
+    switch (nt) {
+        /* could exist within a declarator */
+        case POINTER_DECLARATOR:
+        case IDENTIFIER:
+        case FUNCTION_DECL:
+        case ARRAY_DECL:
+        /* could exist within a parenthesized_expr */
+        case CONDITIONAL_EXPR:
+        case BINARY_EXPR:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+        case CHAR_CONSTANT:
+        case STRING_CONSTANT:
+        case NUMBER_CONSTANT:
+        case SUBSCRIPT_EXPR:
+        case FUNCTION_CALL:
+        /* could exist within an abstract_declarator */
+        case POINTER:
+        case ABSTRACT_DECLARATOR:
+            return 1;
+        default:
+            return 0;
+    }
 }
 
-char *get_type_name(enum data_type type) {
+void print_pointers(Node *n) {
+    if (n == NULL || n->n_type != POINTER) {
+        return;
+    }
+    do {
+        printf("*");
+        n = n->children.ptr.right;
+    } while (n != NULL && n->n_type == POINTER);
+}
+
+char *get_type_spec(enum data_type type) {
     switch (type) {
         case VOID:
             return "void";
