@@ -1,4 +1,13 @@
+/*
+ * header file for parser.y
+ * In addition to function declarations, contains data definitions
+ * for parse tree nodes.
+ */
+
+
+
 #define DEBUG
+#undef  DEBUG
 
 /* Nodes have a type corresponding to the grammar. Sometimes the type is
  * equivalent to a lexical token, but often the type has a higher-level
@@ -227,7 +236,8 @@ struct Node {
 enum parser_error {
     PE_SUCCESS = 0,
     PE_INVALID_DATA_TYPE = -1,
-    PE_UNRECOGNIZED_NODE_TYPE = -2
+    PE_UNRECOGNIZED_NODE_TYPE = -2,
+    PE_UNRECOGNIZED_OP = -3
 };
 
 
@@ -236,7 +246,7 @@ enum parser_error {
 /* tree traversal */
 void pretty_print(Node *n);
 void traverse_node(void *np);
-void traverse_data_node(void *np);
+void print_data_node(void *np);
 void traverse_direct_abstract_declarator(Node *n);
 void traverse_conditional_statement(void *np);
 void traverse_iterative_statement(void *np);

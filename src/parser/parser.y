@@ -162,11 +162,7 @@ parameter_decl : integer_type_specifier declarator
     ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
-        {
-            yyerror("variable declared without definition: array must have "
-                    "dimension specified"); yyerrok;
-            $$ = create_node(ARRAY_DECL, $1, NULL);
-        }
+        { $$ = create_node(ARRAY_DECL, $1, NULL); }
     | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
         { $$ = create_node(ARRAY_DECL, $1, $3); }
     ;
@@ -544,6 +540,8 @@ void yyerror(char *s) {
   fprintf(stderr, "error: line %d: %s\n", yylineno, s);
 }
 
+/* Node construction and setter functions */
+
 /*
  * create_node
  * Purpose: Create a new node for the parse tree.
@@ -671,6 +669,17 @@ void *create_node(enum node_type nt, ...) {
     return (void *) n;
 }
 
+/*
+ * append_two_children 
+ * Purpose: Given a node, append child nodes to it. Uses the node's type to
+ *          decide where to append the children.
+ * Parameters:
+ *  n       Node * The node to which this function appends the children.
+ *  child1  Node * The first child node to append.
+ *  child2  Node * The second child node to append.
+ * Returns: None
+ * Side-effects: None
+ */
 void append_two_children(Node *n, Node *child1, Node *child2) {
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
@@ -757,6 +766,18 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
     }
 }
 
+/*
+ * append_three_children 
+ * Purpose: Given a node, append child nodes to it. Uses the node's type to
+ *          decide where to append the children.
+ * Parameters:
+ *  n       Node * The node to which this function appends the children.
+ *  child1  Node * The first child node to append.
+ *  child2  Node * The second child node to append.
+ *  child3  Node * The third child node to append.
+ * Returns: None
+ * Side-effects: None
+ */
 void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
     switch (n->n_type) {
         case IF_THEN_ELSE:
@@ -773,6 +794,19 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
     }
 }
 
+/*
+ * append_four_children 
+ * Purpose: Given a node, append child nodes to it. Uses the node's type to
+ *          decide where to append the children.
+ * Parameters:
+ *  n       Node * The node to which this function appends the children.
+ *  child1  Node * The first child node to append.
+ *  child2  Node * The second child node to append.
+ *  child3  Node * The third child node to append.
+ *  child4  Node * The fourth child node to append.
+ * Returns: None
+ * Side-effects: None
+ */
 void append_four_children(Node *n, Node *child1, Node *child2,
     Node *child3, Node *child4) {
     switch (n->n_type) {
@@ -790,6 +824,15 @@ void append_four_children(Node *n, Node *child1, Node *child2,
     }
 }
 
+/*
+ * initialize_children 
+ * Purpose: Given a node, initialize its children to NULL.
+ *          Uses node type to know which children to initialize.
+ * Parameters:
+ *  n       Node * The node whose children should be initialized.
+ * Returns: None
+ * Side-effects: None
+ */
 void initialize_children(Node *n) {
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
@@ -920,6 +963,14 @@ void initialize_children(Node *n) {
     }
 }
 
+/*
+ * construct_node
+ * Purpose: Construct a new node and set its type to the passed type.
+ * Parameters:
+ *  nt       enum node_type The type of node to construct.
+ * Returns: A void pointer to the constructed node
+ * Side-effects: Allocates heap memory
+ */
 void *construct_node(enum node_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
@@ -927,11 +978,30 @@ void *construct_node(enum node_type nt) {
     return n;
 }
 
+/* Printing and Tree Traversal Functions */
 
+/*
+ * pretty_print
+ * Purpose: Traverse the parse tree rooted at the passed node and print
+ *          out C syntax appropriately.
+ * Parameters:
+ *  n       Node * The node to start traversing from, generally a top_level_decl
+ * Returns: None
+ * Side-effects: None
+ */
 void pretty_print(Node *n) {
     traverse_node(n);
 }
 
+/*
+ * traverse_node
+ * Purpose: Workhorse function for pretty_print. Does the actually traversal.
+ * Parameters:
+ *  np      void * The node to start traversing from. Recursively traverses
+ *          the children of np.
+ * Returns: None
+ * Side-effects: None
+ */
 void traverse_node(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -1094,7 +1164,7 @@ void traverse_node(void *np) {
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
         case STRING_CONSTANT:
-            traverse_data_node(n);
+            print_data_node(n);
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"traverse_node",
@@ -1107,6 +1177,16 @@ void traverse_node(void *np) {
     }
 }
 
+/*
+ * traverse_iterative_statement
+ * Purpose: Helper function for traverse_node.
+ *          Traverses iterative statements.
+ * Parameters:
+ *  np      void * The node to start traversing from. Recursively traverses
+ *          the children of np.
+ * Returns: None
+ * Side-effects: None
+ */
 void traverse_iterative_statement(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -1144,6 +1224,16 @@ void traverse_iterative_statement(void *np) {
     }
 }
 
+/*
+ * traverse_conditional_statement
+ * Purpose: Helper function for traverse_node.
+ *          Traverses conditional statements.
+ * Parameters:
+ *  np      void * The node to start traversing from. Recursively traverses
+ *          the children of np.
+ * Returns: None
+ * Side-effects: None
+ */
 void traverse_conditional_statement(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
@@ -1173,7 +1263,46 @@ void traverse_conditional_statement(void *np) {
     }
 }
 
-void traverse_data_node(void *np) {
+/*
+ * traverse_direct_abstract_declarator
+ * Purpose: Helper function for traverse_node.
+ *          Traverses direct_abstract_declarators.
+ * Parameters:
+ *  np      void * The node to start traversing from. Recursively traverses
+ *          the children of np.
+ * Returns: None
+ * Side-effects: None
+ */
+void traverse_direct_abstract_declarator(Node *n) {
+    switch (n->n_type) {
+        case PAREN_DIR_ABS_DECL:
+            traverse_node(n->children.dir_abs_decl.abs_decl);
+            break;
+        case BRACKET_DIR_ABS_DECL:
+            traverse_node(n->children.dir_abs_decl.dir_abs_decl);
+            fprintf(output, "[");
+            traverse_node(n->children.dir_abs_decl.cond_expr);
+            fprintf(output, "]");
+            break;
+        default:
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "traverse_direct_abstract_declarator",
+                                yylineno);
+            break;
+    }
+}
+
+/*
+ * print_data_node
+ * Purpose: Helper function for traverse_node.
+ *          Traverses nodes with literal data, i.e. strings, chars, and numbers.
+ *          Also traverses identifier nodes since they have literal names.
+ * Parameters:
+ *  np      void * The node to start traversing from.
+ * Returns: None
+ * Side-effects: None
+ */
+void print_data_node(void *np) {
     Node *n = (Node *) np;
     switch (n->n_type) {
         case IDENTIFIER:
@@ -1197,24 +1326,7 @@ void traverse_data_node(void *np) {
         }
 }
 
-void traverse_direct_abstract_declarator(Node *n) {
-    switch (n->n_type) {
-        case PAREN_DIR_ABS_DECL:
-            traverse_node(n->children.dir_abs_decl.abs_decl);
-            break;
-        case BRACKET_DIR_ABS_DECL:
-            traverse_node(n->children.dir_abs_decl.dir_abs_decl);
-            fprintf(output, "[");
-            traverse_node(n->children.dir_abs_decl.cond_expr);
-            fprintf(output, "]");
-            break;
-        default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "traverse_direct_abstract_declarator",
-                                yylineno);
-            break;
-    }
-}
+/* basic helper procs for pretty printing */
 
 int parenthesize(enum node_type nt) {
 
@@ -1351,7 +1463,8 @@ char *get_operator_value(int op) {
         case REMAINDER:
             return "%";
         default:
-            printf("op not recognized\n");
+            handle_parser_error(PE_UNRECOGNIZED_OP,
+                                "get_operator_value", yylineno);
             return "";
     }
 }
@@ -1382,6 +1495,10 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             error(0, 0, "line %d: %s: unrecognized node type", line, data);
             #endif
             return;
+        case PE_UNRECOGNIZED_OP:
+            #ifdef DEBUG
+            error(0, 0, "line %d: %s: unrecognized operator", line, data);
+            #endif
         default:
             return;
     }

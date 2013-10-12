@@ -1,7 +1,7 @@
 compiler
 ========
 
-Parser
+Parser - construct a parse tree for a subset of the C language and print it.
 
 Build:
 make parser
