@@ -130,7 +130,9 @@ non_function_declarator : simple_declarator
     ;
 
 parameter_list : void_type_specifier
+        { $$ = create_node(PARAMETER_LIST, $1); }
     | parameter_decl
+        { $$ = create_node(PARAMETER_LIST, $1); }
     | parameter_list COMMA parameter_decl
         { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
     ;
@@ -571,6 +573,9 @@ void *create_node(enum node_type nt, ...) {
         case PAREN_DIR_DECL:
             n->children.paren_dir_decl.decl = va_arg(ap, Node *);
             break;
+        case PARAMETER_LIST:
+            n->children.param_ls.param = va_arg(ap, Node *);
+            break;
         case EXPRESSION_STATEMENT:
             n->children.expr_stmt.expr = va_arg(ap, Node *);
             break;
@@ -839,6 +844,9 @@ void initialize_children(Node *n) {
             n->children.func_def.func_def_spec = NULL;
             n->children.func_def.cmpd_stmt = NULL;
             break;
+        case PARAMETER_LIST:
+            n->children.param_ls.param = NULL;
+            break;
         case TYPE_SPEC_DECL:
             n->children.type_spec_decl.type_spec = NULL;
             n->children.type_spec_decl.decl = NULL;
@@ -1016,6 +1024,9 @@ void traverse_node(void *np) {
             traverse_node(n->children.func_def.func_def_spec);
             traverse_node(n->children.func_def.cmpd_stmt);
             break;
+        case PARAMETER_LIST:
+            traverse_node(n->children.param_ls.param);
+            break;
         case TYPE_SPEC_DECL:
             traverse_node(n->children.type_spec_decl.type_spec);
             fprintf(output, " ");
@@ -1042,9 +1053,7 @@ void traverse_node(void *np) {
             break;
         case FUNCTION_DECL:
             traverse_node(n->children.func_decl.dir_decl);
-            fprintf(output, "(");
             traverse_node(n->children.func_decl.param_ls);
-            fprintf(output, ")");
             break;
         case ARRAY_DECL:
             traverse_node(n->children.array_decl.dir_decl);
@@ -1335,6 +1344,7 @@ int parenthesize(enum node_type nt) {
         case POINTER_DECLARATOR:
         case IDENTIFIER:
         case FUNCTION_DECL:
+        case PARAMETER_LIST:
         case ARRAY_DECL:
         /* could exist within a parenthesized_expr */
         case CONDITIONAL_EXPR:

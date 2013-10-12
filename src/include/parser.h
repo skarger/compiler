@@ -21,6 +21,7 @@ enum node_type {
     DECL,
     PAREN_DIR_DECL,
     FUNCTION_DECL,
+    PARAMETER_LIST,
     ARRAY_DECL,
     EXPRESSION_STATEMENT,
     LABELED_STATEMENT,
@@ -103,6 +104,10 @@ union NodeChildren {
         Node *dir_decl;
         Node *param_ls;
     } func_decl;
+
+    struct {
+        Node *param;
+    } param_ls;
 
     struct {
         Node *dir_decl;
