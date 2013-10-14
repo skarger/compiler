@@ -477,6 +477,7 @@ void_type_specifier : VOID
 abstract_declarator : pointer direct_abstract_declarator
         { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2);  }
     | pointer
+        { $$ = create_node(ABSTRACT_DECLARATOR, $1, NULL);  }
     | direct_abstract_declarator
     ;
 
