@@ -132,7 +132,7 @@ non_function_declarator : simple_declarator
 parameter_list : void_type_specifier
     | parameter_decl
     | parameter_list COMMA parameter_decl
-        { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
+        { $$ = create_node(PARAMETER_LIST, $1, $3); }
     ;
 
 /*
@@ -606,6 +606,7 @@ void *create_node(enum node_type nt, ...) {
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
             break;
+        case PARAMETER_LIST:
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
@@ -725,6 +726,10 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
         case POINTER_DECLARATOR:
             n->children.ptr_decl.ptr = child1;
             n->children.ptr_decl.dir_decl = child2;
+            break;
+        case PARAMETER_LIST:
+            n->children.param_ls.left = child1;
+            n->children.param_ls.right = child2;
             break;
         case BINARY_EXPR:
             n->children.bin_op.left = child1;
@@ -910,6 +915,10 @@ void initialize_children(Node *n) {
             break;
         case GOTO_STATEMENT:
             n->children.goto_stmt.id = NULL;
+            break;
+        case PARAMETER_LIST:
+            n->children.param_ls.left = NULL;
+            n->children.param_ls.right = NULL;
             break;
         case BINARY_EXPR:
             n->children.bin_op.left = NULL;
@@ -1111,6 +1120,11 @@ void traverse_node(void *np) {
             fprintf(output, ") ");
             traverse_node(n->children.cast_expr.cast_expr);
             break;
+        case PARAMETER_LIST:
+            traverse_node(n->children.param_ls.left);
+            fprintf(output, " , ");
+            traverse_node(n->children.param_ls.right);
+            break;
         case BINARY_EXPR:
             traverse_node(n->children.bin_op.left);
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
@@ -1129,9 +1143,6 @@ void traverse_node(void *np) {
             traverse_node(n->children.abs_decl.dir_abs_decl);
             break;
         case POINTER:
-            /* special case: pointers should be parenthesized, but when there */
-            /* are nested pointers there should just be one set of ()         */
-            /* surrounding the group                                          */
             print_pointers(n);
             break;
         case PAREN_DIR_ABS_DECL:
@@ -1349,7 +1360,6 @@ int parenthesize(enum node_type nt) {
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
         /* could exist within an abstract_declarator */
-        case POINTER:
         case ABSTRACT_DECLARATOR:
             return 1;
         default:
