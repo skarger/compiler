@@ -1,0 +1,33 @@
+
+/*** should error ***/
+int main(void)
+{
+    void x;
+    return 0;
+}
+
+
+
+
+
+/* should error */
+f(void) { int i; }
+
+int main
+{
+int arr[];
+}
+
+main(void) {
+return 0;
+}
+
+int a {
+}
+
+int (b) {
+}
+
+int c[10] {
+}
+

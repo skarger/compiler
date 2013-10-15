@@ -356,7 +356,7 @@ primary_expr : IDENTIFIER
         { $$ = create_node( IDENTIFIER, yylval ); }
     | constant
     | LEFT_PAREN expr RIGHT_PAREN
-        { $$ = $2; }
+        { $$ = create_node(PAREN_EXPR, $2); }
     ;
 
 constant : CHAR_CONSTANT
@@ -605,6 +605,9 @@ void *create_node(enum node_type nt, ...) {
             n->data.symbols[OPERATOR] = va_arg(ap, int);
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
             append_two_children(n, child1, child2);
+            break;
+        case PAREN_EXPR:
+            n->children.paren_expr.expr = va_arg(ap, Node *);
             break;
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
@@ -915,6 +918,9 @@ void initialize_children(Node *n) {
             n->children.bin_op.left = NULL;
             n->children.bin_op.right = NULL;
             break;
+        case PAREN_EXPR:
+            n->children.paren_expr.expr = NULL;
+            break;
         case CAST_EXPR:
             n->children.cast_expr.type_name = NULL;
             n->children.cast_expr.cast_expr = NULL;
@@ -1007,6 +1013,9 @@ void traverse_node(void *np) {
     if (n == NULL) {
         return;
     }
+    #ifdef DEBUG
+        printf("traverse_node: node type: %d\n", n->n_type);
+    #endif
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
     }
@@ -1115,6 +1124,9 @@ void traverse_node(void *np) {
             traverse_node(n->children.bin_op.left);
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.bin_op.right);
+            break;
+        case PAREN_EXPR:
+            traverse_node(n->children.expr_stmt.expr);
             break;
         case TYPE_SPEC_ABS_DECL:
             traverse_node(n->children.type_spec_abs_decl.type_spec);
@@ -1331,26 +1343,9 @@ void print_data_node(void *np) {
 int parenthesize(enum node_type nt) {
 
     switch (nt) {
-        /* could exist within a declarator */
-        case POINTER_DECLARATOR:
-        case IDENTIFIER:
-        case FUNCTION_DECL:
-        case ARRAY_DECL:
-        /* could exist within a parenthesized_expr */
-        case CONDITIONAL_EXPR:
-        case BINARY_EXPR:
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
-        case CHAR_CONSTANT:
-        case STRING_CONSTANT:
-        case NUMBER_CONSTANT:
-        case SUBSCRIPT_EXPR:
-        case FUNCTION_CALL:
-        /* could exist within an abstract_declarator */
-        case POINTER:
-        case ABSTRACT_DECLARATOR:
+        case PAREN_DIR_ABS_DECL:
+        case PAREN_DIR_DECL:
+        case PAREN_EXPR:
             return 1;
         default:
             return 0;
