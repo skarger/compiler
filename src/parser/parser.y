@@ -567,48 +567,127 @@ void *create_node(enum node_type nt, ...) {
     initialize_children(n);
     va_list ap;
     va_start(ap, nt);
-    switch (nt) {
-        case PAREN_DIR_DECL:
-            n->children.paren_dir_decl.decl = va_arg(ap, Node *);
+
+    if (has_operator(nt)) {
+        set_operator(n, va_arg(ap, int));
+    }
+
+    if (nt == TYPE_SPECIFIER) {
+        set_type(n, va_arg(ap, int));
+    }
+
+    if (has_literal_data(nt)) {
+        set_literal_data(n, va_arg(ap, YYSTYPE));
+    }
+
+    int num_children = number_of_children(nt);
+    switch (num_children) {
+        case 1:
+            child1 = va_arg(ap, Node *);
+            append_one_child(n, child1);
             break;
-        case EXPRESSION_STATEMENT:
-            n->children.expr_stmt.expr = va_arg(ap, Node *);
+        case 2:
+            child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
+            append_two_children(n, child1, child2);
             break;
-        case COMPOUND_STATEMENT:
-            n->children.cmpd_stmt.decl_or_stmt_ls = va_arg(ap, Node *);
-            break;
-        case IF_THEN_ELSE:
-        case CONDITIONAL_EXPR:
+        case 3:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
             child3 = va_arg(ap, Node *);
             append_three_children(n, child1, child2, child3);
             break;
-        case FOR_STATEMENT:
+        case 4:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
             child3 = va_arg(ap, Node *);
             child4 = va_arg(ap, Node *);
             append_four_children(n, child1, child2, child3, child4);
             break;
+        default:
+            break;
+    }
+    va_end(ap);
+
+    return (void *) n;
+}
+
+
+/* helpers for create_node */
+int has_operator(enum node_type nt) {
+    switch (nt) {
+        case BINARY_EXPR:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int has_literal_data(enum node_type nt) {
+    switch (nt) {
+        case IDENTIFIER:
+        case NUMBER_CONSTANT:
+        case CHAR_CONSTANT:
+        case STRING_CONSTANT:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+void set_operator(Node *n, int op) {
+    n->data.symbols[OPERATOR] = op;
+}
+
+void set_type(Node *n, int type_spec) {
+    n->data.symbols[TYPE] = type_spec;
+}
+
+void set_literal_data(Node *n, YYSTYPE data) {
+    switch (n->n_type) {
+        /* passed in data is yylval */
+        case IDENTIFIER:
+            n->data.str =
+                strdup( ((struct String *) data)->str );
+            break;
+        case NUMBER_CONSTANT:
+            n->data.num = ((struct Number *) data)->value;
+            break;
+        case CHAR_CONSTANT:
+            n->data.ch = ((struct Character *) data)->c;
+            break;
+        case STRING_CONSTANT:
+            n->data.str = ((struct String *) data)->str;
+            break;
+        default:
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
+                                "set_literal_data",
+                                yylineno);
+    }
+}
+
+int number_of_children(enum node_type nt) {
+    switch (nt) {
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
-            break;
+            return 0;
+        case PAREN_DIR_DECL:
+        case EXPRESSION_STATEMENT:
+        case COMPOUND_STATEMENT:
         case RETURN_STATEMENT:
-            n->children.return_stmt.expr = va_arg(ap, Node *);
-            break;
         case GOTO_STATEMENT:
-            n->children.goto_stmt.id = va_arg(ap, Node *);
-            break;
-        case BINARY_EXPR:
-            n->data.symbols[OPERATOR] = va_arg(ap, int);
-            child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
-            append_two_children(n, child1, child2);
-            break;
         case PAREN_EXPR:
-            n->children.paren_expr.expr = va_arg(ap, Node *);
-            break;
+        case POINTER:
+        case PAREN_DIR_ABS_DECL:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_INCREMENT:
+        case POSTFIX_DECREMENT:
+            return 1;
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
@@ -627,49 +706,23 @@ void *create_node(enum node_type nt, ...) {
         case ABSTRACT_DECLARATOR:
         case BRACKET_DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
-            child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
-            append_two_children(n, child1, child2);
-            break;
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
-            n->data.symbols[OPERATOR] = va_arg(ap, int);
-            n->children.unary_op.operand = va_arg(ap, Node *);
-            break;
-        case TYPE_SPECIFIER:
-            n->data.symbols[TYPE] = va_arg(ap, int);
-            break;
-        case POINTER:
-            n->children.ptr.right = va_arg(ap, Node *);
-            break;
-        case PAREN_DIR_ABS_DECL:
-            n->children.dir_abs_decl.abs_decl = va_arg(ap, Node *);
-            break;
-        /* for identifiers and constants yylval should have been passed in */
-        case IDENTIFIER:
-            n->data.str =
-                strdup( ((struct String *) va_arg(ap, YYSTYPE))->str );
-            break;
-        case NUMBER_CONSTANT:
-            n->data.num = ((struct Number *) va_arg(ap, YYSTYPE))->value;
-            break;
-        case CHAR_CONSTANT:
-            n->data.ch = ((struct Character *) va_arg(ap, YYSTYPE))->c;
-            break;
-        case STRING_CONSTANT:
-            n->data.str = ((struct String *) va_arg(ap, YYSTYPE))->str;
-            break;
+        case BINARY_EXPR:
+            return 2;
+        case IF_THEN_ELSE:
+        case CONDITIONAL_EXPR:
+            return 3;
+        case FOR_STATEMENT:
+            return 4;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "create_node",
+                                "number_of_children",
                                 yylineno);
-            free(n);
-            return NULL;
+            return -1;
     }
-    va_end(ap);
+}
 
-    return (void *) n;
+void append_one_child(Node *n, Node *child1) {
+    n->children.child1 = child1;
 }
 
 /*
@@ -684,89 +737,8 @@ void *create_node(enum node_type nt, ...) {
  * Side-effects: None
  */
 void append_two_children(Node *n, Node *child1, Node *child2) {
-    switch (n->n_type) {
-        case FUNCTION_DEFINITION:
-            n->children.func_def.func_def_spec = child1;
-            n->children.func_def.cmpd_stmt = child2;
-            break;
-        case TYPE_SPEC_DECL:
-            n->children.type_spec_decl.type_spec = child1;
-            n->children.type_spec_decl.decl = child2;
-            break;
-        case DECL_OR_STMT_LIST:
-            n->children.decl_stmt_ls.decl_stmt_ls = child1;
-            n->children.decl_stmt_ls.decl_stmt = child2;
-            break;
-        case INIT_DECL_LIST:
-            n->children.init_decl_ls.init_decl_ls = child1;
-            n->children.init_decl_ls.decl = child2;
-            break;
-        case DECL:
-            n->children.decl.type_spec = child1;
-            n->children.decl.init_decl_ls = child2;
-            break;
-        case FUNCTION_DECL:
-            n->children.func_decl.dir_decl = child1;
-            n->children.func_decl.param_ls = child2;
-            break;
-        case LABELED_STATEMENT:
-            n->children.lab_stmt.label = child1;
-            n->children.lab_stmt.stmt = child2;
-            break;
-        case IF_THEN:
-            n->children.if_then_else.cond = child1;
-            n->children.if_then_else.val_if_true = child2;
-            break;
-        case WHILE_STATEMENT:
-            n->children.while_do.expr = child1;
-            n->children.while_do.stmt = child2;
-            break;
-        case DO_STATEMENT:
-            n->children.while_do.stmt = child1;
-            n->children.while_do.expr = child2;
-            break;
-        case POINTER_DECLARATOR:
-            n->children.ptr_decl.ptr = child1;
-            n->children.ptr_decl.dir_decl = child2;
-            break;
-        case BINARY_EXPR:
-            n->children.bin_op.left = child1;
-            n->children.bin_op.right = child2;
-            break;
-        case CAST_EXPR:
-            n->children.cast_expr.type_name = child1;
-            n->children.cast_expr.cast_expr = child2;
-            break;
-        case SUBSCRIPT_EXPR:
-            n->children.subs_expr.pstf_expr = child1;
-            n->children.subs_expr.expr = child2;
-            break;
-        case FUNCTION_CALL:
-            n->children.function_call.pstf_expr = child1;
-            n->children.function_call.expr_list = child2;
-            break;
-        case ABSTRACT_DECLARATOR:
-            n->children.abs_decl.ptr = child1;
-            n->children.abs_decl.dir_abs_decl = child2;
-            break;
-        case ARRAY_DECL:
-            n->children.array_decl.dir_decl = (Node *) child1;
-            n->children.array_decl.cond_expr = (Node *) child2;
-            break;
-        case BRACKET_DIR_ABS_DECL:
-            n->children.dir_abs_decl.dir_abs_decl = (Node *) child1;
-            n->children.dir_abs_decl.cond_expr = (Node *) child2;
-            break;
-        case TYPE_SPEC_ABS_DECL:
-            n->children.type_spec_abs_decl.type_spec = child1;
-            n->children.type_spec_abs_decl.abs_decl = child2;
-            break;
-        default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_two_children",
-                                yylineno);
-            break;
-    }
+    n->children.child1 = child1;
+    n->children.child2 = child2;
 }
 
 /*
@@ -782,19 +754,9 @@ void append_two_children(Node *n, Node *child1, Node *child2) {
  * Side-effects: None
  */
 void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
-    switch (n->n_type) {
-        case IF_THEN_ELSE:
-        case CONDITIONAL_EXPR:
-            n->children.if_then_else.cond = child1;
-            n->children.if_then_else.val_if_true = child2;
-            n->children.if_then_else.val_if_false = child3;
-            break;
-        default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_three_children",
-                                yylineno);
-            break;
-    }
+    n->children.child1 = child1;
+    n->children.child2 = child2;
+    n->children.child3 = child3;
 }
 
 /*
@@ -812,159 +774,43 @@ void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
  */
 void append_four_children(Node *n, Node *child1, Node *child2,
     Node *child3, Node *child4) {
-    switch (n->n_type) {
-        case FOR_STATEMENT:
-            n->children.for_stmt.init = child1;
-            n->children.for_stmt.cond = child2;
-            n->children.for_stmt.loop = child3;
-            n->children.for_stmt.stmt = child4;
-            break;
-        default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "append_four_children",
-                                yylineno);
-            break;
-    }
+    n->children.child1 = child1;
+    n->children.child2 = child2;
+    n->children.child3 = child3;
+    n->children.child4 = child4;
 }
 
 /*
  * initialize_children 
  * Purpose: Given a node, initialize its children to NULL.
- *          Uses node type to know which children to initialize.
+ *          Uses node type to know how many children to initialize.
  * Parameters:
  *  n       Node * The node whose children should be initialized.
  * Returns: None
  * Side-effects: None
  */
 void initialize_children(Node *n) {
-    switch (n->n_type) {
-        case FUNCTION_DEFINITION:
-            n->children.func_def.func_def_spec = NULL;
-            n->children.func_def.cmpd_stmt = NULL;
+    int num_children = number_of_children(n->n_type);
+    switch (num_children) {
+        case 1:
+            n->children.child1 = NULL;
             break;
-        case TYPE_SPEC_DECL:
-            n->children.type_spec_decl.type_spec = NULL;
-            n->children.type_spec_decl.decl = NULL;
+        case 2:
+            n->children.child1 = NULL;
+            n->children.child2 = NULL;
             break;
-        case DECL_OR_STMT_LIST:
-            n->children.decl_stmt_ls.decl_stmt_ls = NULL;
-            n->children.decl_stmt_ls.decl_stmt = NULL;
+        case 3:
+            n->children.child1 = NULL;
+            n->children.child2 = NULL;
+            n->children.child3 = NULL;
             break;
-        case INIT_DECL_LIST:
-            n->children.init_decl_ls.init_decl_ls = NULL;
-            n->children.init_decl_ls.decl = NULL;
-            break;
-        case DECL:
-            n->children.decl.type_spec = NULL;
-            n->children.decl.init_decl_ls = NULL;
-            break;
-        case PAREN_DIR_DECL:
-            n->children.paren_dir_decl.decl = NULL;
-            break;
-        case FUNCTION_DECL:
-            n->children.func_decl.dir_decl = NULL;
-            n->children.func_decl.param_ls = NULL;
-            break;
-        case ARRAY_DECL:
-            n->children.array_decl.dir_decl = NULL;
-            n->children.array_decl.cond_expr = NULL;
-            break;
-        case EXPRESSION_STATEMENT:
-            n->children.expr_stmt.expr = NULL;
-            break;
-        case LABELED_STATEMENT:
-            n->children.lab_stmt.label = NULL;
-            n->children.lab_stmt.stmt = NULL;
-            break;
-        case COMPOUND_STATEMENT:
-            n->children.cmpd_stmt.decl_or_stmt_ls = NULL;
-            break;
-        case POINTER_DECLARATOR:
-            n->children.ptr_decl.ptr = NULL;
-            n->children.ptr_decl.dir_decl = NULL;
-            break;
-        case IF_THEN:
-            n->children.if_then_else.cond = NULL;
-            n->children.if_then_else.val_if_true = NULL;
-            break;
-        case CONDITIONAL_EXPR:
-        case IF_THEN_ELSE:
-            n->children.if_then_else.cond = NULL;
-            n->children.if_then_else.val_if_true = NULL;
-            n->children.if_then_else.val_if_false = NULL;
-            break;
-        case WHILE_STATEMENT:
-        case DO_STATEMENT:
-            n->children.while_do.expr = NULL;
-            n->children.while_do.stmt = NULL;
-            break;
-        case FOR_STATEMENT:
-            n->children.for_stmt.init = NULL;
-            n->children.for_stmt.cond = NULL;
-            n->children.for_stmt.loop = NULL;
-            n->children.for_stmt.stmt = NULL;
-            break;
-        case BREAK_STATEMENT:
-        case CONTINUE_STATEMENT:
-        case NULL_STATEMENT:
-            break;
-        case RETURN_STATEMENT:
-            n->children.return_stmt.expr = NULL;
-            break;
-        case GOTO_STATEMENT:
-            n->children.goto_stmt.id = NULL;
-            break;
-        case BINARY_EXPR:
-            n->children.bin_op.left = NULL;
-            n->children.bin_op.right = NULL;
-            break;
-        case PAREN_EXPR:
-            n->children.paren_expr.expr = NULL;
-            break;
-        case CAST_EXPR:
-            n->children.cast_expr.type_name = NULL;
-            n->children.cast_expr.cast_expr = NULL;
-            break;
-        case SUBSCRIPT_EXPR:
-            n->children.subs_expr.pstf_expr = NULL;
-            n->children.subs_expr.expr = NULL;
-            break;
-        case FUNCTION_CALL:
-            n->children.function_call.pstf_expr = NULL;
-            n->children.function_call.expr_list = NULL;
-            break;
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
-            n->children.unary_op.operand = NULL;
-            break;
-        case POINTER:
-            n->children.ptr.right = NULL;
-            break;
-        case TYPE_SPEC_ABS_DECL:
-            n->children.type_spec_abs_decl.type_spec = NULL;
-            n->children.type_spec_abs_decl.abs_decl = NULL;
-            break;
-        case ABSTRACT_DECLARATOR:
-            n->children.abs_decl.ptr = NULL;
-            n->children.abs_decl.dir_abs_decl = NULL;
-            break;
-        case PAREN_DIR_ABS_DECL:
-        case BRACKET_DIR_ABS_DECL:
-            n->children.dir_abs_decl.abs_decl = NULL;
-            n->children.dir_abs_decl.dir_abs_decl = NULL;
-            n->children.dir_abs_decl.cond_expr = NULL;
-            break;
-        case TYPE_SPECIFIER:
-        case IDENTIFIER:
-        case CHAR_CONSTANT:
-        case NUMBER_CONSTANT:
-        case STRING_CONSTANT:
+        case 4:
+            n->children.child1 = NULL;
+            n->children.child2 = NULL;
+            n->children.child3 = NULL;
+            n->children.child4 = NULL;
             break;
         default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"initialize_children",
-                                yylineno);
             break;
     }
 }
@@ -1021,58 +867,61 @@ void traverse_node(void *np) {
     }
 
     switch (n->n_type) {
+        case PAREN_EXPR:
+        case PAREN_DIR_DECL:
+            traverse_node(n->children.child1);
+            break;
+        case ABSTRACT_DECLARATOR:
+        case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
-            traverse_node(n->children.func_def.func_def_spec);
-            traverse_node(n->children.func_def.cmpd_stmt);
+            traverse_node(n->children.child1);
+            traverse_node(n->children.child2);
             break;
         case TYPE_SPEC_DECL:
-            traverse_node(n->children.type_spec_decl.type_spec);
+            traverse_node(n->children.child1);
             fprintf(output, " ");
-            traverse_node(n->children.type_spec_decl.decl);
+            traverse_node(n->children.child2);
             break;
         case DECL_OR_STMT_LIST:
-            traverse_node(n->children.decl_stmt_ls.decl_stmt_ls);
+            traverse_node(n->children.child1);
             fprintf(output, "\n");
-            traverse_node(n->children.decl_stmt_ls.decl_stmt);
+            traverse_node(n->children.child2);
             break;
         case INIT_DECL_LIST:
-            traverse_node(n->children.init_decl_ls.init_decl_ls);
+            traverse_node(n->children.child1);
             fprintf(output, ", ");
-            traverse_node(n->children.init_decl_ls.decl);
+            traverse_node(n->children.child2);
             break;
         case DECL:
-            traverse_node(n->children.decl.type_spec);
+            traverse_node(n->children.child1);
             fprintf(output, " ");
-            traverse_node(n->children.decl.init_decl_ls);
+            traverse_node(n->children.child2);
             fprintf(output, ";");
             break;
-        case PAREN_DIR_DECL:
-            traverse_node(n->children.paren_dir_decl.decl);
-            break;
         case FUNCTION_DECL:
-            traverse_node(n->children.func_decl.dir_decl);
+            traverse_node(n->children.child1);
             fprintf(output, "(");
-            traverse_node(n->children.func_decl.param_ls);
+            traverse_node(n->children.child2);
             fprintf(output, ")");
             break;
         case ARRAY_DECL:
-            traverse_node(n->children.array_decl.dir_decl);
+            traverse_node(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.array_decl.cond_expr);
+            traverse_node(n->children.child2);
             fprintf(output, "]");
             break;
         case EXPRESSION_STATEMENT:
-            traverse_node(n->children.expr_stmt.expr);
+            traverse_node(n->children.child1);
             fprintf(output, ";");
             break;
         case LABELED_STATEMENT:
-            traverse_node(n->children.lab_stmt.label);
+            traverse_node(n->children.child1);
             fprintf(output, " : ");
-            traverse_node(n->children.lab_stmt.stmt);
+            traverse_node(n->children.child2);
             break;
         case COMPOUND_STATEMENT:
             fprintf(output, "\n{\n");
-            traverse_node(n->children.cmpd_stmt.decl_or_stmt_ls);
+            traverse_node(n->children.child1);
             fprintf(output, "\n}\n");
             break;
         case IF_THEN:
@@ -1092,53 +941,42 @@ void traverse_node(void *np) {
             break;
         case RETURN_STATEMENT:
             fprintf(output, "return ");
-            traverse_node(n->children.return_stmt.expr);
+            traverse_node(n->children.child1);
             fprintf(output, ";");
             break;
         case GOTO_STATEMENT:
             fprintf(output, "goto ");
-            traverse_node(n->children.goto_stmt.id);
+            traverse_node(n->children.child1);
             fprintf(output, ";");
             break;
         case NULL_STATEMENT:
             fprintf(output, ";");
             break;
-        case POINTER_DECLARATOR:
-            traverse_node(n->children.ptr_decl.ptr);
-            traverse_node(n->children.ptr_decl.dir_decl);
-            break;
         case CONDITIONAL_EXPR:
-            traverse_node(n->children.if_then_else.cond);
+            traverse_node(n->children.child1);
             fprintf(output, " ? ");
-            traverse_node(n->children.if_then_else.val_if_true);
+            traverse_node(n->children.child2);
             fprintf(output, " : ");
-            traverse_node(n->children.if_then_else.val_if_false);
+            traverse_node(n->children.child3);
             break;
         case CAST_EXPR:
             fprintf(output, "(");
-            traverse_node(n->children.cast_expr.type_name);
+            traverse_node(n->children.child1);
             fprintf(output, ") ");
-            traverse_node(n->children.cast_expr.cast_expr);
+            traverse_node(n->children.child2);
             break;
         case BINARY_EXPR:
-            traverse_node(n->children.bin_op.left);
+            traverse_node(n->children.child1);
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
-            traverse_node(n->children.bin_op.right);
-            break;
-        case PAREN_EXPR:
-            traverse_node(n->children.expr_stmt.expr);
+            traverse_node(n->children.child2);
             break;
         case TYPE_SPEC_ABS_DECL:
-            traverse_node(n->children.type_spec_abs_decl.type_spec);
+            traverse_node(n->children.child1);
             fprintf(output, " ");
-            traverse_node(n->children.type_spec_abs_decl.abs_decl);
+            traverse_node(n->children.child2);
             break;
         case TYPE_SPECIFIER:
             fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE]));
-            break;
-        case ABSTRACT_DECLARATOR:
-            traverse_node(n->children.abs_decl.ptr);
-            traverse_node(n->children.abs_decl.dir_abs_decl);
             break;
         case POINTER:
             /* special case: pointers should be parenthesized, but when there */
@@ -1151,25 +989,25 @@ void traverse_node(void *np) {
             traverse_direct_abstract_declarator(n);
             break;
         case SUBSCRIPT_EXPR:
-            traverse_node(n->children.subs_expr.pstf_expr);
+            traverse_node(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.subs_expr.expr);
+            traverse_node(n->children.child2);
             fprintf(output, "]");
             break;
         case FUNCTION_CALL:
-            traverse_node(n->children.function_call.pstf_expr);
+            traverse_node(n->children.child1);
             fprintf(output, "(");
-            traverse_node(n->children.function_call.expr_list);
+            traverse_node(n->children.child2);
             fprintf(output, ")");
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
-            traverse_node(n->children.unary_op.operand);
+            traverse_node(n->children.child1);
             break;
         case POSTFIX_INCREMENT:
         case POSTFIX_DECREMENT:
-            traverse_node(n->children.unary_op.operand);
+            traverse_node(n->children.child1);
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
         case IDENTIFIER:
@@ -1207,32 +1045,33 @@ void traverse_iterative_statement(void *np) {
     switch (n->n_type) {
         case WHILE_STATEMENT:
             fprintf(output, "while ( ");
-            traverse_node(n->children.while_do.expr);
+            traverse_node(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.while_do.stmt);
+            traverse_node(n->children.child2);
             break;
         case DO_STATEMENT:
             fprintf(output, "do ");
-            traverse_node(n->children.while_do.stmt);
+            traverse_node(n->children.child1);
             fprintf(output, " while ( ");
-            traverse_node(n->children.while_do.expr);
+            traverse_node(n->children.child2);
             fprintf(output, " );");
             break;
         case FOR_STATEMENT:
             fprintf(output, "for ( ");
-            traverse_node(n->children.for_stmt.init);
+            traverse_node(n->children.child1);
             fprintf(output, "; ");
-            traverse_node(n->children.for_stmt.cond);
+            traverse_node(n->children.child2);
             fprintf(output, "; ");
-            traverse_node(n->children.for_stmt.loop);
+            traverse_node(n->children.child3);
             fprintf(output, " ) ");
-            traverse_node(n->children.for_stmt.stmt);
+            traverse_node(n->children.child4);
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
                                 "traverse_iterative_statement",
                                 yylineno);
             break;
+
     }
 }
 
@@ -1254,18 +1093,18 @@ void traverse_conditional_statement(void *np) {
     switch (n->n_type) {
         case IF_THEN:
             fprintf(output, "if ( ");
-            traverse_node(n->children.if_then_else.cond);
+            traverse_node(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.if_then_else.val_if_true);
+            traverse_node(n->children.child2);
             fprintf(output, "");
             break;
         case IF_THEN_ELSE:
             fprintf(output, "if ( ");
-            traverse_node(n->children.if_then_else.cond);
+            traverse_node(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.if_then_else.val_if_true);
+            traverse_node(n->children.child2);
             fprintf(output, " else ");
-            traverse_node(n->children.if_then_else.val_if_false);
+            traverse_node(n->children.child3);
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
@@ -1288,12 +1127,12 @@ void traverse_conditional_statement(void *np) {
 void traverse_direct_abstract_declarator(Node *n) {
     switch (n->n_type) {
         case PAREN_DIR_ABS_DECL:
-            traverse_node(n->children.dir_abs_decl.abs_decl);
+            traverse_node(n->children.child1);
             break;
         case BRACKET_DIR_ABS_DECL:
-            traverse_node(n->children.dir_abs_decl.dir_abs_decl);
+            traverse_node(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.dir_abs_decl.cond_expr);
+            traverse_node(n->children.child2);
             fprintf(output, "]");
             break;
         default:
@@ -1358,7 +1197,7 @@ void print_pointers(Node *n) {
     }
     do {
         fprintf(output, "*");
-        n = n->children.ptr.right;
+        n = n->children.child1;
     } while (n != NULL && n->n_type == POINTER);
 }
 
