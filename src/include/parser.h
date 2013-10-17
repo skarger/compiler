@@ -21,7 +21,6 @@ enum node_type {
     DECL,
     PAREN_DIR_DECL,
     FUNCTION_DECL,
-    PARAMETER_LIST,
     ARRAY_DECL,
     EXPRESSION_STATEMENT,
     LABELED_STATEMENT,
@@ -172,11 +171,6 @@ union NodeChildren {
         Node *left;
         Node *right;
     } bin_op;
-
-    struct {
-        Node *left;
-        Node *right;
-    } param_ls;
 
     struct {
         Node *pstf_expr;
