@@ -19,6 +19,8 @@ src/parser/parser.y : PS2 Bison file.
 src/include/parser.h : PS2 header file
 src/lexer/* : files for PS1 scanner. Required for parser.
 src/utilities/* : utility functions, required to build but not specifically part of PS2.
-test_input : for testing parser $ ./parser test_input
+test_input_valid : for testing parser $ ./parser test_input_invalid [output_file]
+test_input_invalid : input that should provoke errors
+test_input : the valid and invalid versions combined
 test_result : output from testing parser.
 typescript : transcript of building and testing parser
