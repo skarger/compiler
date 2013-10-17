@@ -584,24 +584,24 @@ void *create_node(enum node_type nt, ...) {
     switch (num_children) {
         case 1:
             child1 = va_arg(ap, Node *);
-            append_one_child(n, child1);
+            append_children(n, 1, child1);
             break;
         case 2:
             child1 = va_arg(ap, Node *); child2 = va_arg(ap, Node *);
-            append_two_children(n, child1, child2);
+            append_children(n, 2, child1, child2);
             break;
         case 3:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
             child3 = va_arg(ap, Node *);
-            append_three_children(n, child1, child2, child3);
+            append_children(n, 3, child1, child2, child3);
             break;
         case 4:
             child1 = va_arg(ap, Node *);
             child2 = va_arg(ap, Node *);
             child3 = va_arg(ap, Node *);
             child4 = va_arg(ap, Node *);
-            append_four_children(n, child1, child2, child3, child4);
+            append_children(n, 4, child1, child2, child3, child4);
             break;
         default:
             break;
@@ -721,63 +721,42 @@ int number_of_children(enum node_type nt) {
     }
 }
 
-void append_one_child(Node *n, Node *child1) {
-    n->children.child1 = child1;
-}
 
 /*
- * append_two_children 
- * Purpose: Given a node, append child nodes to it. Uses the node's type to
- *          decide where to append the children.
+ * append_children
+ * Purpose: Given a node, append child nodes to it.
  * Parameters:
- *  n       Node * The node to which this function appends the children.
- *  child1  Node * The first child node to append.
- *  child2  Node * The second child node to append.
+ *  n            Node * The node to which this function appends the children.
+ *  num_children int    The number of children to append.
+ *  Optional arguments representing nodes to append, in order:
+ *  Node * The first child node to append.
+ *  Node * The second child node to append.
+ *  Node * The third child node to append.
+ *  Node * The fourth child node to append.
  * Returns: None
  * Side-effects: None
  */
-void append_two_children(Node *n, Node *child1, Node *child2) {
-    n->children.child1 = child1;
-    n->children.child2 = child2;
-}
-
-/*
- * append_three_children 
- * Purpose: Given a node, append child nodes to it. Uses the node's type to
- *          decide where to append the children.
- * Parameters:
- *  n       Node * The node to which this function appends the children.
- *  child1  Node * The first child node to append.
- *  child2  Node * The second child node to append.
- *  child3  Node * The third child node to append.
- * Returns: None
- * Side-effects: None
- */
-void append_three_children(Node *n, Node *child1, Node *child2, Node *child3) {
-    n->children.child1 = child1;
-    n->children.child2 = child2;
-    n->children.child3 = child3;
-}
-
-/*
- * append_four_children 
- * Purpose: Given a node, append child nodes to it. Uses the node's type to
- *          decide where to append the children.
- * Parameters:
- *  n       Node * The node to which this function appends the children.
- *  child1  Node * The first child node to append.
- *  child2  Node * The second child node to append.
- *  child3  Node * The third child node to append.
- *  child4  Node * The fourth child node to append.
- * Returns: None
- * Side-effects: None
- */
-void append_four_children(Node *n, Node *child1, Node *child2,
-    Node *child3, Node *child4) {
-    n->children.child1 = child1;
-    n->children.child2 = child2;
-    n->children.child3 = child3;
-    n->children.child4 = child4;
+void append_children(Node *n, int num_children, ...) {
+    Node *child1, *child2, *child3, *child4;
+    va_list ap;
+    va_start(ap, num_children);
+    if (num_children >= 1) {
+        child1 = va_arg(ap, Node *);
+        n->children.child1 = child1;
+    }
+    if (num_children >= 2) {
+        child2 = va_arg(ap, Node *);
+        n->children.child2 = child2;
+    }
+    if (num_children >= 3) {
+        child3 = va_arg(ap, Node *);
+        n->children.child3 = child3;
+    }
+    if (num_children >= 4) {
+        child4 = va_arg(ap, Node *);
+        n->children.child4 = child4;
+    }
+    va_end(ap);
 }
 
 /*

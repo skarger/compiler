@@ -132,12 +132,8 @@ int has_operator(enum node_type nt);
 int number_of_children(enum node_type nt);
 
 void *construct_node(enum node_type nt);
-void append_one_child(Node *n, Node *child1);
-void append_two_children(Node *n, Node *child1, Node *child2);
-void append_three_children(Node *n, Node *child1, Node *child2, Node *child3);
-void append_four_children(Node *n, Node *child1, Node *child2,
-    Node *child3, Node *child4);
 void initialize_children(Node *n);
+void append_children(Node *n, int num_children, ...);
 char *get_type_spec(enum data_type type);
 char *get_operator_value(int op);
 void handle_parser_error(enum parser_error e, char *data, int line);
