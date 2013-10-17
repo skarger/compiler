@@ -47,6 +47,7 @@ enum node_type {
     BRACKET_DIR_ABS_DECL,
     UNARY_EXPR,
     PREFIX_EXPR,
+    PAREN_EXPR,
     SUBSCRIPT_EXPR,
     FUNCTION_CALL,
     POSTFIX_INCREMENT,
@@ -112,6 +113,10 @@ union NodeChildren {
     struct {
         Node *expr;
     } expr_stmt;
+
+    struct {
+        Node *expr;
+    } paren_expr;
 
     struct {
         Node *expr;
