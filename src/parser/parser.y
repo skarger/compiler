@@ -114,18 +114,21 @@ simple_declarator : identifier
         { set_node_type($1, SIMPLE_DECLARATOR); $$ = $1; }
     ;
 
-parenthesized_declarator : LEFT_PAREN declarator RIGHT_PAREN
-        { $$ = $2; }
-    ;
-
 identifier : IDENTIFIER
         { $$ = create_node( IDENTIFIER, yylval ); }
+    ;
+
+parenthesized_declarator : LEFT_PAREN declarator RIGHT_PAREN
+        { $$ = $2; }
     ;
 
 function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
         { $$ = create_node(FUNCTION_DECLARATOR, $1, $3); }
     | direct_declarator LEFT_PAREN RIGHT_PAREN
-        { yyerror("function must have a parameter list, even if it is (void)"); yyerrok; }
+        {
+            yyerror("function must have a parameter list, even if it is (void)"); yyerrok;
+            $$ = create_node(FUNCTION_DECLARATOR, NULL, NULL);
+        }
     ;
 
 /* non_function_declarator exists for error checking */
@@ -133,22 +136,14 @@ non_function_declarator : simple_declarator
     | array_declarator
     ;
 
-/* void may only appear by itself in a parameter list */
+/* void may only appear by itself in a parameter list, which is why it
+   is part of its production rather than being part of parameter_decl */
 parameter_list : void_type_specifier
     | parameter_decl
     | parameter_list COMMA parameter_decl
         { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
     ;
 
-/*
-simpler parameter_decl production without error checking:
-parameter_decl : type_specifier declarator
-        { $$ = create_node(PARAMETER_DECL, $1, $2); }
-    | type_specifier abstract_declarator
-        { $$ = create_node(PARAMETER_DECL, $1, $2); }
-    | type_specifier
-    ;
-*/
 parameter_decl : integer_type_specifier declarator
         { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | integer_type_specifier abstract_declarator
@@ -167,9 +162,9 @@ parameter_decl : integer_type_specifier declarator
     ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(ARRAY_DECL, $1, NULL); }
+        { $$ = create_node(ARRAY_DECLARATOR, $1, NULL); }
     | direct_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        { $$ = create_node(ARRAY_DECL, $1, $3); }
+        { $$ = create_node(ARRAY_DECLARATOR, $1, $3); }
     ;
 
 /*
@@ -705,7 +700,7 @@ int number_of_children(enum node_type nt) {
 
         case DECL:
         case FUNCTION_DECLARATOR:
-        case ARRAY_DECL:
+        case ARRAY_DECLARATOR:
         case IF_THEN:
         case LABELED_STATEMENT:
         case WHILE_STATEMENT:
@@ -834,6 +829,11 @@ int parenthesize(enum node_type nt) {
     switch (nt) {
         case PAREN_DIR_ABS_DECL:
         case PAREN_EXPR:
+
+        case POINTER_DECLARATOR:
+        case SIMPLE_DECLARATOR:
+        case FUNCTION_DECLARATOR:
+        case ARRAY_DECLARATOR:
             return 1;
         default:
             return 0;
@@ -900,7 +900,7 @@ void traverse_node(void *np) {
             traverse_node(n->children.child2);
             fprintf(output, ")");
             break;
-        case ARRAY_DECL:
+        case ARRAY_DECLARATOR:
             traverse_node(n->children.child1);
             fprintf(output, "[");
             traverse_node(n->children.child2);
