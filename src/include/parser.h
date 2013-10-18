@@ -14,18 +14,19 @@
  * semantic value that the parser ascertains.
  */
 enum node_type {
+
     FUNCTION_DEFINITION,
-    TYPE_SPEC_DECL,
+    FUNCTION_DEF_SPEC,
     DECL_OR_STMT_LIST,
     INIT_DECL_LIST,
     DECL,
-    PAREN_DIR_DECL,
-    FUNCTION_DECL,
+    FUNCTION_DECLARATOR,
     ARRAY_DECL,
     EXPRESSION_STATEMENT,
     LABELED_STATEMENT,
     COMPOUND_STATEMENT,
     POINTER_DECLARATOR,
+    SIMPLE_DECLARATOR,
     IF_THEN,
     IF_THEN_ELSE,
     WHILE_STATEMENT,
@@ -39,7 +40,10 @@ enum node_type {
     CONDITIONAL_EXPR,
     BINARY_EXPR,
     CAST_EXPR,
-    TYPE_SPEC_ABS_DECL,
+
+    PARAMETER_DECL,
+
+    TYPE_NAME,
     TYPE_SPECIFIER,
     ABSTRACT_DECLARATOR,
     POINTER,
@@ -68,8 +72,10 @@ typedef struct Node Node;
 /* Because different Node types have a variety of data fields, when processing
  * a specific Node type we need a way to refer to fields specific to that type
  */
-#define TYPE 0
+#define TYPE_SPEC 0
 #define OPERATOR 0
+
+    
 
 /*
  * A Node may contain various types of data fields.
@@ -127,6 +133,7 @@ void *create_node(enum node_type nt, ...);
 void set_literal_data(Node *n, YYSTYPE data);
 void set_type(Node *n, int type_spec);
 void set_operator(Node *n, int op);
+void set_node_type(Node *n, enum node_type nt);
 int has_literal_data(enum node_type nt);
 int has_operator(enum node_type nt);
 int number_of_children(enum node_type nt);

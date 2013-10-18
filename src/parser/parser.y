@@ -48,15 +48,18 @@ function_definition : function_def_specifier compound_statement
     ;
 
 function_def_specifier : declarator
-        { yyerror("return type missing from function specifier"); yyerrok; }
+        {
+            yyerror("return type missing from function specifier"); yyerrok;
+            $$ = create_node(FUNCTION_DEF_SPEC, $1, NULL);
+        }
     | type_specifier function_declarator
-        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+        { $$ = create_node(FUNCTION_DEF_SPEC, $1, $2); }
     | type_specifier parenthesized_declarator
-        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+        { $$ = create_node(FUNCTION_DEF_SPEC, $1, $2); }
     | type_specifier non_function_declarator
         {
             yyerror("invalid function declarator"); yyerrok;
-            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+            $$ = create_node(FUNCTION_DEF_SPEC, $1, $2);
         }
     ;
 
@@ -64,7 +67,7 @@ function_def_specifier : declarator
 decl : type_specifier initialized_declarator_list SEMICOLON
         {
             Node *n = $1;
-            if (n->data.symbols[TYPE] == VOID) {
+            if (n->data.symbols[TYPE_SPEC] == VOID) {
                 { yyerror("void declaration not permitted"); yyerrok; }
             }
             $$ = create_node(DECL, $1, $2);
@@ -108,10 +111,11 @@ direct_declarator : simple_declarator
     ;
 
 simple_declarator : identifier
+        { set_node_type($1, SIMPLE_DECLARATOR); $$ = $1; }
     ;
 
 parenthesized_declarator : LEFT_PAREN declarator RIGHT_PAREN
-        { $$ = create_node(PAREN_DIR_DECL, $2); }
+        { $$ = $2; }
     ;
 
 identifier : IDENTIFIER
@@ -119,7 +123,7 @@ identifier : IDENTIFIER
     ;
 
 function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
-        { $$ = create_node(FUNCTION_DECL, $1, $3); }
+        { $$ = create_node(FUNCTION_DECLARATOR, $1, $3); }
     | direct_declarator LEFT_PAREN RIGHT_PAREN
         { yyerror("function must have a parameter list, even if it is (void)"); yyerrok; }
     ;
@@ -129,6 +133,7 @@ non_function_declarator : simple_declarator
     | array_declarator
     ;
 
+/* void may only appear by itself in a parameter list */
 parameter_list : void_type_specifier
     | parameter_decl
     | parameter_list COMMA parameter_decl
@@ -138,26 +143,26 @@ parameter_list : void_type_specifier
 /*
 simpler parameter_decl production without error checking:
 parameter_decl : type_specifier declarator
-        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+        { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | type_specifier abstract_declarator
-        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+        { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | type_specifier
     ;
 */
 parameter_decl : integer_type_specifier declarator
-        { $$ = create_node(TYPE_SPEC_DECL, $1, $2); }
+        { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | integer_type_specifier abstract_declarator
-        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+        { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | integer_type_specifier
     | void_type_specifier declarator
         {
             yyerror("void may not appear with any other function parameters"); yyerrok;
-            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+            $$ = create_node(PARAMETER_DECL, $1, $2);
         }
     | void_type_specifier abstract_declarator
         {
             yyerror("void may not appear with any other function parameters"); yyerrok;
-            $$ = create_node(TYPE_SPEC_DECL, $1, $2);
+            $$ = create_node(PARAMETER_DECL, $1, $2);
         }
     ;
 
@@ -412,12 +417,19 @@ assignment_expr : conditional_expr
 
 /* type name and children */
 type_name : integer_type_specifier
+        { $$ = create_node(TYPE_NAME, $1, NULL); }
     | integer_type_specifier abstract_declarator
-        { $$ = create_node(TYPE_SPEC_ABS_DECL, $1, $2); }
+        { $$ = create_node(TYPE_NAME, $1, $2); }
     | void_type_specifier
-        { yyerror("void may not be used in a cast expression"); yyerrok; }
+        {
+            yyerror("void may not be used in a cast expression"); yyerrok;
+            $$ = create_node(TYPE_NAME, $1, NULL);
+        }
     | void_type_specifier abstract_declarator
-        { yyerror("void may not be used in a cast expression"); yyerrok; }
+        {
+            yyerror("void may not be used in a cast expression"); yyerrok;
+            $$ = create_node(TYPE_NAME, $1, $2);
+        }
     ;
 
 type_specifier : integer_type_specifier
@@ -643,7 +655,7 @@ void set_operator(Node *n, int op) {
 }
 
 void set_type(Node *n, int type_spec) {
-    n->data.symbols[TYPE] = type_spec;
+    n->data.symbols[TYPE_SPEC] = type_spec;
 }
 
 void set_literal_data(Node *n, YYSTYPE data) {
@@ -675,7 +687,6 @@ int number_of_children(enum node_type nt) {
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
             return 0;
-        case PAREN_DIR_DECL:
         case EXPRESSION_STATEMENT:
         case COMPOUND_STATEMENT:
         case RETURN_STATEMENT:
@@ -691,9 +702,9 @@ int number_of_children(enum node_type nt) {
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
-        case TYPE_SPEC_DECL:
+
         case DECL:
-        case FUNCTION_DECL:
+        case FUNCTION_DECLARATOR:
         case ARRAY_DECL:
         case IF_THEN:
         case LABELED_STATEMENT:
@@ -702,7 +713,11 @@ int number_of_children(enum node_type nt) {
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
-        case TYPE_SPEC_ABS_DECL:
+
+        case PARAMETER_DECL:
+        case FUNCTION_DEF_SPEC:
+        case TYPE_NAME:
+
         case ABSTRACT_DECLARATOR:
         case BRACKET_DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
@@ -762,36 +777,16 @@ void append_children(Node *n, int num_children, ...) {
 /*
  * initialize_children 
  * Purpose: Given a node, initialize its children to NULL.
- *          Uses node type to know how many children to initialize.
  * Parameters:
  *  n       Node * The node whose children should be initialized.
  * Returns: None
  * Side-effects: None
  */
 void initialize_children(Node *n) {
-    int num_children = number_of_children(n->n_type);
-    switch (num_children) {
-        case 1:
-            n->children.child1 = NULL;
-            break;
-        case 2:
-            n->children.child1 = NULL;
-            n->children.child2 = NULL;
-            break;
-        case 3:
-            n->children.child1 = NULL;
-            n->children.child2 = NULL;
-            n->children.child3 = NULL;
-            break;
-        case 4:
-            n->children.child1 = NULL;
-            n->children.child2 = NULL;
-            n->children.child3 = NULL;
-            n->children.child4 = NULL;
-            break;
-        default:
-            break;
-    }
+    n->children.child1 = NULL;
+    n->children.child2 = NULL;
+    n->children.child3 = NULL;
+    n->children.child4 = NULL;
 }
 
 /*
@@ -809,6 +804,15 @@ void *construct_node(enum node_type nt) {
     return n;
 }
 
+
+
+void set_node_type(Node *n, enum node_type nt) {
+    n->n_type = nt;
+}
+
+
+
+
 /* Printing and Tree Traversal Functions */
 
 /*
@@ -822,6 +826,18 @@ void *construct_node(enum node_type nt) {
  */
 void pretty_print(Node *n) {
     traverse_node(n);
+}
+
+
+int parenthesize(enum node_type nt) {
+
+    switch (nt) {
+        case PAREN_DIR_ABS_DECL:
+        case PAREN_EXPR:
+            return 1;
+        default:
+            return 0;
+    }
 }
 
 /*
@@ -847,7 +863,6 @@ void traverse_node(void *np) {
 
     switch (n->n_type) {
         case PAREN_EXPR:
-        case PAREN_DIR_DECL:
             traverse_node(n->children.child1);
             break;
         case ABSTRACT_DECLARATOR:
@@ -856,7 +871,9 @@ void traverse_node(void *np) {
             traverse_node(n->children.child1);
             traverse_node(n->children.child2);
             break;
-        case TYPE_SPEC_DECL:
+        case FUNCTION_DEF_SPEC:
+        case PARAMETER_DECL:
+        case TYPE_NAME:
             traverse_node(n->children.child1);
             fprintf(output, " ");
             traverse_node(n->children.child2);
@@ -877,7 +894,7 @@ void traverse_node(void *np) {
             traverse_node(n->children.child2);
             fprintf(output, ";");
             break;
-        case FUNCTION_DECL:
+        case FUNCTION_DECLARATOR:
             traverse_node(n->children.child1);
             fprintf(output, "(");
             traverse_node(n->children.child2);
@@ -949,13 +966,8 @@ void traverse_node(void *np) {
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.child2);
             break;
-        case TYPE_SPEC_ABS_DECL:
-            traverse_node(n->children.child1);
-            fprintf(output, " ");
-            traverse_node(n->children.child2);
-            break;
         case TYPE_SPECIFIER:
-            fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE]));
+            fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE_SPEC]));
             break;
         case POINTER:
             /* special case: pointers should be parenthesized, but when there */
@@ -989,6 +1001,7 @@ void traverse_node(void *np) {
             traverse_node(n->children.child1);
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
+        case SIMPLE_DECLARATOR:
         case IDENTIFIER:
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
@@ -1135,6 +1148,7 @@ void traverse_direct_abstract_declarator(Node *n) {
 void print_data_node(void *np) {
     Node *n = (Node *) np;
     switch (n->n_type) {
+        case SIMPLE_DECLARATOR:
         case IDENTIFIER:
             fprintf(output, "%s", n->data.str);
             break;
@@ -1158,17 +1172,6 @@ void print_data_node(void *np) {
 
 /* basic helper procs for pretty printing */
 
-int parenthesize(enum node_type nt) {
-
-    switch (nt) {
-        case PAREN_DIR_ABS_DECL:
-        case PAREN_DIR_DECL:
-        case PAREN_EXPR:
-            return 1;
-        default:
-            return 0;
-    }
-}
 
 void print_pointers(Node *n) {
     if (n == NULL || n->n_type != POINTER) {
