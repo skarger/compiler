@@ -347,16 +347,16 @@ postfix_expr : primary_expr
     | subscript_expr
     | function_call
     | postfix_expr INCREMENT
-        { $$ = create_node(POSTFIX_INCREMENT, INCREMENT, $1); }
+        { $$ = create_node(POSTFIX_EXPR, INCREMENT, $1); }
     | postfix_expr DECREMENT
-        { $$ = create_node(POSTFIX_DECREMENT, DECREMENT, $1); }
+        { $$ = create_node(POSTFIX_EXPR, DECREMENT, $1); }
     ;
 
-primary_expr : IDENTIFIER
-        { $$ = create_node( IDENTIFIER, yylval ); }
+primary_expr : identifier
+        { set_node_type($1, IDENTIFIER_EXPR); $$ = $1; }
     | constant
     | LEFT_PAREN expr RIGHT_PAREN
-        { $$ = create_node(PAREN_EXPR, $2); }
+        { $$ = $2; }
     ;
 
 constant : CHAR_CONSTANT
@@ -543,6 +543,38 @@ int main(int argc, char *argv[]) {
     return rv;
 }
 
+int parenthesize(enum node_type nt) {
+
+    switch (nt) {
+        case PAREN_DIR_ABS_DECL:
+
+        /* declarator */
+        case POINTER_DECLARATOR:
+        case SIMPLE_DECLARATOR:
+        case FUNCTION_DECLARATOR:
+        case ARRAY_DECLARATOR:
+
+        /* expr */
+        case CONDITIONAL_EXPR:
+        case BINARY_EXPR:
+        case CAST_EXPR:
+        case TYPE_NAME:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_EXPR:
+        case IDENTIFIER_EXPR:
+        case CHAR_CONSTANT:
+        case STRING_CONSTANT:
+        case NUMBER_CONSTANT:
+        case SUBSCRIPT_EXPR:
+        case FUNCTION_CALL:
+
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 void yyerror(char *s) {
   fprintf(stderr, "error: line %d: %s\n", yylineno, s);
 }
@@ -625,8 +657,7 @@ int has_operator(enum node_type nt) {
         case BINARY_EXPR:
         case UNARY_EXPR:
         case PREFIX_EXPR:
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
+        case POSTFIX_EXPR:
             return 1;
         default:
             return 0;
@@ -635,6 +666,8 @@ int has_operator(enum node_type nt) {
 
 int has_literal_data(enum node_type nt) {
     switch (nt) {
+        case SIMPLE_DECLARATOR:
+        case IDENTIFIER_EXPR:
         case IDENTIFIER:
         case NUMBER_CONSTANT:
         case CHAR_CONSTANT:
@@ -656,6 +689,8 @@ void set_type(Node *n, int type_spec) {
 void set_literal_data(Node *n, YYSTYPE data) {
     switch (n->n_type) {
         /* passed in data is yylval */
+        case SIMPLE_DECLARATOR:
+        case IDENTIFIER_EXPR:
         case IDENTIFIER:
             n->data.str =
                 strdup( ((struct String *) data)->str );
@@ -686,13 +721,11 @@ int number_of_children(enum node_type nt) {
         case COMPOUND_STATEMENT:
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
-        case PAREN_EXPR:
         case POINTER:
         case PAREN_DIR_ABS_DECL:
         case UNARY_EXPR:
         case PREFIX_EXPR:
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
+        case POSTFIX_EXPR:
             return 1;
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
@@ -823,23 +856,6 @@ void pretty_print(Node *n) {
     traverse_node(n);
 }
 
-
-int parenthesize(enum node_type nt) {
-
-    switch (nt) {
-        case PAREN_DIR_ABS_DECL:
-        case PAREN_EXPR:
-
-        case POINTER_DECLARATOR:
-        case SIMPLE_DECLARATOR:
-        case FUNCTION_DECLARATOR:
-        case ARRAY_DECLARATOR:
-            return 1;
-        default:
-            return 0;
-    }
-}
-
 /*
  * traverse_node
  * Purpose: Workhorse function for pretty_print. Does the actually traversal.
@@ -862,9 +878,6 @@ void traverse_node(void *np) {
     }
 
     switch (n->n_type) {
-        case PAREN_EXPR:
-            traverse_node(n->children.child1);
-            break;
         case ABSTRACT_DECLARATOR:
         case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
@@ -873,6 +886,7 @@ void traverse_node(void *np) {
             break;
         case FUNCTION_DEF_SPEC:
         case PARAMETER_DECL:
+        case CAST_EXPR:
         case TYPE_NAME:
             traverse_node(n->children.child1);
             fprintf(output, " ");
@@ -955,12 +969,6 @@ void traverse_node(void *np) {
             fprintf(output, " : ");
             traverse_node(n->children.child3);
             break;
-        case CAST_EXPR:
-            fprintf(output, "(");
-            traverse_node(n->children.child1);
-            fprintf(output, ") ");
-            traverse_node(n->children.child2);
-            break;
         case BINARY_EXPR:
             traverse_node(n->children.child1);
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
@@ -996,12 +1004,12 @@ void traverse_node(void *np) {
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             traverse_node(n->children.child1);
             break;
-        case POSTFIX_INCREMENT:
-        case POSTFIX_DECREMENT:
+        case POSTFIX_EXPR:
             traverse_node(n->children.child1);
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
         case SIMPLE_DECLARATOR:
+        case IDENTIFIER_EXPR:
         case IDENTIFIER:
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
@@ -1149,6 +1157,7 @@ void print_data_node(void *np) {
     Node *n = (Node *) np;
     switch (n->n_type) {
         case SIMPLE_DECLARATOR:
+        case IDENTIFIER_EXPR:
         case IDENTIFIER:
             fprintf(output, "%s", n->data.str);
             break;
