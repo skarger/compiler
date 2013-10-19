@@ -141,7 +141,7 @@ non_function_declarator : simple_declarator
 parameter_list : void_type_specifier
     | parameter_decl
     | parameter_list COMMA parameter_decl
-        { $$ = create_node(BINARY_EXPR, COMMA, $1, $3); }
+        { $$ = create_node(PARAMETER_LIST, $1, $3); }
     ;
 
 parameter_decl : integer_type_specifier declarator
@@ -700,6 +700,7 @@ int number_of_children(enum node_type nt) {
         case FUNCTION_DEF_SPEC:
         case DECL:
         case PARAMETER_DECL:
+        case PARAMETER_LIST:
         case FUNCTION_DECLARATOR:
         case ARRAY_DECLARATOR:
         case IF_THEN:
@@ -868,6 +869,7 @@ void traverse_node(void *np) {
             fprintf(output, "\n");
             traverse_node(n->children.child2);
             break;
+        case PARAMETER_LIST:
         case INIT_DECL_LIST:
             traverse_node(n->children.child1);
             fprintf(output, ", ");
@@ -1014,6 +1016,7 @@ int parenthesize(enum node_type nt) {
         case NUMBER_CONSTANT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
+
             return 1;
         default:
             return 0;
