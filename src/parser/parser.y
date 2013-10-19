@@ -481,9 +481,9 @@ void_type_specifier : VOID
     {  $$ = create_node(TYPE_SPECIFIER, VOID); }
 
 /* abstract_declarator and close children */
-abstract_declarator : pointer direct_abstract_declarator
-        { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2);  }
-    | pointer
+abstract_declarator : pointer
+    | pointer direct_abstract_declarator
+        { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2); }
     | direct_abstract_declarator
     ;
 
@@ -494,15 +494,15 @@ pointer : ASTERISK
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
-        { $$ = create_node(PAREN_DIR_ABS_DECL, $2); }
+        { $$ = $2; }
     | direct_abstract_declarator LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        { $$ = create_node(BRACKET_DIR_ABS_DECL, $1, $3); }
+        { $$ = create_node(DIR_ABS_DECL, $1, $3); }
     | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(BRACKET_DIR_ABS_DECL, $1, NULL); }
+        { $$ = create_node(DIR_ABS_DECL, $1, NULL); }
     | LEFT_BRACKET conditional_expr RIGHT_BRACKET
-        { $$ = create_node(BRACKET_DIR_ABS_DECL, NULL, $2); }
+        { $$ = create_node(DIR_ABS_DECL, NULL, $2); }
     | LEFT_BRACKET RIGHT_BRACKET
-        { $$ = create_node(BRACKET_DIR_ABS_DECL, NULL, NULL); }
+        { $$ = create_node(DIR_ABS_DECL, NULL, NULL); }
     ;
 
 
@@ -541,38 +541,6 @@ int main(int argc, char *argv[]) {
     }
 
     return rv;
-}
-
-int parenthesize(enum node_type nt) {
-
-    switch (nt) {
-        case PAREN_DIR_ABS_DECL:
-
-        /* declarator */
-        case POINTER_DECLARATOR:
-        case SIMPLE_DECLARATOR:
-        case FUNCTION_DECLARATOR:
-        case ARRAY_DECLARATOR:
-
-        /* expr */
-        case CONDITIONAL_EXPR:
-        case BINARY_EXPR:
-        case CAST_EXPR:
-        case TYPE_NAME:
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-        case POSTFIX_EXPR:
-        case IDENTIFIER_EXPR:
-        case CHAR_CONSTANT:
-        case STRING_CONSTANT:
-        case NUMBER_CONSTANT:
-        case SUBSCRIPT_EXPR:
-        case FUNCTION_CALL:
-
-            return 1;
-        default:
-            return 0;
-    }
 }
 
 void yyerror(char *s) {
@@ -722,7 +690,6 @@ int number_of_children(enum node_type nt) {
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
         case POINTER:
-        case PAREN_DIR_ABS_DECL:
         case UNARY_EXPR:
         case PREFIX_EXPR:
         case POSTFIX_EXPR:
@@ -730,8 +697,9 @@ int number_of_children(enum node_type nt) {
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
-
+        case FUNCTION_DEF_SPEC:
         case DECL:
+        case PARAMETER_DECL:
         case FUNCTION_DECLARATOR:
         case ARRAY_DECLARATOR:
         case IF_THEN:
@@ -741,13 +709,9 @@ int number_of_children(enum node_type nt) {
         case POINTER_DECLARATOR:
         case FUNCTION_CALL:
         case CAST_EXPR:
-
-        case PARAMETER_DECL:
-        case FUNCTION_DEF_SPEC:
         case TYPE_NAME:
-
         case ABSTRACT_DECLARATOR:
-        case BRACKET_DIR_ABS_DECL:
+        case DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
         case BINARY_EXPR:
             return 2;
@@ -878,6 +842,13 @@ void traverse_node(void *np) {
     }
 
     switch (n->n_type) {
+
+        case DIR_ABS_DECL:
+            traverse_node(n->children.child1);
+            fprintf(output, "[");
+            traverse_node(n->children.child2);
+            fprintf(output, "]");
+            break;
         case ABSTRACT_DECLARATOR:
         case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
@@ -978,14 +949,7 @@ void traverse_node(void *np) {
             fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE_SPEC]));
             break;
         case POINTER:
-            /* special case: pointers should be parenthesized, but when there */
-            /* are nested pointers there should just be one set of ()         */
-            /* surrounding the group                                          */
             print_pointers(n);
-            break;
-        case PAREN_DIR_ABS_DECL:
-        case BRACKET_DIR_ABS_DECL:
-            traverse_direct_abstract_declarator(n);
             break;
         case SUBSCRIPT_EXPR:
             traverse_node(n->children.child1);
@@ -1024,6 +988,35 @@ void traverse_node(void *np) {
 
     if (parenthesize(n->n_type)) {
         fprintf(output, ")");
+    }
+}
+
+int parenthesize(enum node_type nt) {
+
+    switch (nt) {
+        /* declarator */
+        case POINTER_DECLARATOR:
+        case SIMPLE_DECLARATOR:
+        case FUNCTION_DECLARATOR:
+        case ARRAY_DECLARATOR:
+
+        /* expr */
+        case CONDITIONAL_EXPR:
+        case BINARY_EXPR:
+        case CAST_EXPR:
+        case TYPE_NAME:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_EXPR:
+        case IDENTIFIER_EXPR:
+        case CHAR_CONSTANT:
+        case STRING_CONSTANT:
+        case NUMBER_CONSTANT:
+        case SUBSCRIPT_EXPR:
+        case FUNCTION_CALL:
+            return 1;
+        default:
+            return 0;
     }
 }
 
@@ -1114,34 +1107,7 @@ void traverse_conditional_statement(void *np) {
     }
 }
 
-/*
- * traverse_direct_abstract_declarator
- * Purpose: Helper function for traverse_node.
- *          Traverses direct_abstract_declarators.
- * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
- *          the children of np.
- * Returns: None
- * Side-effects: None
- */
-void traverse_direct_abstract_declarator(Node *n) {
-    switch (n->n_type) {
-        case PAREN_DIR_ABS_DECL:
-            traverse_node(n->children.child1);
-            break;
-        case BRACKET_DIR_ABS_DECL:
-            traverse_node(n->children.child1);
-            fprintf(output, "[");
-            traverse_node(n->children.child2);
-            fprintf(output, "]");
-            break;
-        default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "traverse_direct_abstract_declarator",
-                                yylineno);
-            break;
-    }
-}
+
 
 /*
  * print_data_node
