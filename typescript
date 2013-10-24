@@ -1,5 +1,5 @@
-Script started on Mon 14 Oct 2013 11:36:17 PM EDT
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m make parser
+Script started on Wed 23 Oct 2013 11:27:33 PM EDT
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m make parser
 flex  -o lex.yy.c src/lexer/lexer.lex
 yacc -d -o y.tab.c src/parser/parser.y
 rm -f ./.depend
@@ -7,8 +7,7 @@ gcc -pedantic -Wall -Wextra -MM y.tab.c lex.yy.c src/lexer/lexer.c src/utilities
 gcc -c y.tab.c
 gcc -c src/utilities/utilities.c
 gcc y.tab.o utilities.o -o parser
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m # run th [Ke parser on valid input
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m make parser[K[K[K[K[K[K[K[K[K[K[K./parser test_input_valid test_output
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m ./parser test_input_valid test_output
 
 
 
@@ -43,8 +42,7 @@ gcc y.tab.o utilities.o -o parser
 
 
 
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m # now run parser on its own output
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m ./parser test_output second_output
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m ./parser test_output second_output
 
 
 
@@ -79,40 +77,35 @@ gcc y.tab.o utilities.o -o parser
 
 
 
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m diff test_output second_output
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m wc test_output
- 149  359 1425 test_output
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m wc second_output
- 149  359 1425 second_output
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m # now catch a few errors
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m ./parser test_input_invalid
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m diff test_ouput [K[K[K[Kto[Kput second_output
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m ./parser test_input_invalid
 error: line 5: void declaration not permitted
-int main(void)
+int ((main)(void))
 {
-void x;
-return 0;
+void (x);
+return (0);
 }
 
 error: line 14: return type missing from function specifier
-f(void)
+((f)(void)) 
 {
-int i;
+int (i);
 }
 
 error: line 17: invalid function declarator
-int main
+int (main)
 {
-int arr[];
+int ((arr)[]);
 }
 
 error: line 21: return type missing from function specifier
-main(void)
+((main)(void)) 
 {
-return 0;
+return (0);
 }
 
 error: line 25: invalid function declarator
-int a
+int (a)
 {
 
 }
@@ -123,12 +116,12 @@ int (b)
 }
 
 error: line 31: invalid function declarator
-int c[10]
+int ((c)[(10)])
 {
 
 }
 
-[00mkarger@ice1[01;34m compiler [31m(paren) [00m$[00m exit
+[00mkarger@ice1[01;34m compiler [31m(master) [00m$[00m exit
 exit
 
-Script done on Mon 14 Oct 2013 11:37:32 PM EDT
+Script done on Wed 23 Oct 2013 11:28:45 PM EDT
