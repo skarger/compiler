@@ -482,6 +482,7 @@ void_type_specifier : VOID
 
 /* abstract_declarator and close children */
 abstract_declarator : pointer
+        { $$ = create_node(PTR_ABS_DECL, $1); }
     | pointer direct_abstract_declarator
         { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2); }
     | direct_abstract_declarator
@@ -690,6 +691,7 @@ int number_of_children(enum node_type nt) {
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
         case POINTER:
+        case PTR_ABS_DECL:
         case UNARY_EXPR:
         case PREFIX_EXPR:
         case POSTFIX_EXPR:
@@ -844,6 +846,9 @@ void traverse_node(void *np) {
 
     switch (n->n_type) {
 
+        case PTR_ABS_DECL:
+            traverse_node(n->children.child1);
+            break;
         case DIR_ABS_DECL:
             traverse_node(n->children.child1);
             fprintf(output, "[");
@@ -1016,6 +1021,10 @@ int parenthesize(enum node_type nt) {
         case NUMBER_CONSTANT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
+
+        case ABSTRACT_DECLARATOR:
+        case PTR_ABS_DECL:
+        case DIR_ABS_DECL:
 
             return 1;
         default:

@@ -107,6 +107,7 @@ int main(void)
 {
 char (*p);
 p = (int []) arr;
+i = (int *[]) j;
 }
 
 int main(int argc , char *argv[])

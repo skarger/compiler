@@ -52,7 +52,8 @@ enum node_type {
     TYPE_SPECIFIER,
     ABSTRACT_DECLARATOR,
     POINTER,
-    DIR_ABS_DECL
+    DIR_ABS_DECL,
+    PTR_ABS_DECL
 };
 
 typedef struct Node Node;
