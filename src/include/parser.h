@@ -14,7 +14,6 @@
  * semantic value that the parser ascertains.
  */
 enum node_type {
-
     FUNCTION_DEFINITION,
     FUNCTION_DEF_SPEC,
     DECL_OR_STMT_LIST,
@@ -139,6 +138,7 @@ void *construct_node(enum node_type nt);
 void initialize_children(Node *n);
 void append_children(Node *n, int num_children, ...);
 char *get_type_spec(enum data_type type);
+char *get_node_name(enum node_type nt);
 char *get_operator_value(int op);
 void handle_parser_error(enum parser_error e, char *data, int line);
 int parenthesize(enum node_type nt);

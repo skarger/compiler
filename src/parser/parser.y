@@ -685,6 +685,11 @@ int number_of_children(enum node_type nt) {
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
+        case IDENTIFIER:
+        case STRING_CONSTANT:
+        case NUMBER_CONSTANT:
+        case CHAR_CONSTANT:
+        case TYPE_SPECIFIER:
             return 0;
         case EXPRESSION_STATEMENT:
         case COMPOUND_STATEMENT:
@@ -837,7 +842,7 @@ void traverse_node(void *np) {
         return;
     }
     #ifdef DEBUG
-        printf("traverse_node: node type: %d\n", n->n_type);
+        printf("traverse_node: node type: %s\n", get_node_name(n->n_type));
     #endif
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
@@ -1264,6 +1269,71 @@ char *get_operator_value(int op) {
                                 "get_operator_value", yylineno);
             return "";
     }
+}
+
+
+/*
+ * get_node_name
+ *   Get the name of a node discovered by yyparse
+ *
+ * Parameters:
+ *   nt - enum node_type - the node type returned by yyparse
+ *
+ * Return: A pointer to the zero-terminated the node name.
+ * Side effects: none
+ *
+ */
+char *get_node_name(enum node_type nt) {
+    /* try for a lexer token */
+    char *tok = get_token_name(nt);
+    if (strlen(tok) > 0) {
+        return tok;
+    }
+
+    /* parser productions */
+    switch (nt) {
+    #define CASE_FOR(nt) case nt: return #nt
+        CASE_FOR(FUNCTION_DEFINITION);
+        CASE_FOR(FUNCTION_DEF_SPEC);
+        CASE_FOR(DECL_OR_STMT_LIST);
+        CASE_FOR(INIT_DECL_LIST);
+        CASE_FOR(DECL);
+        CASE_FOR(FUNCTION_DECLARATOR);
+        CASE_FOR(PARAMETER_LIST);
+        CASE_FOR(PARAMETER_DECL);
+        CASE_FOR(ARRAY_DECLARATOR);
+        CASE_FOR(EXPRESSION_STATEMENT);
+        CASE_FOR(LABELED_STATEMENT);
+        CASE_FOR(COMPOUND_STATEMENT);
+        CASE_FOR(POINTER_DECLARATOR);
+        CASE_FOR(SIMPLE_DECLARATOR);
+        CASE_FOR(IF_THEN);
+        CASE_FOR(IF_THEN_ELSE);
+        CASE_FOR(WHILE_STATEMENT);
+        CASE_FOR(DO_STATEMENT);
+        CASE_FOR(FOR_STATEMENT);
+        CASE_FOR(BREAK_STATEMENT);
+        CASE_FOR(CONTINUE_STATEMENT);
+        CASE_FOR(RETURN_STATEMENT);
+        CASE_FOR(GOTO_STATEMENT);
+        CASE_FOR(NULL_STATEMENT);
+        CASE_FOR(CONDITIONAL_EXPR);
+        CASE_FOR(BINARY_EXPR);
+        CASE_FOR(CAST_EXPR);
+        CASE_FOR(UNARY_EXPR);
+        CASE_FOR(PREFIX_EXPR);
+        CASE_FOR(POSTFIX_EXPR);
+        CASE_FOR(IDENTIFIER_EXPR);
+        CASE_FOR(SUBSCRIPT_EXPR);
+        CASE_FOR(FUNCTION_CALL);
+        CASE_FOR(TYPE_NAME);
+        CASE_FOR(TYPE_SPECIFIER);
+        CASE_FOR(ABSTRACT_DECLARATOR);
+        CASE_FOR(POINTER);
+        CASE_FOR(DIR_ABS_DECL);
+    #undef CASE_FOR
+        default: return "";
+  }
 }
 
 
