@@ -55,7 +55,13 @@ function_def_specifier : declarator
     | type_specifier function_declarator
         { $$ = create_node(FUNCTION_DEF_SPEC, $1, $2); }
     | type_specifier parenthesized_declarator
-        { $$ = create_node(FUNCTION_DEF_SPEC, $1, $2); }
+        {
+            Node *n = $2;
+            if (n->n_type != FUNCTION_DECLARATOR) {
+                yyerror("invalid function declarator"); yyerrok;
+            }
+            $$ = create_node(FUNCTION_DEF_SPEC, $1, $2);
+        }
     | type_specifier non_function_declarator
         {
             yyerror("invalid function declarator"); yyerrok;

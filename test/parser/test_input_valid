@@ -33,6 +33,7 @@ int f(char c) { int i; int j; }
 int f(int x) { char c, d; }
 int f(char *p) { ( i ); }
 int f(int a, int b) { int ( i ); }
+int (a)(char c) {;}
 
 int f(int a, char c) {
 /* this function decl is a scope error but is syntactically correct */
