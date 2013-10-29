@@ -7,8 +7,8 @@ YFLAGS += -d
 
 VPATH = src
 
-EXECS = lexer parser
-SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c
+EXECS = lexer parser symbol
+SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c src/symbol/symbol.c
 
 all : $(EXECS)
 
@@ -48,3 +48,8 @@ y.tab.o :
 parser : y.tab.o utilities.o
 	$(CC) y.tab.o utilities.o -o $@
 
+symbol.o :src/symbol/symbol-utils.c
+	$(CC) -c src/symbol/symbol-utils.c -o symbol.o
+
+symbol : symbol.o
+	$(CC) symbol.o -o $@
