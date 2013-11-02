@@ -6,3 +6,8 @@ lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
 utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h
 symbol.o: src/symbol/symbol.c src/symbol/../include/uthash.h
+symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/uthash.h \
+  src/symbol/../include/symbol.h src/symbol/../include/parse-tree.h \
+  src/symbol/../include/token.h src/symbol/../include/parse-tree.h
+symbol-test.o: src/symbol/symbol-test.c src/symbol/../include/symbol.h \
+  src/symbol/../include/parse-tree.h
