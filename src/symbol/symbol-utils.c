@@ -105,6 +105,17 @@ int main() {
     return 0;
 }
 
+
+/*
+ * transition_scope
+ *      update program scope in response to the given node
+ * parameters:
+ *  n - pointer to the Node prompting the call to this function
+ *  action - START or END, depending on what point of the parse tree traversal
+ *                         the caller is one with the given node
+ * returns: none
+ * side effects: none
+ */
 void transition_scope(Node *n, int action) {
     if (action == START) {
         scope_fsm_start(n);
@@ -113,7 +124,17 @@ void transition_scope(Node *n, int action) {
     }
 }
 
-
+/*
+ * scope_fsm_start
+ *      update finite state machine representing program scope
+ *      this method assumes that the caller just ENTERED the given node
+ *      while traversing the parse tree.
+ * parameters:
+ *  n - pointer to the Node prompting the call to this function
+ *
+ * returns: none
+ * side effects: updates internal representation of scope
+ */
 void scope_fsm_start(Node *n) {
     enum node_type nt = n->n_type;
     if (nt == FUNCTION_DEFINITION && get_state() == TOP_LEVEL) {
@@ -139,6 +160,17 @@ void scope_fsm_start(Node *n) {
 }
 
 
+/*
+ * scope_fsm_start
+ *      update finite state machine representing program scope
+ *      this method assumes that the caller just EXITED the given node
+ *      while traversing the parse tree.
+ * parameters:
+ *  n - pointer to the Node prompting the call to this function
+ *
+ * returns: none
+ * side effects: updates internal representation of scope
+ */
 void scope_fsm_end(Node *n) {
     enum node_type nt = n->n_type;
 
@@ -160,6 +192,17 @@ void scope_fsm_end(Node *n) {
     }
 }
 
+/*
+ * is_function_param
+ *  determine if given node is a function parameter
+ *
+ * Parameters:
+ *  n - pointer to the Node prompting the call to this function
+ *
+ * Return: 1 if it is a function parameter, 0 otherwise
+ * Side effects: none
+ *
+ */
 int is_function_param(Node *n) {
     return (n->n_type == PARAMETER_LIST ||  n->n_type == PARAMETER_DECL ||
            (n->n_type == TYPE_SPECIFIER && n->data.symbols[TYPE_SPEC] == VOID));
