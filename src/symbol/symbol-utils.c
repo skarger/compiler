@@ -105,8 +105,7 @@ int main() {
     return 0;
 }
 
-void transition(Node *n, enum node_type nt, int action) {
-    n->n_type = nt;
+void transition_scope(Node *n, int action) {
     if (action == START) {
         scope_fsm_start(n);
     } else {

@@ -40,7 +40,7 @@ void scope_fsm_start(Node *n);
 void scope_fsm_end(Node *n);
 int get_state();
 int get_scope();
-
+void transition_scope(Node *n, int action);
 
 
 int is_function_param(Node *);

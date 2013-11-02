@@ -8,10 +8,11 @@ void test_transition(Node *n, enum node_type nt, int action,
 void test_transition(Node *n, enum node_type nt, int action,
                     enum scope_state expected_state, int expected_scope) {
     int test_state, test_scope;
-    transition(n, nt, action);
+
+    n->n_type = nt;
+    transition_scope(n, action);
     enum scope_state cur = get_state();
     int scope = get_scope();
-
     printf("current state: %s scope: %d   ", get_scope_state_name(cur), get_scope());
 
     test_state = (cur == expected_state ? PASS : FAIL);
