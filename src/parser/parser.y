@@ -818,7 +818,7 @@ void set_node_type(Node *n, enum node_type nt) {
 
 
 
-/* Printing and Tree Traversal Functions */
+/* Printing Functions */
 
 /*
  * pretty_print
@@ -836,7 +836,7 @@ void pretty_print(void *np) {
         return;
     }
     #ifdef DEBUG
-        printf("pretty_print: node type: %s\n", get_node_name(n->n_type));
+        printf("\n/* pretty_print: node type: %s */\n", get_node_name(n->n_type));
     #endif
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
