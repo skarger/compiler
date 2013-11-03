@@ -1,8 +1,6 @@
-#include <stdio.h>
-#include "../include/uthash.h"
 #include "../include/symbol.h"
-#include "../include/token.h"
 #include "../include/parse-tree.h"
+#include "../include/token.h"
 
 /*
  * define a finite state machine to help with scope determination
@@ -86,41 +84,9 @@ int get_overloading_class() {
     return overloading_class;
 }
 
-int main() {
-    enum scope_state cur = get_state();
-    printf("current state: %s scope: %d\n", get_scope_state_name(cur), get_scope());
-
-    Node *n = malloc(sizeof(Node));
-
-    printf("function definition:\n");
-    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_LIST, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3, OTHER_NAMES);
-
-    test_transition(n, GOTO_STATEMENT, START, BLOCK, 3, STATEMENT_LABELS);
-    test_transition(n, IDENTIFIER, END, BLOCK, 3, OTHER_NAMES);
-
-    test_transition(n, COMPOUND_STATEMENT, END, BLOCK, 2, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, END, FUNCTION_BODY, 1, OTHER_NAMES);
-
-    test_transition(n, LABELED_STATEMENT, START, FUNCTION_BODY, 1, STATEMENT_LABELS);
-    test_transition(n, IDENTIFIER, END, FUNCTION_BODY, 1, OTHER_NAMES);
-
-    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
-
-
-    printf("function prototype:\n");
+void initialize_fsm() {
     set_state(TOP_LEVEL);
-    n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_DECL, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
-
-    return 0;
 }
-
 
 /*
  * transition_scope

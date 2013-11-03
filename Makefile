@@ -46,8 +46,9 @@ y.tab.c : src/parser/parser.y lex.yy.c
 
 y.tab.o :
 	$(CC) -c y.tab.c
-parser : y.tab.o utilities.o traverse.o
-	$(CC) y.tab.o utilities.o traverse.o -o $@
+
+parser : y.tab.o utilities.o traverse.o symbol-utils.o
+	$(CC) y.tab.o utilities.o traverse.o symbol-utils.o -o $@
 
 symbol-utils.o :src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c

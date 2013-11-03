@@ -29,15 +29,12 @@ enum scope_state {
 #define OTHER_NAMES 1
 #define STATEMENT_LABELS 2
 
-struct traverse_data {
-    int scope;
-};
-
 
 
 int get_state();
 int get_scope();
 int get_overloading_class();
+void initialize_fsm();
 void transition_scope(Node *n, int action);
 
 #endif
