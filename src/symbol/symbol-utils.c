@@ -4,26 +4,12 @@
 #include "../include/token.h"
 #include "../include/parse-tree.h"
 
-
 /*
  * define a finite state machine to help with scope determination
  * while traversing parse tree.
  */
 
 /*
-
-* states
-TOP_LEVEL
-FUNCTION_DEF
-FUNCTION_PARAMETERS
-FUNCTION_BODY
-FUNCTION_PROTOTYPE
-BLOCK
-
-* overloading classes
-OTHER_NAME
-STATEMENT_LABEL
-
 * transitions
 * Functions may be declared only at file scope.
 TOP_LEVEL -> FUNCTION_DEF
@@ -51,10 +37,25 @@ BLOCK -> BLOCK
     node: start of COMPOUND_STATEMENT
 BLOCK -> BLOCK
     node: end of COMPOUND_STATEMENT
+
+OTHER_NAMES -> STATEMENT_LABELS
+    node: ( LABELED_STATEMENT | GOTO_STATEMENT )
+STATEMENT_LABELS -> OTHER_NAMES
+    node: IDENTIFIER
+
 */
 
 static int current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
+static int overloading_class = OTHER_NAMES;
+
+/* helper functions */
+void scope_fsm_start(Node *n);
+void scope_fsm_end(Node *n);
+int is_function_param(Node *);
+int node_begins_statement_label(Node *n);
+char *get_scope_state_name(enum scope_state);
+char *get_overloading_class_name(int oc);
 
 static void set_state(int state) {
     current_state = state;
@@ -62,6 +63,10 @@ static void set_state(int state) {
 
 static void new_scope() {
     scope++;
+}
+
+static void set_overloading_class(int oc) {
+    overloading_class = oc;
 }
 
 static void previous_scope() {
@@ -77,6 +82,9 @@ int get_scope() {
     return scope;
 }
 
+int get_overloading_class() {
+    return overloading_class;
+}
 
 int main() {
     enum scope_state cur = get_state();
@@ -85,22 +93,30 @@ int main() {
     Node *n = malloc(sizeof(Node));
 
     printf("function definition:\n");
-    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0);
-    test_transition(n, PARAMETER_LIST, START, FUNCTION_PARAMETERS, 1);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1);
-    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2);
-    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3);
-    test_transition(n, COMPOUND_STATEMENT, END, BLOCK, 2);
-    test_transition(n, COMPOUND_STATEMENT, END, FUNCTION_BODY, 1);
-    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0);
+    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
+    test_transition(n, PARAMETER_LIST, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3, OTHER_NAMES);
+
+    test_transition(n, GOTO_STATEMENT, START, BLOCK, 3, STATEMENT_LABELS);
+    test_transition(n, IDENTIFIER, END, BLOCK, 3, OTHER_NAMES);
+
+    test_transition(n, COMPOUND_STATEMENT, END, BLOCK, 2, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, END, FUNCTION_BODY, 1, OTHER_NAMES);
+
+    test_transition(n, LABELED_STATEMENT, START, FUNCTION_BODY, 1, STATEMENT_LABELS);
+    test_transition(n, IDENTIFIER, END, FUNCTION_BODY, 1, OTHER_NAMES);
+
+    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
 
     printf("function prototype:\n");
     set_state(TOP_LEVEL);
     n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0);
-    test_transition(n, PARAMETER_DECL, START, FUNCTION_PARAMETERS, 1);
-    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0);
+    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
 
     return 0;
 }
@@ -156,12 +172,15 @@ void scope_fsm_start(Node *n) {
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
         new_scope();
         set_state(BLOCK);
+    } else if (node_begins_statement_label(n)) {
+        set_overloading_class(STATEMENT_LABELS);
     }
+
 }
 
 
 /*
- * scope_fsm_start
+ * scope_fsm_end
  *      update finite state machine representing program scope
  *      this method assumes that the caller just EXITED the given node
  *      while traversing the parse tree.
@@ -189,6 +208,8 @@ void scope_fsm_end(Node *n) {
         } else {
             set_state(BLOCK);
         }
+    } else  if (nt == IDENTIFIER && get_overloading_class() == STATEMENT_LABELS) {
+        set_overloading_class(OTHER_NAMES);
     }
 }
 
@@ -206,6 +227,10 @@ void scope_fsm_end(Node *n) {
 int is_function_param(Node *n) {
     return (n->n_type == PARAMETER_LIST ||  n->n_type == PARAMETER_DECL ||
            (n->n_type == TYPE_SPECIFIER && n->data.symbols[TYPE_SPEC] == VOID));
+}
+
+int node_begins_statement_label(Node *n) {
+    return (n->n_type == LABELED_STATEMENT || n->n_type == GOTO_STATEMENT);
 }
 
 
@@ -229,6 +254,16 @@ char *get_scope_state_name(enum scope_state ss) {
         CASE_FOR(FUNCTION_BODY);
         CASE_FOR(FUNCTION_PROTOTYPE);
         CASE_FOR(BLOCK);
+    #undef CASE_FOR
+        default: return "";
+  }
+}
+
+char *get_overloading_class_name(int oc) {
+    switch (oc) {
+    #define CASE_FOR(oc) case oc: return #oc
+        CASE_FOR(OTHER_NAMES);
+        CASE_FOR(STATEMENT_LABELS);
     #undef CASE_FOR
         default: return "";
   }

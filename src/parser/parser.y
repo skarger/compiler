@@ -5,6 +5,7 @@
 #include "src/include/lexer.h"
 #include "src/include/parser.h"
 #include "src/include/utilities.h"
+#include "src/include/traverse.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H
@@ -34,9 +35,9 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 translation_unit : top_level_decl
-        { pretty_print($1); printf("\n"); }
+        { pretty_print($1); printf("\n"); traverse_node($1); }
     | translation_unit top_level_decl
-        { pretty_print($2); printf("\n"); }
+        { pretty_print($2); printf("\n"); traverse_node($2); }
     ;
 
 top_level_decl : decl
