@@ -825,30 +825,18 @@ void set_node_type(Node *n, enum node_type nt) {
  * Purpose: Traverse the parse tree rooted at the passed node and print
  *          out C syntax appropriately.
  * Parameters:
- *  n       Node * The node to start traversing from, generally a top_level_decl
- * Returns: None
- * Side-effects: None
- */
-void pretty_print(Node *n) {
-    traverse_node(n);
-}
-
-/*
- * traverse_node
- * Purpose: Workhorse function for pretty_print. Does the actually traversal.
- * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
+ *  np      void * The node to start traversing from. Recursively prints
  *          the children of np.
  * Returns: None
  * Side-effects: None
  */
-void traverse_node(void *np) {
+void pretty_print(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
     }
     #ifdef DEBUG
-        printf("traverse_node: node type: %s\n", get_node_name(n->n_type));
+        printf("pretty_print: node type: %s\n", get_node_name(n->n_type));
     #endif
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
@@ -856,76 +844,76 @@ void traverse_node(void *np) {
 
     switch (n->n_type) {
         case DIR_ABS_DECL:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, "]");
             break;
         case ABSTRACT_DECLARATOR:
         case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child1);
+            pretty_print(n->children.child2);
             break;
         case FUNCTION_DEF_SPEC:
         case PARAMETER_DECL:
         case CAST_EXPR:
         case TYPE_NAME:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case DECL_OR_STMT_LIST:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "\n");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case PARAMETER_LIST:
         case INIT_DECL_LIST:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, ", ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case DECL:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, ";");
             break;
         case FUNCTION_DECLARATOR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "(");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, ")");
             break;
         case ARRAY_DECLARATOR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, "]");
             break;
         case EXPRESSION_STATEMENT:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, ";");
             break;
         case LABELED_STATEMENT:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " : ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case COMPOUND_STATEMENT:
             fprintf(output, "\n{\n");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "\n}\n");
             break;
         case IF_THEN:
         case IF_THEN_ELSE:
-            traverse_conditional_statement(n);
+            print_conditional_statement(n);
             break;
         case WHILE_STATEMENT:
         case DO_STATEMENT:
         case FOR_STATEMENT:
-            traverse_iterative_statement(n);
+            print_iterative_statement(n);
             break;
         case BREAK_STATEMENT:
             fprintf(output, "break;");
@@ -935,28 +923,28 @@ void traverse_node(void *np) {
             break;
         case RETURN_STATEMENT:
             fprintf(output, "return ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, ";");
             break;
         case GOTO_STATEMENT:
             fprintf(output, "goto ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, ";");
             break;
         case NULL_STATEMENT:
             fprintf(output, ";");
             break;
         case CONDITIONAL_EXPR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ? ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, " : ");
-            traverse_node(n->children.child3);
+            pretty_print(n->children.child3);
             break;
         case BINARY_EXPR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case TYPE_SPECIFIER:
             fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE_SPEC]));
@@ -965,24 +953,24 @@ void traverse_node(void *np) {
             print_pointers(n);
             break;
         case SUBSCRIPT_EXPR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "[");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, "]");
             break;
         case FUNCTION_CALL:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "(");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, ")");
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             break;
         case POSTFIX_EXPR:
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
             break;
         case SIMPLE_DECLARATOR:
@@ -994,7 +982,7 @@ void traverse_node(void *np) {
             print_data_node(n);
             break;
         default:
-            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"traverse_node",
+            handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,"pretty_print",
                                 yylineno);
             break;
     }
@@ -1038,16 +1026,16 @@ int parenthesize(enum node_type nt) {
 }
 
 /*
- * traverse_iterative_statement
- * Purpose: Helper function for traverse_node.
- *          Traverses iterative statements.
+ * print_iterative_statement
+ * Purpose: Helper function for pretty_print.
+ *          Prints iterative statements.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
+ *  np      void * The node to start traversing from. Recursively prints
  *          the children of np.
  * Returns: None
  * Side-effects: None
  */
-void traverse_iterative_statement(void *np) {
+void print_iterative_statement(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
@@ -1055,30 +1043,30 @@ void traverse_iterative_statement(void *np) {
     switch (n->n_type) {
         case WHILE_STATEMENT:
             fprintf(output, "while ( ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             break;
         case DO_STATEMENT:
             fprintf(output, "do ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " while ( ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, " );");
             break;
         case FOR_STATEMENT:
             fprintf(output, "for ( ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, "; ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, "; ");
-            traverse_node(n->children.child3);
+            pretty_print(n->children.child3);
             fprintf(output, " ) ");
-            traverse_node(n->children.child4);
+            pretty_print(n->children.child4);
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "traverse_iterative_statement",
+                                "print_iterative_statement",
                                 yylineno);
             break;
 
@@ -1086,16 +1074,16 @@ void traverse_iterative_statement(void *np) {
 }
 
 /*
- * traverse_conditional_statement
- * Purpose: Helper function for traverse_node.
- *          Traverses conditional statements.
+ * print_conditional_statement
+ * Purpose: Helper function for pretty_print.
+ *          Prints conditional statements.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
+ *  np      void * The node to start traversing from. Recursively prints
  *          the children of np.
  * Returns: None
  * Side-effects: None
  */
-void traverse_conditional_statement(void *np) {
+void print_conditional_statement(void *np) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
@@ -1103,22 +1091,22 @@ void traverse_conditional_statement(void *np) {
     switch (n->n_type) {
         case IF_THEN:
             fprintf(output, "if ( ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, "");
             break;
         case IF_THEN_ELSE:
             fprintf(output, "if ( ");
-            traverse_node(n->children.child1);
+            pretty_print(n->children.child1);
             fprintf(output, " ) ");
-            traverse_node(n->children.child2);
+            pretty_print(n->children.child2);
             fprintf(output, " else ");
-            traverse_node(n->children.child3);
+            pretty_print(n->children.child3);
             break;
         default:
             handle_parser_error(PE_UNRECOGNIZED_NODE_TYPE,
-                                "traverse_conditional_statement",
+                                "print_conditional_statement",
                                 yylineno);
             break;
     }
@@ -1128,9 +1116,9 @@ void traverse_conditional_statement(void *np) {
 
 /*
  * print_data_node
- * Purpose: Helper function for traverse_node.
- *          Traverses nodes with literal data, i.e. strings, chars, and numbers.
- *          Also traverses identifier nodes since they have literal names.
+ * Purpose: Helper function for pretty_print.
+ *          Prints nodes with literal data, i.e. strings, chars, and numbers.
+ *          Also prints identifier nodes since they have literal names.
  * Parameters:
  *  np      void * The node to start traversing from.
  * Returns: None

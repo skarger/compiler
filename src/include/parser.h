@@ -24,12 +24,18 @@ enum parser_error {
 /* function declarations */
 
 /* tree traversal */
-void pretty_print(Node *n);
-void traverse_node(void *np);
+void pretty_print(void *np);
 void print_data_node(void *np);
+void print_direct_abstract_declarator(Node *n);
+void print_conditional_statement(void *np);
+void print_iterative_statement(void *np);
+
+/*
+void traverse_node(void *np);
 void traverse_direct_abstract_declarator(Node *n);
 void traverse_conditional_statement(void *np);
 void traverse_iterative_statement(void *np);
+*/
 
 /* node creation */
 void *create_node(enum node_type nt, ...);
