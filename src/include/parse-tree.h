@@ -1,7 +1,4 @@
-/*
- * contains data definitions for parse tree nodes.
- */
-
+/* contains data definitions for parse tree nodes. */
 #ifndef PARSE_TREE_H
 #define PARSE_TREE_H
 

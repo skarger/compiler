@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/symbol.h"
-#include "../include/token.h"
+#include "../../y.tab.h"
 
 char *get_test_result_name(int res);
 char *get_overloading_class_name(int oc);
@@ -47,7 +47,7 @@ int main() {
 
     printf("function definition:\n");
     test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_LIST, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_LIST, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3, OTHER_NAMES);
@@ -68,7 +68,14 @@ int main() {
     initialize_fsm();
     n->n_type = TOP_LEVEL;
     test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_DECL, START, FUNCTION_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, START, FUNCTION_PROTO_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
+
+    printf("function prototype:\n");
+    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
+    /* set the type to void to make the node match a possible function param */
+    n->data.symbols[TYPE_SPEC] = VOID;
+    test_transition(n, TYPE_SPECIFIER, START, FUNCTION_PROTO_PARAMETERS, 1, OTHER_NAMES);
     test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
 
     return 0;

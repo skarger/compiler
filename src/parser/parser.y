@@ -216,7 +216,7 @@ other_open_statement: labeled_statement
     ;
 
 labeled_statement : identifier COLON statement
-        { create_node(LABELED_STATEMENT, $1, $3); }
+        { $$ = create_node(LABELED_STATEMENT, $1, $3); }
     ;
 
 while_statement : WHILE LEFT_PAREN expr RIGHT_PAREN statement

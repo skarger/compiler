@@ -9,12 +9,14 @@
 enum scope_state {
     TOP_LEVEL,
     FUNCTION_DEF,
-    FUNCTION_PARAMETERS,
+    FUNCTION_DEF_PARAMETERS,
     FUNCTION_BODY,
     FUNCTION_PROTOTYPE,
+    FUNCTION_PROTO_PARAMETERS,
     BLOCK
 };
 
+#define TOP_LEVEL_SCOPE 0
 #define FUNCTION_BODY_SCOPE 1
 
 /* indicate whether we are starting or ending the traversal of a node */

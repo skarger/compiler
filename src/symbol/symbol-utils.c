@@ -1,6 +1,8 @@
+#include <stdio.h>
 #include "../include/symbol.h"
 #include "../include/parse-tree.h"
-#include "../include/token.h"
+#include "../../y.tab.h"
+
 
 /*
  * define a finite state machine to help with scope determination
@@ -12,18 +14,18 @@
 * Functions may be declared only at file scope.
 TOP_LEVEL -> FUNCTION_DEF
     node: FUNCTION_DEFINITION
-FUNCTION_DEF -> FUNCTION_PARAMETERS
+FUNCTION_DEF -> FUNCTION_DEF_PARAMETERS
     node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER == VOID)
-FUNCTION_PARAMETERS -> FUNCTION_BODY
+FUNCTION_DEF_PARAMETERS -> FUNCTION_BODY
     node: start of COMPOUND_STATEMENT
 FUNCTION_BODY -> TOP_LEVEL
     node: end of COMPOUND_STATEMENT
 
 TOP_LEVEL -> FUNCTION_PROTOTYPE
     node: FUNCTION_DECLARATOR
-FUNCTION_PROTOTYPE -> FUNCTION_PARAMETERS
+FUNCTION_PROTOTYPE -> FUNCTION_PROTO_PARAMETERS
     node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER == VOID)
-FUNCTION_PARAMETERS -> TOP_LEVEL
+FUNCTION_PROTO_PARAMETERS -> TOP_LEVEL
     node: end of FUNCTION_DECLARATOR
 
 FUNCTION_BODY -> BLOCK
@@ -63,6 +65,10 @@ static void new_scope() {
     scope++;
 }
 
+static void set_scope(int s) {
+    scope = s;
+}
+
 static void set_overloading_class(int oc) {
     overloading_class = oc;
 }
@@ -86,6 +92,8 @@ int get_overloading_class() {
 
 void initialize_fsm() {
     set_state(TOP_LEVEL);
+    set_scope(TOP_LEVEL_SCOPE);
+    set_overloading_class(OTHER_NAMES);
 }
 
 /*
@@ -119,19 +127,20 @@ void transition_scope(Node *n, int action) {
  */
 void scope_fsm_start(Node *n) {
     enum node_type nt = n->n_type;
+
     if (nt == FUNCTION_DEFINITION && get_state() == TOP_LEVEL) {
         set_state(FUNCTION_DEF);
     } else if (is_function_param(n) && get_state() == FUNCTION_DEF) {
         new_scope();
-        set_state(FUNCTION_PARAMETERS);
-    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_PARAMETERS) {
+        set_state(FUNCTION_DEF_PARAMETERS);
+    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_DEF_PARAMETERS) {
         set_state(FUNCTION_BODY);
-        /* already entered the new scope for FUNCTION_PARAMETERS */
+        /* already entered the new scope for FUNCTION_DEF_PARAMETERS */
     } else if (nt == FUNCTION_DECLARATOR && get_state() == TOP_LEVEL) {
         set_state(FUNCTION_PROTOTYPE);
     } else if (is_function_param(n) && get_state() == FUNCTION_PROTOTYPE) {
         new_scope();
-        set_state(FUNCTION_PARAMETERS);
+        set_state(FUNCTION_PROTO_PARAMETERS);
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
         new_scope();
         set_state(BLOCK);
@@ -163,7 +172,7 @@ void scope_fsm_end(Node *n) {
         /* end of function definition */
         previous_scope();
         set_state(TOP_LEVEL);
-    } else if (FUNCTION_DECLARATOR && get_state() == FUNCTION_PARAMETERS) {
+    } else if (FUNCTION_DECLARATOR && get_state() == FUNCTION_PROTO_PARAMETERS) {
         /* end of function prototype */
         previous_scope();
         set_state(TOP_LEVEL);
@@ -216,7 +225,8 @@ char *get_scope_state_name(enum scope_state ss) {
     #define CASE_FOR(ss) case ss: return #ss
         CASE_FOR(TOP_LEVEL);
         CASE_FOR(FUNCTION_DEF);
-        CASE_FOR(FUNCTION_PARAMETERS);
+        CASE_FOR(FUNCTION_DEF_PARAMETERS);
+        CASE_FOR(FUNCTION_PROTO_PARAMETERS);
         CASE_FOR(FUNCTION_BODY);
         CASE_FOR(FUNCTION_PROTOTYPE);
         CASE_FOR(BLOCK);
