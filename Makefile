@@ -50,10 +50,10 @@ y.tab.o :
 parser : y.tab.o utilities.o traverse.o symbol-utils.o
 	$(CC) y.tab.o utilities.o traverse.o symbol-utils.o -o $@
 
-symbol-utils.o :src/symbol/symbol-utils.c
+symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
 
-symbol-test.o :src/symbol/symbol-test.c
+symbol-test.o : src/symbol/symbol-test.c
 	$(CC) -c src/symbol/symbol-test.c
 
 symbol : symbol-utils.o symbol-test.o
