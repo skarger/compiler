@@ -56,8 +56,8 @@ symbol-utils.o : src/symbol/symbol-utils.c
 symbol-test.o : src/symbol/symbol-test.c
 	$(CC) -c src/symbol/symbol-test.c
 
-symbol : symbol-utils.o symbol-test.o
-	$(CC) symbol-utils.o symbol-test.o -o $@
+symbol : symbol-utils.o symbol-test.o utilities.o
+	$(CC) symbol-utils.o symbol-test.o utilities.o -o $@
 
 traverse.o : src/symbol/traverse.c
 	$(CC) -c src/symbol/traverse.c

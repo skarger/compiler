@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include "../include/symbol.h"
 #include "../include/parse-tree.h"
@@ -263,8 +262,7 @@ char *get_overloading_class_name(int oc) {
 /* symbol table */
 SymbolTable *create_symbol_table() {
     SymbolTable *st;
-    /*util_emalloc( (void **) &st, sizeof(SymbolTable));*/
-    /*st = malloc(sizeof(SymbolTable));*/
+    util_emalloc( (void **) &st, sizeof(SymbolTable));
     /* initialize */
     set_st_scope(st, TOP_LEVEL_SCOPE);
     set_st_symbols(st, NULL);

@@ -2,10 +2,10 @@
  * Definitions, enumerations, structures and function prototypes
  * used for utilities used in multiple compiler components.
  */
-#include <sys/types.h>
-
 #ifndef UTILITIES_H
 #define UTILITIES_H
+
+#include <sys/types.h>
 
 enum util_error {
     UE_SUCCESS = 0,
