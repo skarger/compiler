@@ -61,3 +61,7 @@ symbol : symbol-utils.o symbol-test.o utilities.o
 
 traverse.o : src/symbol/traverse.c
 	$(CC) -c src/symbol/traverse.c
+
+test-symbol : parser
+	./test/symbol/run-test-symbol
+

@@ -7,7 +7,10 @@
 #define DEBUG
 #undef  DEBUG
 
+#define PRETTY_PRINT
+#undef  PRETTY_PRINT
 
+#define TRAVERSE
 
 /*
  * Errors that are caught in the parsing step.

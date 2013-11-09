@@ -28,11 +28,15 @@ void traverse_node(void *np) {
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START);
-    printf("nt: %s, b %d", get_node_name(n->n_type), should_create_new_st());
+
+    #ifdef DEBUG
     if (should_create_new_st()) {
-        printf("should create new st\n", get_node_name(n->n_type));
+        fprintf(output, "/* node type: %s, "
+            "creating a new symbol table at scope: %d */\n",
+            get_node_name(n->n_type), get_scope());
         create_symbol_table();
     }
+    #endif
 
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:

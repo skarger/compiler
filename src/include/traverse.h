@@ -1,4 +1,6 @@
 
+#define DEBUG
+
 #include "../include/parse-tree.h"
 
 /* tree traversal */

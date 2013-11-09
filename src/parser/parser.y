@@ -36,9 +36,23 @@ void yyerror(char *s);
 
 %%      /*  beginning  of  rules  section  */
 translation_unit : top_level_decl
-        { pretty_print($1); printf("\n"); traverse_node($1); }
+        {
+            #ifdef PRETTY_PRINT
+            pretty_print($1);
+            #endif
+            #ifdef TRAVERSE
+            traverse_node($1);
+            #endif
+        }
     | translation_unit top_level_decl
-        { pretty_print($2); printf("\n"); traverse_node($2); }
+        {
+            #ifdef PRETTY_PRINT
+            pretty_print($2);
+            #endif
+            #ifdef TRAVERSE
+            traverse_node($2);
+            #endif
+        }
     ;
 
 top_level_decl : decl
@@ -518,10 +532,11 @@ direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
 %%      /*  start  of  programs  */
 #include "lex.yy.c"
 
-static FILE *output;
+FILE *output;
 int main(int argc, char *argv[]) {
     extern FILE *yyin;
     FILE *input;
+
 
     int rv;
 
@@ -842,8 +857,10 @@ void pretty_print(void *np) {
     if (n == NULL) {
         return;
     }
+    #ifdef PRETTY_PRINT
     #ifdef DEBUG
         printf("\n/* pretty_print: node type: %s */\n", get_node_name(n->n_type));
+    #endif
     #endif
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
