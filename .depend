@@ -1,7 +1,8 @@
 y.tab.o: y.tab.c src/include/lexer.h src/include/literal.h \
   src/include/parser.h src/include/parse-tree.h src/include/utilities.h \
   src/include/traverse.h src/include/../include/parse-tree.h \
-  src/include/symbol.h lex.yy.c y.tab.h
+  src/include/../include/symbol.h src/include/../include/parse-tree.h \
+  src/include/../include/literal.h src/include/symbol.h lex.yy.c y.tab.h
 lex.yy.o: lex.yy.c src/include/lexer.h src/include/literal.h y.tab.h
 lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
   src/lexer/../include/literal.h src/lexer/../../y.tab.h

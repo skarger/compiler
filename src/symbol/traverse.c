@@ -6,8 +6,21 @@
 #include "../include/traverse.h"
 #include "../include/parse-tree.h"
 
-#include "../include/symbol.h"
 #include "../../y.tab.h"
+
+/*
+ * start_traversal
+ * Purpose: Kick off traversal of parse tree. Meant for parser to call.
+ * Parameters:
+ *  np      void * The node to start traversing from. Recursively traverses
+ *          the children of np.
+ * Returns: None
+ * Side-effects: None
+ */
+void start_traversal(void *np) {
+    traverse_node(np, NULL);
+}
+
 
 /*
  * traverse_node
@@ -16,15 +29,16 @@
  * Parameters:
  *  np      void * The node to start traversing from. Recursively traverses
  *          the children of np.
+ *  data_st traverse_data_ST * symbol table related data
+            to carry through traversals
  * Returns: None
  * Side-effects: None
  */
-void traverse_node(void *np) {
+void traverse_node(void *np, traverse_data_ST *data_st) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
     }
-    /* printf("traverse_node: node type: %s\n", get_node_name(n->n_type)); */
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START);
@@ -34,7 +48,12 @@ void traverse_node(void *np) {
         fprintf(output, "/* node type: %s, "
             "creating a new symbol table at scope: %d */\n",
             get_node_name(n->n_type), get_scope());
-        create_symbol_table();
+
+        SymbolTable *st = create_symbol_table();
+
+        /* find or create the scope set that this ST should live in */
+        /* navigate to end of the scope set and insert this ST */
+        /* insert_symbol_table(tdst->stc, st); */
     }
     #endif
 
@@ -42,8 +61,8 @@ void traverse_node(void *np) {
         case FUNCTION_DEF_SPEC:
         case DECL:
             /* add_symbol(); */
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
             break;
         case DIR_ABS_DECL:
         case ABSTRACT_DECLARATOR:
@@ -60,51 +79,51 @@ void traverse_node(void *np) {
         case LABELED_STATEMENT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
             break;
         case EXPRESSION_STATEMENT:
         case COMPOUND_STATEMENT:
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
-            traverse_node(n->children.child1);
+            traverse_node(n->children.child1, data_st);
             break;
         case IF_THEN:
         case IF_THEN_ELSE:
-            traverse_conditional_statement(n);
+            traverse_conditional_statement(n, data_st);
             break;
         case WHILE_STATEMENT:
         case DO_STATEMENT:
         case FOR_STATEMENT:
-            traverse_iterative_statement(n);
+            traverse_iterative_statement(n, data_st);
             break;
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
             break;
         case CONDITIONAL_EXPR:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
-            traverse_node(n->children.child3);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
+            traverse_node(n->children.child3, data_st);
             break;
         case BINARY_EXPR:
-            traverse_node(n->children.child1);
+            traverse_node(n->children.child1, data_st);
             /* n->data.symbols[OPERATOR] */
-            traverse_node(n->children.child2);
+            traverse_node(n->children.child2, data_st);
             break;
         case TYPE_SPECIFIER:
             /* printf("ts %d\n", n->data.symbols[TYPE_SPEC]); */
             break;
         case POINTER:
-            traverse_pointers(n);
+            traverse_pointers(n, data_st);
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
             /* n->data.symbols[OPERATOR] */
-            traverse_node(n->children.child1);
+            traverse_node(n->children.child1, data_st);
             break;
         case POSTFIX_EXPR:
-            traverse_node(n->children.child1);
+            traverse_node(n->children.child1, data_st);
             /* n->data.symbols[OPERATOR] */
             break;
         case SIMPLE_DECLARATOR:
@@ -133,7 +152,7 @@ void traverse_node(void *np) {
  * Returns: None
  * Side-effects: None
  */
-void traverse_iterative_statement(void *np) {
+void traverse_iterative_statement(void *np, traverse_data_ST *data_st) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
@@ -141,14 +160,14 @@ void traverse_iterative_statement(void *np) {
     switch (n->n_type) {
         case WHILE_STATEMENT:
         case DO_STATEMENT:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
             break;
         case FOR_STATEMENT:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
-            traverse_node(n->children.child3);
-            traverse_node(n->children.child4);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
+            traverse_node(n->children.child3, data_st);
+            traverse_node(n->children.child4, data_st);
             break;
         default:
             break;
@@ -166,27 +185,27 @@ void traverse_iterative_statement(void *np) {
  * Returns: None
  * Side-effects: None
  */
-void traverse_conditional_statement(void *np) {
+void traverse_conditional_statement(void *np, traverse_data_ST *data_st) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
     }
     switch (n->n_type) {
         case IF_THEN:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
             break;
         case IF_THEN_ELSE:
-            traverse_node(n->children.child1);
-            traverse_node(n->children.child2);
-            traverse_node(n->children.child3);
+            traverse_node(n->children.child1, data_st);
+            traverse_node(n->children.child2, data_st);
+            traverse_node(n->children.child3, data_st);
             break;
         default:
             break;
     }
 }
 
-void traverse_pointers(void *np) {
+void traverse_pointers(void *np, traverse_data_ST *data_st) {
     Node *n = (Node *) np;
     if (n == NULL || n->n_type != POINTER) {
         return;

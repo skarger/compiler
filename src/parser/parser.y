@@ -41,7 +41,7 @@ translation_unit : top_level_decl
             pretty_print($1);
             #endif
             #ifdef TRAVERSE
-            traverse_node($1);
+            start_traversal($1);
             #endif
         }
     | translation_unit top_level_decl
@@ -50,7 +50,7 @@ translation_unit : top_level_decl
             pretty_print($2);
             #endif
             #ifdef TRAVERSE
-            traverse_node($2);
+            start_traversal($2);
             #endif
         }
     ;
@@ -556,7 +556,7 @@ int main(int argc, char *argv[]) {
     yyin = input;
 
     /* do the work */
-    SymbolTable *st = create_symbol_table();
+    SymbolTableContainer *symbol_table_container = create_st_container();
 
     rv = yyparse();
 
