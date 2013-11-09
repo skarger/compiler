@@ -6,6 +6,7 @@
 #include "src/include/parser.h"
 #include "src/include/utilities.h"
 #include "src/include/traverse.h"
+#include "src/include/symbol.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H
@@ -540,7 +541,7 @@ int main(int argc, char *argv[]) {
     yyin = input;
 
     /* do the work */
-    struct symbol_table *st = create_symbol_table();
+    SymbolTable *st = create_symbol_table();
 
     rv = yyparse();
 
