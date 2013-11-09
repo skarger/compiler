@@ -1,6 +1,9 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "../include/symbol.h"
 #include "../include/parse-tree.h"
+#include "../include/literal.h"
+#include "../include/utilities.h"
 #include "../../y.tab.h"
 
 
@@ -49,6 +52,10 @@ static int current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
 
+/* upon entering a new scope level we should create a new symbol table */
+/* this may occur more than once at that scope level (siblings) */
+static enum Boolean create_new_st = TRUE;
+
 /* helper functions */
 void scope_fsm_start(Node *n);
 void scope_fsm_end(Node *n);
@@ -63,6 +70,7 @@ static void set_state(int state) {
 
 static void new_scope() {
     scope++;
+    create_new_st = TRUE;
 }
 
 static void set_scope(int s) {
@@ -77,6 +85,9 @@ static void previous_scope() {
     scope--;
 }
 
+static void complete_st_creation() {
+    create_new_st = FALSE;
+}
 
 int get_state() {
     return current_state;
@@ -88,6 +99,10 @@ int get_scope() {
 
 int get_overloading_class() {
     return overloading_class;
+}
+
+enum Boolean should_create_new_st() {
+    return create_new_st;
 }
 
 void initialize_fsm() {
@@ -245,4 +260,45 @@ char *get_overloading_class_name(int oc) {
   }
 }
 
+/* symbol table */
+SymbolTable *create_symbol_table() {
+    SymbolTable *st;
+    /*util_emalloc( (void **) &st, sizeof(SymbolTable));*/
+    /*st = malloc(sizeof(SymbolTable));*/
+    /* initialize */
+    set_st_scope(st, TOP_LEVEL_SCOPE);
+    set_st_symbols(st, NULL);
+    complete_st_creation();
+    return st;
+}
+
+void set_st_scope(SymbolTable *st, int scope) {
+    st->scope = scope;
+}
+
+void set_st_symbols(SymbolTable *st, struct symbol *s) {
+    st->symbols = s;
+}
+
+/*
+ * handle_symbol_error
+ * Purpose:
+ *      Handle an error caught in the calling method.
+ * Parameters:
+ *      e - the error value.
+ *      data - string that will be inserted into the message printed to stderr
+ *      line - line number causing error, if applicable (e.g. from input source)
+ * Returns:
+ *      None
+ * Side effects:
+ *      May terminate program depending on error type
+ */
+void handle_symbol_error(enum symbol_error e, char *data, int line) {
+    switch (e) {
+        case STE_SUCCESS:
+            return;
+        default:
+            return;
+    }
+}
 

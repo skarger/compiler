@@ -9,7 +9,9 @@ utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h
 symbol.o: src/symbol/symbol.c src/symbol/../include/uthash.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/parse-tree.h \
-  src/symbol/../../y.tab.h
+  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
+  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
+  src/symbol/../include/utilities.h src/symbol/../../y.tab.h
 symbol-test.o: src/symbol/symbol-test.c src/symbol/../include/symbol.h \
-  src/symbol/../include/parse-tree.h src/symbol/../../y.tab.h
+  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
+  src/symbol/../../y.tab.h

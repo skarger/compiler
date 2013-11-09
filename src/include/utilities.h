@@ -4,6 +4,9 @@
  */
 #include <sys/types.h>
 
+#ifndef UTILITIES_H
+#define UTILITIES_H
+
 enum util_error {
     UE_SUCCESS = 0,
     UE_MALLOC = -1,
@@ -11,3 +14,5 @@ enum util_error {
 
 void util_handle_error(enum util_error e, char *data);
 void util_emalloc(void **ptr, size_t n);
+
+#endif

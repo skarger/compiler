@@ -539,8 +539,13 @@ int main(int argc, char *argv[]) {
 
     yyin = input;
 
+    /* do the work */
+    struct symbol_table *st = create_symbol_table();
+
     rv = yyparse();
 
+
+    /* cleanup */
     if (output != stdout) {
         fclose(output);
     }
