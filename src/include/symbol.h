@@ -39,6 +39,7 @@ typedef struct SymbolTable SymbolTable;
 
 struct SymbolTableContainer {
     SymbolTable *symbol_tables[NUM_OC_CLASSES];
+    SymbolTable *current;
 };
 typedef struct SymbolTableContainer SymbolTableContainer;
 
@@ -73,8 +74,7 @@ SymbolTableContainer *create_st_container();
 SymbolTable *create_symbol_table();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
-void insert_symbol_table(SymbolTable *new, SymbolTable *enc,
-                            SymbolTableContainer *stc);
+void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
 
 
 /* error handling */

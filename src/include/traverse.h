@@ -8,7 +8,6 @@
 
 struct traversal_data {
     SymbolTableContainer *stc;
-    SymbolTable *cur_st;
 };
 typedef struct traversal_data traversal_data;
 

@@ -275,6 +275,7 @@ SymbolTableContainer *create_st_container() {
 void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
+    stc->current = (SymbolTable *) NULL;
 }
 
 /* symbol table */
@@ -309,22 +310,22 @@ void set_st_symbols(SymbolTable *st, Symbol *s) {
  *
  * Parameters:
  *      new - the new symbol table to insert
- *      enc - the symbol table constituting the enclosing scope of the new one
  *      stc - the symbol table container.
  *
  * Returns:
  *      None
  * Side Effects:
- *      None
+ *      Updates the current symbol table pointer of the ST container.
  */
-void insert_symbol_table(SymbolTable *new, SymbolTable *enc,
-                            SymbolTableContainer *stc) {
+void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
+    SymbolTable *enc = stc->current;
     if (enc == NULL) {
         /* new->oc is OTHER_NAMES or STATEMENT_LABELS */
         stc->symbol_tables[new->oc] = new;
     }
     /* link new to its enclosing scope (even if it is NULL) */
     new->enclosing = enc;
+    stc->current = new;
 }
 
 /*

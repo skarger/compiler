@@ -24,9 +24,6 @@ void start_traversal(void *np) {
     /* pass the container across traversal so that new STs may be inserted */
     SymbolTableContainer *symbol_table_container = create_st_container();
     td->stc = symbol_table_container;
-
-    /* pointer to the current symbol table. null since none exists yet. */
-    td->cur_st = NULL;
     traverse_node(np, td);
 }
 
@@ -53,9 +50,7 @@ void traverse_node(void *np, traversal_data *td) {
 
     if (should_create_new_st()) {
         SymbolTable *st = create_symbol_table();
-        insert_symbol_table(st, td->cur_st, td->stc);
-        /* the new ST becomes the current ST */
-        td->cur_st = st;
+        insert_symbol_table(st, td->stc);
 
         #ifdef DEBUG
         fprintf(output, "/* node type: %s, "
