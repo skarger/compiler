@@ -269,28 +269,9 @@ SymbolTableContainer *create_st_container() {
 }
 
 void initialize_st_container(SymbolTableContainer *stc) {
-    stc->scope_set[OTHER_NAMES] = (ScopeSet*) NULL;
-    stc->scope_set[STATEMENT_LABELS] = (ScopeSet*) NULL;
+    stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
+    stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
 }
-
-/* scope set */
-ScopeSet *create_scope_set() {
-    ScopeSet *ss;
-    util_emalloc( (void **) &ss, sizeof(ScopeSet));
-    set_ss_scope(ss, get_scope());
-    set_ss_overloading_class(ss, get_overloading_class());
-    ss->st = (SymbolTable *) NULL;
-}
-
-void set_ss_scope(ScopeSet *ss, int scope) {
-    ss->scope = scope;
-}
-
-void set_ss_overloading_class(ScopeSet *ss, int oc) {
-    ss->oc = oc;
-}
-
-
 
 /* symbol table */
 /*
@@ -300,12 +281,22 @@ SymbolTable *create_symbol_table() {
     SymbolTable *st;
     util_emalloc( (void **) &st, sizeof(SymbolTable));
     /* initialize */
+    set_st_scope(st, get_scope());
+    set_st_overloading_class(st, get_overloading_class());
     set_st_symbols(st, NULL);
     complete_st_creation();
     return st;
 }
 
-void set_st_symbols(SymbolTable *st, struct symbol *s) {
+void set_st_scope(SymbolTable *st, int scope) {
+    st->scope = scope;
+}
+
+void set_st_overloading_class(SymbolTable *st, int oc) {
+    st->oc = oc;
+}
+
+void set_st_symbols(SymbolTable *st, Symbol *s) {
     st->symbols = s;
 }
 

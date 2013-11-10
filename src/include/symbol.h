@@ -4,10 +4,11 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+/* give names to fundamental scope levels. deeper levels need no name */
 #define TOP_LEVEL_SCOPE 0
 #define FUNCTION_BODY_SCOPE 1
 
-/* indicate whether we are starting or ending the traversal of a node */
+/* indicator for whether we are starting or ending the traversal of a node */
 #define START 1
 #define END 2
 
@@ -20,27 +21,24 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
-struct symbol {
+/* data structures for symbol table management */
+struct Symbol {
     char *name;
-    enum data_type type;
-    struct symbol_table *enclosing;
-    struct symbol *next;
+    /* type tree */
+    struct Symbol *next;
 };
+typedef struct Symbol Symbol;
 
 struct SymbolTable {
-    struct symbol *symbols; /* list of symbols in symbol table    */
+    Symbol *symbols;                /* list of symbols in symbol table     */
+    int scope;                      /* scope level (file, function, etc.)  */
+    int oc;                         /* overloading class                   */
+    struct SymbolTable *enclosing;  /* symbol table at enclosing scope     */
 };
 typedef struct SymbolTable SymbolTable;
 
-struct ScopeSet {
-    int scope;              /* scope level (file, function, etc.)    */
-    int oc;                 /* overloading class                     */
-    SymbolTable *st;       /* list of symbol tables at this scope/oc */
-};
-typedef struct ScopeSet ScopeSet;
-
 struct SymbolTableContainer {
-    ScopeSet *scope_set[NUM_OC_CLASSES];
+    SymbolTable *symbol_tables[NUM_OC_CLASSES];
 };
 typedef struct SymbolTableContainer SymbolTableContainer;
 
@@ -74,14 +72,12 @@ void transition_scope(Node *n, int action);
 SymbolTableContainer *create_st_container();
 void initialize_st_container(SymbolTableContainer *stc);
 
-/* scope set functions */
-ScopeSet *create_scope_set();
-void set_ss_scope(ScopeSet *ss, int scope);
-void set_ss_overloading_class(ScopeSet *ss, int oc);
-
 /* symbol table functions */
 SymbolTable *create_symbol_table();
-void set_st_symbols(SymbolTable *st, struct symbol *s);
+void set_st_scope(SymbolTable *st, int scope);
+void set_st_overloading_class(SymbolTable *st, int oc);
+void set_st_symbols(SymbolTable *st, Symbol *s);
+
 enum Boolean should_create_new_st();
 
 /* error handling */
