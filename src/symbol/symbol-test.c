@@ -74,7 +74,7 @@ int main() {
     printf("function prototype:\n");
     test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
     /* set the type to void to make the node match a possible function param */
-    n->data.symbols[TYPE_SPEC] = VOID;
+    n->data.attributes[TYPE_SPEC] = VOID;
     test_transition(n, TYPE_SPECIFIER, START, FUNCTION_PROTO_PARAMETERS, 1, OTHER_NAMES);
     test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
 

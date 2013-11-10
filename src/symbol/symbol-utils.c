@@ -215,7 +215,7 @@ void scope_fsm_end(Node *n) {
  */
 int is_function_param(Node *n) {
     return (n->n_type == PARAMETER_LIST ||  n->n_type == PARAMETER_DECL ||
-           (n->n_type == TYPE_SPECIFIER && n->data.symbols[TYPE_SPEC] == VOID));
+        (n->n_type == TYPE_SPECIFIER && n->data.attributes[TYPE_SPEC] == VOID));
 }
 
 int node_begins_statement_label(Node *n) {

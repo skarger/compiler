@@ -89,7 +89,7 @@ function_def_specifier : declarator
 decl : type_specifier initialized_declarator_list SEMICOLON
         {
             Node *n = $1;
-            if (n->data.symbols[TYPE_SPEC] == VOID) {
+            if (n->data.attributes[TYPE_SPEC] == VOID) {
                 { yyerror("void declaration not permitted"); yyerrok; }
             }
             $$ = create_node(DECL, $1, $2);
@@ -676,11 +676,11 @@ int has_literal_data(enum node_type nt) {
 }
 
 void set_operator(Node *n, int op) {
-    n->data.symbols[OPERATOR] = op;
+    n->data.attributes[OPERATOR] = op;
 }
 
 void set_type(Node *n, int type_spec) {
-    n->data.symbols[TYPE_SPEC] = type_spec;
+    n->data.attributes[TYPE_SPEC] = type_spec;
 }
 
 void set_literal_data(Node *n, YYSTYPE data) {
@@ -967,11 +967,12 @@ void pretty_print(void *np) {
             break;
         case BINARY_EXPR:
             pretty_print(n->children.child1);
-            fprintf(output, " %s ", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, " %s ",
+                    get_operator_value(n->data.attributes[OPERATOR]));
             pretty_print(n->children.child2);
             break;
         case TYPE_SPECIFIER:
-            fprintf(output, "%s", get_type_spec(n->data.symbols[TYPE_SPEC]));
+            fprintf(output, "%s", get_type_spec(n->data.attributes[TYPE_SPEC]));
             break;
         case POINTER:
             print_pointers(n);
@@ -990,12 +991,14 @@ void pretty_print(void *np) {
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
-            fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, "%s",
+                    get_operator_value(n->data.attributes[OPERATOR]));
             pretty_print(n->children.child1);
             break;
         case POSTFIX_EXPR:
             pretty_print(n->children.child1);
-            fprintf(output, "%s", get_operator_value(n->data.symbols[OPERATOR]));
+            fprintf(output, "%s",
+                    get_operator_value(n->data.attributes[OPERATOR]));
             break;
         case SIMPLE_DECLARATOR:
         case IDENTIFIER_EXPR:

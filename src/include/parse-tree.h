@@ -73,8 +73,8 @@ typedef struct Node Node;
  * A Node may contain various types of data fields.
  */
 union NodeData {
-    /* fields with a symbolic (int or enum) representation */
-    int symbols[MAX_ITEMS];
+    /* fields with an int or enum representation */
+    int attributes[MAX_ITEMS];
     /* Storage for literal data. Applies to identifiers and constants. */
     char ch;           /* CHAR_CONSTANT */
     unsigned long num; /* NUMBER_CONSTANT */

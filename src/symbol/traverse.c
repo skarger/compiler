@@ -108,23 +108,23 @@ void traverse_node(void *np, traverse_data_ST *data_st) {
             break;
         case BINARY_EXPR:
             traverse_node(n->children.child1, data_st);
-            /* n->data.symbols[OPERATOR] */
+            /* n->data.attributes[OPERATOR] */
             traverse_node(n->children.child2, data_st);
             break;
         case TYPE_SPECIFIER:
-            /* printf("ts %d\n", n->data.symbols[TYPE_SPEC]); */
+            /* printf("ts %d\n", n->data.attributes[TYPE_SPEC]); */
             break;
         case POINTER:
             traverse_pointers(n, data_st);
             break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
-            /* n->data.symbols[OPERATOR] */
+            /* n->data.attributes[OPERATOR] */
             traverse_node(n->children.child1, data_st);
             break;
         case POSTFIX_EXPR:
             traverse_node(n->children.child1, data_st);
-            /* n->data.symbols[OPERATOR] */
+            /* n->data.attributes[OPERATOR] */
             break;
         case SIMPLE_DECLARATOR:
         case IDENTIFIER_EXPR:
