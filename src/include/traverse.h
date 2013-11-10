@@ -1,4 +1,5 @@
 
+#undef  DEBUG
 #define DEBUG
 
 #include "../include/parse-tree.h"

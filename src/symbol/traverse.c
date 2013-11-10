@@ -51,19 +51,18 @@ void traverse_node(void *np, traversal_data *td) {
     /* this node may or may not imply a scope transition */
     transition_scope(n, START);
 
-    #ifdef DEBUG
     if (should_create_new_st()) {
+        SymbolTable *st = create_symbol_table();
+        insert_symbol_table(st, td->cur_st, td->stc);
+        /* the new ST becomes the current ST */
+        td->cur_st = st;
+
+        #ifdef DEBUG
         fprintf(output, "/* node type: %s, "
             "creating a new symbol table at scope: %d */\n",
             get_node_name(n->n_type), get_scope());
-
-        SymbolTable *st = create_symbol_table();
-
-        /* find or create the scope set that this ST should live in */
-        /* navigate to end of the scope set and insert this ST */
-        /* insert_symbol_table(tdst->stc, st); */
+        #endif
     }
-    #endif
 
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:

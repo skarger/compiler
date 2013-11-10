@@ -68,15 +68,14 @@ int get_overloading_class();
 void initialize_fsm();
 void transition_scope(Node *n, int action);
 
-/* symbol table container functions */
+/* symbol table management functions */
 SymbolTableContainer *create_st_container();
-
-
-/* symbol table functions */
 SymbolTable *create_symbol_table();
 void set_st_symbols(SymbolTable *st, Symbol *s);
-
 enum Boolean should_create_new_st();
+void insert_symbol_table(SymbolTable *new, SymbolTable *enc,
+                            SymbolTableContainer *stc);
+
 
 /* error handling */
 void handle_symbol_error(enum symbol_error e, char *data, int line);

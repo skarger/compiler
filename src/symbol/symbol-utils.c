@@ -299,7 +299,33 @@ void set_st_symbols(SymbolTable *st, Symbol *s) {
     st->symbols = s;
 }
 
-
+/*
+ * insert_symbol_table
+ * Purpose:
+ *      Insert a new symbol table into the ST container, linking it to its
+ *      enclosing scope.
+ *      The new ST is either first in its overloading class (largest scope)
+ *      or it has a non-null enclosing scope.
+ *
+ * Parameters:
+ *      new - the new symbol table to insert
+ *      enc - the symbol table constituting the enclosing scope of the new one
+ *      stc - the symbol table container.
+ *
+ * Returns:
+ *      None
+ * Side Effects:
+ *      None
+ */
+void insert_symbol_table(SymbolTable *new, SymbolTable *enc,
+                            SymbolTableContainer *stc) {
+    if (enc == NULL) {
+        /* new->oc is OTHER_NAMES or STATEMENT_LABELS */
+        stc->symbol_tables[new->oc] = new;
+    }
+    /* link new to its enclosing scope (even if it is NULL) */
+    new->enclosing = enc;
+}
 
 /*
  * handle_symbol_error
