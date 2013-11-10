@@ -35,3 +35,4 @@ lex.yy.c
 lexer
 parser
 symbol
+symbol-test

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+./parser ./test/symbol/input ./test/symbol/output
+
+diff ./test/symbol/output ./test/symbol/expected
+
+# An  exit status of 0 means no differences were found
+# 1 means some differences were found
+if [ $? -eq 0 ]
+then
+    echo "TESTS PASSED"
+else
+    echo "TESTS FAILED"
+fi
+
