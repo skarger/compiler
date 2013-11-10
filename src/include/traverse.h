@@ -5,15 +5,16 @@
 #include "../include/symbol.h"
 
 
-struct traverse_data_ST {
+struct traversal_data {
     SymbolTableContainer *stc;
+    SymbolTable *cur_st;
 };
-typedef struct traverse_data_ST traverse_data_ST;
+typedef struct traversal_data traversal_data;
 
 
 /* tree traversal */
-void traverse_node(void *np, traverse_data_ST *data_st);
-void traverse_direct_abstract_declarator(void *np, traverse_data_ST *data_st);
-void traverse_conditional_statement(void *np, traverse_data_ST *data_st);
-void traverse_iterative_statement(void *np, traverse_data_ST *data_st);
-void traverse_pointers(void *np, traverse_data_ST *data_st);
+void traverse_node(void *np, traversal_data *td);
+void traverse_direct_abstract_declarator(void *np, traversal_data *td);
+void traverse_conditional_statement(void *np, traversal_data *td);
+void traverse_iterative_statement(void *np, traversal_data *td);
+void traverse_pointers(void *np, traversal_data *td);

@@ -556,7 +556,6 @@ int main(int argc, char *argv[]) {
     yyin = input;
 
     /* do the work */
-    SymbolTableContainer *symbol_table_container = create_st_container();
 
     rv = yyparse();
 

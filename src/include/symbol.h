@@ -70,12 +70,10 @@ void transition_scope(Node *n, int action);
 
 /* symbol table container functions */
 SymbolTableContainer *create_st_container();
-void initialize_st_container(SymbolTableContainer *stc);
+
 
 /* symbol table functions */
 SymbolTable *create_symbol_table();
-void set_st_scope(SymbolTable *st, int scope);
-void set_st_overloading_class(SymbolTable *st, int oc);
 void set_st_symbols(SymbolTable *st, Symbol *s);
 
 enum Boolean should_create_new_st();

@@ -56,12 +56,17 @@ static int overloading_class = OTHER_NAMES;
 static enum Boolean create_new_st = TRUE;
 
 /* helper functions */
+
+/* scope finite state machine */
 void scope_fsm_start(Node *n);
 void scope_fsm_end(Node *n);
 int is_function_param(Node *);
 int node_begins_statement_label(Node *n);
 char *get_scope_state_name(enum scope_state);
 char *get_overloading_class_name(int oc);
+/* symbol table */
+void initialize_st_container(SymbolTableContainer *stc);
+void initialize_st(SymbolTable *st);
 
 static void set_state(int state) {
     current_state = state;
@@ -263,7 +268,6 @@ char *get_overloading_class_name(int oc) {
 SymbolTableContainer *create_st_container() {
     SymbolTableContainer *stc;
     util_emalloc( (void **) &stc, sizeof(SymbolTableContainer));
-    /* initialize */
     initialize_st_container(stc);
     return stc;
 }
@@ -280,20 +284,15 @@ void initialize_st_container(SymbolTableContainer *stc) {
 SymbolTable *create_symbol_table() {
     SymbolTable *st;
     util_emalloc( (void **) &st, sizeof(SymbolTable));
-    /* initialize */
-    set_st_scope(st, get_scope());
-    set_st_overloading_class(st, get_overloading_class());
-    set_st_symbols(st, NULL);
+    initialize_st(st);
     complete_st_creation();
     return st;
 }
 
-void set_st_scope(SymbolTable *st, int scope) {
-    st->scope = scope;
-}
-
-void set_st_overloading_class(SymbolTable *st, int oc) {
-    st->oc = oc;
+void initialize_st(SymbolTable *st) {
+    st->scope = get_scope();
+    st->oc = get_overloading_class();
+    st->symbols = NULL;
 }
 
 void set_st_symbols(SymbolTable *st, Symbol *s) {
