@@ -60,7 +60,7 @@ static enum Boolean create_new_st = TRUE;
 /* scope finite state machine */
 void scope_fsm_start(Node *n);
 void scope_fsm_end(Node *n);
-int is_function_param(Node *);
+int node_is_function_param(Node *);
 int node_begins_statement_label(Node *n);
 char *get_scope_state_name(enum scope_state);
 char *get_overloading_class_name(int oc);
@@ -149,7 +149,7 @@ void scope_fsm_start(Node *n) {
 
     if (nt == FUNCTION_DEFINITION && get_state() == TOP_LEVEL) {
         set_state(FUNCTION_DEF);
-    } else if (is_function_param(n) && get_state() == FUNCTION_DEF) {
+    } else if (node_is_function_param(n) && get_state() == FUNCTION_DEF) {
         new_scope();
         set_state(FUNCTION_DEF_PARAMETERS);
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_DEF_PARAMETERS) {
@@ -157,7 +157,7 @@ void scope_fsm_start(Node *n) {
         /* already entered the new scope for FUNCTION_DEF_PARAMETERS */
     } else if (nt == FUNCTION_DECLARATOR && get_state() == TOP_LEVEL) {
         set_state(FUNCTION_PROTOTYPE);
-    } else if (is_function_param(n) && get_state() == FUNCTION_PROTOTYPE) {
+    } else if (node_is_function_param(n) && get_state() == FUNCTION_PROTOTYPE) {
         new_scope();
         set_state(FUNCTION_PROTO_PARAMETERS);
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
@@ -208,7 +208,7 @@ void scope_fsm_end(Node *n) {
 }
 
 /*
- * is_function_param
+ * node_is_function_param
  *  determine if given node is a function parameter
  *
  * Parameters:
@@ -218,7 +218,7 @@ void scope_fsm_end(Node *n) {
  * Side effects: none
  *
  */
-int is_function_param(Node *n) {
+int node_is_function_param(Node *n) {
     return (n->n_type == PARAMETER_LIST ||  n->n_type == PARAMETER_DECL ||
         (n->n_type == TYPE_SPECIFIER && n->data.attributes[TYPE_SPEC] == VOID));
 }
