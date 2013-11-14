@@ -59,6 +59,15 @@ void traverse_node(void *np, traversal_data *td) {
         #endif
     }
 
+    /*
+    if is a decl
+    note that we are processing a decl
+    first item is type spec - look for it
+    followed by 0 or more pointers
+    followed by an identifier
+    followed by array brackets or function param list
+    */
+
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:
         case DECL:
@@ -130,8 +139,21 @@ void traverse_node(void *np, traversal_data *td) {
             break;
         case SIMPLE_DECLARATOR:
         case IDENTIFIER_EXPR:
+            break;
         case IDENTIFIER:
-            /* symbol table entry */
+            /*
+                if processing decl
+                    add to type tree
+                    check current symbol table for duplicate id
+                    if duplicated
+                        if it is a function def duplicating a func prototype or vice versa
+                            check that num params and param types match
+                        else
+                            error
+                else
+                    look for id in symbol table and enclosing
+                    if not found error
+            */
             break;
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:

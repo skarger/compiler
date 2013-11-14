@@ -23,13 +23,6 @@ FUNCTION_DEF_PARAMETERS -> FUNCTION_BODY
 FUNCTION_BODY -> TOP_LEVEL
     node: end of COMPOUND_STATEMENT
 
-TOP_LEVEL -> FUNCTION_PROTOTYPE
-    node: FUNCTION_DECLARATOR
-FUNCTION_PROTOTYPE -> FUNCTION_PROTO_PARAMETERS
-    node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER == VOID)
-FUNCTION_PROTO_PARAMETERS -> TOP_LEVEL
-    node: end of FUNCTION_DECLARATOR
-
 FUNCTION_BODY -> BLOCK
     node: start of COMPOUND_STATEMENT
 BLOCK -> FUNCTION_BODY
@@ -155,11 +148,6 @@ void scope_fsm_start(Node *n) {
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_DEF_PARAMETERS) {
         set_state(FUNCTION_BODY);
         /* already entered the new scope for FUNCTION_DEF_PARAMETERS */
-    } else if (nt == FUNCTION_DECLARATOR && get_state() == TOP_LEVEL) {
-        set_state(FUNCTION_PROTOTYPE);
-    } else if (node_is_function_param(n) && get_state() == FUNCTION_PROTOTYPE) {
-        new_scope();
-        set_state(FUNCTION_PROTO_PARAMETERS);
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
         new_scope();
         set_state(BLOCK);
@@ -191,10 +179,6 @@ void scope_fsm_end(Node *n) {
         /* end of function definition */
         previous_scope();
         set_state(TOP_LEVEL);
-    } else if (FUNCTION_DECLARATOR && get_state() == FUNCTION_PROTO_PARAMETERS) {
-        /* end of function prototype */
-        previous_scope();
-        set_state(TOP_LEVEL);
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
         previous_scope();
         if (scope <= FUNCTION_BODY_SCOPE) {
@@ -202,7 +186,7 @@ void scope_fsm_end(Node *n) {
         } else {
             set_state(BLOCK);
         }
-    } else  if (nt == IDENTIFIER && get_overloading_class() == STATEMENT_LABELS) {
+    } else if (nt == IDENTIFIER && get_overloading_class() == STATEMENT_LABELS) {
         set_overloading_class(OTHER_NAMES);
     }
 }
@@ -219,7 +203,7 @@ void scope_fsm_end(Node *n) {
  *
  */
 int node_is_function_param(Node *n) {
-    return (n->n_type == PARAMETER_LIST ||  n->n_type == PARAMETER_DECL ||
+    return (n->n_type == PARAMETER_LIST || n->n_type == PARAMETER_DECL ||
         (n->n_type == TYPE_SPECIFIER && n->data.attributes[TYPE_SPEC] == VOID));
 }
 
@@ -245,9 +229,7 @@ char *get_scope_state_name(enum scope_state ss) {
         CASE_FOR(TOP_LEVEL);
         CASE_FOR(FUNCTION_DEF);
         CASE_FOR(FUNCTION_DEF_PARAMETERS);
-        CASE_FOR(FUNCTION_PROTO_PARAMETERS);
         CASE_FOR(FUNCTION_BODY);
-        CASE_FOR(FUNCTION_PROTOTYPE);
         CASE_FOR(BLOCK);
     #undef CASE_FOR
         default: return "";

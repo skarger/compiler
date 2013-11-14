@@ -24,7 +24,19 @@
 /* data structures for symbol table management */
 struct Symbol {
     char *name;
-    /* type tree */
+    /* type category */
+    /* type tree
+     * value type for integral/pointer symbols
+     * return type for functions
+     * element type for arrays
+     */
+    /* union
+     * func_param_count
+     * array_size
+     */
+    /*
+     * function parameter list */
+    /* adjacent item in symbol table */
     struct Symbol *next;
 };
 typedef struct Symbol Symbol;
@@ -49,8 +61,6 @@ enum scope_state {
     FUNCTION_DEF,
     FUNCTION_DEF_PARAMETERS,
     FUNCTION_BODY,
-    FUNCTION_PROTOTYPE,
-    FUNCTION_PROTO_PARAMETERS,
     BLOCK
 };
 

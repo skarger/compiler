@@ -105,19 +105,23 @@ void test_st_fsm() {
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
 
-    printf("function prototype:\n");
+    printf("function definition 2:\n");
     initialize_fsm();
     n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_DECL, START, FUNCTION_PROTO_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
+    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
-    printf("function prototype:\n");
-    test_transition(n, FUNCTION_DECLARATOR, START, FUNCTION_PROTOTYPE, 0, OTHER_NAMES);
+    printf("function definition 3:\n");
+    initialize_fsm();
+    n->n_type = TOP_LEVEL;
+    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
     /* set the type to void to make the node match a possible function param */
     n->data.attributes[TYPE_SPEC] = VOID;
-    test_transition(n, TYPE_SPECIFIER, START, FUNCTION_PROTO_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, FUNCTION_DECLARATOR, END, TOP_LEVEL, 0, OTHER_NAMES);
+    test_transition(n, TYPE_SPECIFIER, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 }
 
 void test_transition(Node *n, enum node_type nt, int action,

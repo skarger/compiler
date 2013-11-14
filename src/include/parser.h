@@ -10,7 +10,9 @@
 #define PRETTY_PRINT
 #undef  PRETTY_PRINT
 
+/* define TRAVERSE to for 'make test-symbol-output' to pass */
 #define TRAVERSE
+#undef TRAVERSE
 
 /*
  * Errors that are caught in the parsing step.
