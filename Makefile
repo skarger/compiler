@@ -1,22 +1,26 @@
 CC = gcc
+CPP = g++
 LEX = flex
 YACC = yacc
 CFLAGS += -pedantic -Wall -Wextra
+CXXFLAGS += -g -Wall -Wextra
 LDLIBS += -lfl -ly
 YFLAGS += -d
 
 VPATH = src
+GTEST_DIR = ./test/gtest-1.7.0
 
-EXECS = lexer parser symbol-test
+
+TESTS = libgtest.a symbol-test gtest-symbol
+EXECS = lexer parser
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/symbol/symbol.c src/symbol/symbol-utils.c src/symbol/symbol-test.c
 
+
 all : $(EXECS)
 
-
-
 clean :
-	rm -f $(EXECS) *.o lex.yy.c y.tab.c y.tab.h
+	rm -f $(TESTS) $(EXECS) *.o lex.yy.c y.tab.c y.tab.h
 
 # autmatically pull in dependencies on included header files
 # copied from http://stackoverflow.com/a/2394668/1424966
@@ -33,7 +37,6 @@ lex.yy.o :
 
 lex.yy.c : lexer/lexer.lex
 	$(LEX) $(LFLAGS) -o $@ $<
-
 
 lexer.o : lex.yy.o
 	$(CC) -c src/lexer/lexer.c lex.yy.c
@@ -53,6 +56,20 @@ parser : y.tab.o utilities.o traverse.o symbol-utils.o
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
 
+traverse.o : src/symbol/traverse.c
+	$(CC) -c src/symbol/traverse.c
+
+
+# tests
+libtest.a :
+	$(CPP) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
+-pthread -c ${GTEST_DIR}/src/gtest-all.cc
+	ar -rv libgtest.a gtest-all.o
+
+gtest-symbol : libtest.a ./test/symbol/gtest-symbol.cpp
+	$(CPP) -isystem ${GTEST_DIR}/include -pthread \
+./test/symbol/gtest-symbol.cpp libgtest.a -o $@
+
 symbol-test.o : src/symbol/symbol-test.c
 	$(CC) -c src/symbol/symbol-test.c
 
@@ -61,6 +78,3 @@ symbol-test : symbol-utils.o symbol-test.o utilities.o
 
 test-symbol-output : test/symbol/test-symbol-output parser
 	test/symbol/test-symbol-output
-
-traverse.o : src/symbol/traverse.c
-	$(CC) -c src/symbol/traverse.c
