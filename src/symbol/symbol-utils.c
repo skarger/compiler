@@ -310,6 +310,8 @@ void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
     stc->current = new;
 }
 
+
+
 Symbol *create_symbol() {
     Symbol *s;
     util_emalloc((void **) &s, sizeof(Symbol));

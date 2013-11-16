@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/symbol.h"
+#include "../../src/include/symbol.h"
 #include "../../y.tab.h"
 
 char *get_test_result_name(int res);

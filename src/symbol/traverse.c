@@ -70,6 +70,14 @@ void traverse_node(void *np, traversal_data *td) {
 
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:
+            /* type_specifier */
+            /* create type tree */
+            traverse_node(n->children.child1, td);
+            /* function_declarator */
+            /* grab symbol name */
+            /* process params */
+            traverse_node(n->children.child2, td);
+            break;
         case DECL:
             /* add_symbol(); */
             traverse_node(n->children.child1, td);

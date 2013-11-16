@@ -13,7 +13,7 @@ VPATH = src
 TESTS = symbol-test
 EXECS = lexer parser
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
-src/symbol/symbol.c src/symbol/symbol-utils.c src/symbol/symbol-test.c
+src/symbol/symbol.c src/symbol/symbol-utils.c test/symbol/symbol-test.c
 
 
 all : $(EXECS)
@@ -60,8 +60,8 @@ traverse.o : src/symbol/traverse.c
 
 
 # tests
-symbol-test.o : src/symbol/symbol-test.c
-	$(CC) -c src/symbol/symbol-test.c
+symbol-test.o : test/symbol/symbol-test.c
+	$(CC) -c test/symbol/symbol-test.c
 
 symbol-test : symbol-utils.o symbol-test.o utilities.o
 	$(CC) symbol-utils.o symbol-test.o utilities.o -o $@

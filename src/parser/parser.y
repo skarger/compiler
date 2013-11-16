@@ -68,22 +68,19 @@ function_def_specifier : declarator
             yyerror("return type missing from function specifier"); yyerrok;
             $$ = create_node(FUNCTION_DEF_SPEC, $1, NULL);
         }
-    | type_specifier function_declarator
-        { $$ = create_node(FUNCTION_DEF_SPEC, $1, $2); }
-    | type_specifier parenthesized_declarator
+    | type_specifier declarator
         {
+            /* basic checks, not comprehensive */
             Node *n = $2;
-            if (n->n_type != FUNCTION_DECLARATOR) {
+            if (n->n_type != FUNCTION_DECLARATOR &&
+                n->n_type != POINTER_DECLARATOR) {
                 yyerror("invalid function declarator"); yyerrok;
             }
             $$ = create_node(FUNCTION_DEF_SPEC, $1, $2);
         }
-    | type_specifier non_function_declarator
-        {
-            yyerror("invalid function declarator"); yyerrok;
-            $$ = create_node(FUNCTION_DEF_SPEC, $1, $2);
-        }
+
     ;
+
 
 /* decl and close children */
 decl : type_specifier initialized_declarator_list SEMICOLON
@@ -151,11 +148,6 @@ function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
             yyerror("function must have a parameter list, even if it is (void)"); yyerrok;
             $$ = create_node(FUNCTION_DECLARATOR, NULL, NULL);
         }
-    ;
-
-/* non_function_declarator exists for error checking */
-non_function_declarator : simple_declarator
-    | array_declarator
     ;
 
 /* void may only appear by itself in a parameter list, which is why it
@@ -856,11 +848,7 @@ void pretty_print(void *np) {
     if (n == NULL) {
         return;
     }
-    #ifdef PRETTY_PRINT
-    #ifdef DEBUG
-        printf("\n/* pretty_print: node type: %s */\n", get_node_name(n->n_type));
-    #endif
-    #endif
+
     if (parenthesize(n->n_type)) {
         fprintf(output, "(");
     }
