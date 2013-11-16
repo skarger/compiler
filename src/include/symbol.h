@@ -21,23 +21,49 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
+/* possible type categories of symbols */
+enum type_category {
+    SCALAR,
+    ARRAY,
+    FUNCTION
+};
+
 /* data structures for symbol table management */
-struct Symbol {
+struct TypeNode {
+    int type;
+    struct TypeNode *next;
+};
+typedef struct TypeNode TypeNode;
+
+struct FunctionParameter {
     char *name;
-    /* type category */
-    /* type tree
-     * value type for integral/pointer symbols
-     * return type for functions
-     * element type for arrays
-     */
-    /* union
-     * func_param_count
-     * array_size
-     */
-    /*
-     * function parameter list */
-    /* adjacent item in symbol table */
-    struct Symbol *next;
+    TypeNode *type_tree;
+};
+typedef struct FunctionParameter FunctionParameter;
+
+union TypeData {
+    TypeNode *scalar_type;
+    TypeNode *return_type;
+    TypeNode *element_type;
+};
+
+union SymbolMetadata {
+    int param_count;
+    int array_size;
+};
+
+/*
+ * Symbol data structure
+ * A symbol can represent a basic scalar value, a function, or an array.
+ * This structure accommodates all three.
+ */
+struct Symbol {
+    char *name;             /* the name of the symbol */
+    int category;           /* type category: SCALAR, ARRAY, FUNCTION */
+    union TypeData td;      /* type, function return type, array element type */
+    union SymbolMetadata md;        /* function param count, array size */
+    FunctionParameter *param_list;  /* function parameter list */
+    struct Symbol *next;            /* adjacent item in symbol table */
 };
 typedef struct Symbol Symbol;
 
@@ -85,7 +111,7 @@ SymbolTable *create_symbol_table();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
-
+Symbol *create_symbol();
 
 /* error handling */
 void handle_symbol_error(enum symbol_error e, char *data, int line);

@@ -73,8 +73,9 @@ void traverse_node(void *np, traversal_data *td) {
             /* type_specifier */
             /* create type tree */
             traverse_node(n->children.child1, td);
-            /* function_declarator */
-            /* grab symbol name */
+            /* pointer_declarator or function_declarator */
+            /* pointer_declarator: append to return type */
+            /* function declarator: traverse direct_declarator and param list */
             /* process params */
             traverse_node(n->children.child2, td);
             break;

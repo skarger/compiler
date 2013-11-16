@@ -9,17 +9,32 @@ void test_transition(Node *n, enum node_type nt, int action,
         enum scope_state expected_state, int expected_scope, int expected_oc);
 void test_st_fsm();
 void test_st_data();
+void test_symbol_data();
 
 int main() {
     test_st_fsm();
     printf("\n");
     test_st_data();
+    printf("\n");
+    test_symbol_data();
     return 0;
 }
 
 char *get_test_result_name(int res) {
     if (res == PASS) return "PASS";
     if (res == FAIL) return "FAIL";
+}
+
+void test_symbol_data() {
+    printf("*** Testing Symbol data methods ***\n");
+
+    Symbol *s = create_symbol();
+    int test_res = assert_equal_int(sizeof(*s), sizeof(Symbol));
+    printf("%s Symbol: size\n", get_test_result_name(test_res));
+}
+
+int assert_equal_int(int i, int j) {
+    return (i == j ? PASS : FAIL);
 }
 
 void test_st_data() {
