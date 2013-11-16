@@ -8,10 +8,9 @@ LDLIBS += -lfl -ly
 YFLAGS += -d
 
 VPATH = src
-GTEST_DIR = ./test/gtest-1.7.0
 
 
-TESTS = libgtest.a symbol-test gtest-symbol
+TESTS = symbol-test
 EXECS = lexer parser
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/symbol/symbol.c src/symbol/symbol-utils.c src/symbol/symbol-test.c
@@ -61,15 +60,6 @@ traverse.o : src/symbol/traverse.c
 
 
 # tests
-libtest.a :
-	$(CPP) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
--pthread -c ${GTEST_DIR}/src/gtest-all.cc
-	ar -rv libgtest.a gtest-all.o
-
-gtest-symbol : libtest.a ./test/symbol/gtest-symbol.cpp
-	$(CPP) -isystem ${GTEST_DIR}/include -pthread \
-./test/symbol/gtest-symbol.cpp libgtest.a -o $@
-
 symbol-test.o : src/symbol/symbol-test.c
 	$(CC) -c src/symbol/symbol-test.c
 
@@ -78,3 +68,4 @@ symbol-test : symbol-utils.o symbol-test.o utilities.o
 
 test-symbol-output : test/symbol/test-symbol-output parser
 	test/symbol/test-symbol-output
+
