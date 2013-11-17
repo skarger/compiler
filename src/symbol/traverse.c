@@ -24,6 +24,7 @@ void start_traversal(void *np) {
     /* pass the container across traversal so that new STs may be inserted */
     SymbolTableContainer *symbol_table_container = create_st_container();
     td->stc = symbol_table_container;
+    td->current_base_type = NULL;
     traverse_node(np, td);
 }
 
@@ -80,7 +81,15 @@ void traverse_node(void *np, traversal_data *td) {
             traverse_node(n->children.child2, td);
             break;
         case DECL:
+            /* type_specifier */
+            td->current_base_type = create_base_type(n->children.child1);
+
+            /* initialized_declarator or initialized_declarator_list */
+            /* create a symbol for each declarator */
+            traverse_node(n->children.child2, td);
             /* add_symbol(); */
+            break;
+        case INIT_DECL_LIST:
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
@@ -93,7 +102,6 @@ void traverse_node(void *np, traversal_data *td) {
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
         case PARAMETER_LIST:
-        case INIT_DECL_LIST:
         case FUNCTION_DECLARATOR:
         case ARRAY_DECLARATOR:
         case LABELED_STATEMENT:
@@ -246,4 +254,11 @@ void traverse_pointers(void *np, traversal_data *td) {
     do {
         n = n->children.child1;
     } while (n != NULL && n->n_type == POINTER);
+}
+
+TypeNode *create_base_type(Node *n) {
+    int base_type = n->data.attributes[TYPE_SPEC];
+    TypeNode *base_tree = create_type_node(base_type);
+    push_type(base_tree, base_type);
+    return base_tree;
 }

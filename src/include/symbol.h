@@ -71,23 +71,23 @@ typedef struct SymbolTable SymbolTable;
 
 struct SymbolTableContainer {
 /*
-                           s2                s2                    s2
-                           |                 |                     |
-                           s1                s1                    s1
-                           |                 |                     |
-         _ OTHER_NAMES:  file, scope 0  -- function 1, scope 1 -- block, scope 2
-       /                              \
-      /                                \ - function 2, scope 1
-     /                                          |
-STC |                                           s1
-     \
-      \ _ STATEMENT_LABELS: file, scope 0 (no statement label symbols)
-                                         \
-                                           - function 1, scope 1  <- current
-                                                |
-                                                s1
-                                                |
-                                                s2
+                       s2                s2                    s2
+                       |                 |                     |
+                       s1                s1                    s1
+                       |                 |                     |
+     | OTHER_NAMES:  file, scope 0  -- function 1, scope 1 -- block, scope 2
+     |                            \
+     |                             \ - function 2, scope 1
+symbol_tables                                 |
+     |                                        s1
+     |
+     | STATEMENT_LABELS: file, scope 0 (no statement label symbols)
+                                     \
+                                       - function 1, scope 1  <- current
+                                            |
+                                            s1
+                                            |
+                                            s2
 
 function_prototypes: f1 -- f2 -- f3
 

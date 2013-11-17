@@ -258,6 +258,7 @@ void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
     stc->current = (SymbolTable *) NULL;
+    stc->function_prototypes = NULL;
 }
 
 /* symbol table */
@@ -315,6 +316,7 @@ void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
 Symbol *create_symbol() {
     Symbol *s;
     util_emalloc((void **) &s, sizeof(Symbol));
+    s->name = "";
     s->type_tree = NULL;
     s->next = NULL;
     return s;
@@ -330,6 +332,7 @@ Symbol *create_function_symbol() {
     Symbol *s = create_symbol();
     s->category = FUNCTION;
     s->meta.param_count = 0;
+    s->param_list = NULL;
     return s;
 }
 
