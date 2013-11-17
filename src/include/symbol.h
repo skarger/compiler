@@ -41,12 +41,6 @@ struct FunctionParameter {
 };
 typedef struct FunctionParameter FunctionParameter;
 
-union TypeData {
-    TypeNode *scalar_type;
-    TypeNode *return_type;
-    TypeNode *element_type;
-};
-
 union SymbolMetadata {
     int param_count;
     int array_size;
@@ -58,10 +52,10 @@ union SymbolMetadata {
  * This structure accommodates all three.
  */
 struct Symbol {
-    char *name;             /* the name of the symbol */
-    int category;           /* type category: SCALAR, ARRAY, FUNCTION */
-    union TypeData td;      /* type, function return type, array element type */
-    union SymbolMetadata md;        /* function param count, array size */
+    char *name;          /* the name of the symbol */
+    int category;        /* type category: SCALAR, ARRAY, FUNCTION */
+    TypeNode *type_tree; /* basic type, func return type, array element type */
+    union SymbolMetadata meta;      /* function param count, array size */
     FunctionParameter *param_list;  /* function parameter list */
     struct Symbol *next;            /* adjacent item in symbol table */
 };
@@ -76,8 +70,34 @@ struct SymbolTable {
 typedef struct SymbolTable SymbolTable;
 
 struct SymbolTableContainer {
+/*
+                           s2                s2                    s2
+                           |                 |                     |
+                           s1                s1                    s1
+                           |                 |                     |
+         _ OTHER_NAMES:  file, scope 0  -- function 1, scope 1 -- block, scope 2
+       /                              \
+      /                                \ - function 2, scope 1
+     /                                          |
+STC |                                           s1
+     \
+      \ _ STATEMENT_LABELS: file, scope 0 (no statement label symbols)
+                                         \
+                                           - function 1, scope 1  <- current
+                                                |
+                                                s1
+                                                |
+                                                s2
+
+function_prototypes: f1 -- f2 -- f3
+
+symbol_tables: contains the root symbol tables for each overloading class
+current: points to the last symbol table appended
+function_prototypes: separate symbol table for tracking function declarations
+*/
     SymbolTable *symbol_tables[NUM_OC_CLASSES];
     SymbolTable *current;
+    SymbolTable *function_prototypes;
 };
 typedef struct SymbolTableContainer SymbolTableContainer;
 
@@ -111,7 +131,27 @@ SymbolTable *create_symbol_table();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
+
 Symbol *create_symbol();
+Symbol *create_scalar_symbol();
+Symbol *create_function_symbol();
+Symbol *create_array_symbol();
+int get_function_parameter_count(Symbol *s);
+enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
+int get_array_size(Symbol *s);
+
+
+/* helpers */
+TypeNode *create_type_node(int type);
+TypeNode *push_type(TypeNode *type_tree, int t);
+enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
+
+FunctionParameter *create_function_parameter();
+void set_function_parameter_name(FunctionParameter *fp, char *pname);
+void push_parameter_type(FunctionParameter *fp, int t);
+enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);
+
+int get_symbol_category(Symbol *s);
 
 /* error handling */
 void handle_symbol_error(enum symbol_error e, char *data, int line);

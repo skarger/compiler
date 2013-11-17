@@ -311,11 +311,113 @@ void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
 }
 
 
-
+/* Symbol functions */
 Symbol *create_symbol() {
     Symbol *s;
     util_emalloc((void **) &s, sizeof(Symbol));
+    s->type_tree = NULL;
+    s->next = NULL;
     return s;
+}
+
+Symbol *create_scalar_symbol() {
+    Symbol *s = create_symbol();
+    s->category = SCALAR;
+    return s;
+}
+
+Symbol *create_function_symbol() {
+    Symbol *s = create_symbol();
+    s->category = FUNCTION;
+    s->meta.param_count = 0;
+    return s;
+}
+
+Symbol *create_array_symbol() {
+    Symbol *s = create_symbol();
+    s->category = ARRAY;
+    s->meta.array_size = 0;
+}
+
+int get_symbol_category(Symbol *s) {
+    return s->category;
+}
+
+int get_function_parameter_count(Symbol *s) {
+    if (s->category != FUNCTION) {
+        return -1;
+    }
+    return s->meta.param_count;
+}
+
+int get_array_size(Symbol *s) {
+    if (s->category != ARRAY) {
+        return -1;
+    }
+    return s->meta.array_size;
+}
+
+void push_symbol_type(Symbol *s, int t) {
+    s->type_tree = push_type(s->type_tree, t);
+}
+
+enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
+    TypeNode *tn1 = s1->type_tree;
+    TypeNode *tn2 = s2->type_tree;
+    return equal_types(tn1, tn2);
+}
+
+
+/* FunctionParameter helpers */
+FunctionParameter *create_function_parameter() {
+    FunctionParameter *fp;
+    util_emalloc((void **) &fp, sizeof(FunctionParameter));
+    fp->name = "";
+    return fp;
+}
+
+void set_function_parameter_name(FunctionParameter *fp, char *pname) {
+    fp->name = pname;
+}
+
+void push_parameter_type(FunctionParameter *fp, int t) {
+    fp->type_tree = push_type(fp->type_tree, t);
+}
+
+enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2) {
+    TypeNode *tn1 = fp1->type_tree;
+    TypeNode *tn2 = fp2->type_tree;
+    return equal_types(tn1, tn2);
+}
+
+/* TypeNode helpers */
+TypeNode *push_type(TypeNode *type_tree, int t) {
+    TypeNode *tn = create_type_node(t);
+    tn->next = type_tree;
+    return tn;
+}
+
+TypeNode *create_type_node(int type) {
+    TypeNode *tn;
+    util_emalloc((void **) &tn, sizeof(TypeNode));
+    tn->type = type;
+    return tn;
+}
+
+enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
+    while(t1 != NULL && t2 != NULL) {
+        if (t1->type != t2->type) {
+            return FALSE;
+        }
+        t1 = t1->next;
+        t2 = t2->next;
+    }
+    /* exited while loop so at least one must be NULL */
+    /* if the other is not then it's different */
+    if (t1 != NULL || t2 != NULL) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /*
