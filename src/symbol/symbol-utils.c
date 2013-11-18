@@ -257,7 +257,7 @@ SymbolTableContainer *create_st_container() {
 void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
-    stc->current = (SymbolTable *) NULL;
+    stc->current_st = (SymbolTable *) NULL;
     stc->function_prototypes = NULL;
 }
 
@@ -279,8 +279,26 @@ void initialize_st(SymbolTable *st) {
     st->symbols = NULL;
 }
 
-void set_st_symbols(SymbolTable *st, Symbol *s) {
-    st->symbols = s;
+/* append the symbol s to the symbol table st */
+void append_symbol(SymbolTable *st, Symbol *s) {
+    Symbol *prev, *cur;
+    prev = cur = st->symbols;
+    while (cur != NULL) {
+        /* check for duplicates */
+        /* forward declarations, i.e. function prototypes, will only exist */
+        /* in a separate symbol table so they will not be flagged here */
+        if (strcmp(cur->name, s->name) == 0) {
+            handle_symbol_error(STE_DUPLICATE_SYMBOL, "append_symbol");
+            return;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+    if (prev != NULL) {
+        prev->next = s;
+    } else {
+        st->symbols = s;
+    }
 }
 
 /*
@@ -301,14 +319,14 @@ void set_st_symbols(SymbolTable *st, Symbol *s) {
  *      Updates the current symbol table pointer of the ST container.
  */
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
-    SymbolTable *enc = stc->current;
+    SymbolTable *enc = stc->current_st;
     if (enc == NULL) {
         /* new->oc is OTHER_NAMES or STATEMENT_LABELS */
         stc->symbol_tables[new->oc] = new;
     }
     /* link new to its enclosing scope (even if it is NULL) */
     new->enclosing = enc;
-    stc->current = new;
+    stc->current_st = new;
 }
 
 
@@ -322,44 +340,6 @@ Symbol *create_symbol() {
     return s;
 }
 
-Symbol *create_scalar_symbol() {
-    Symbol *s = create_symbol();
-    s->category = SCALAR;
-    return s;
-}
-
-Symbol *create_function_symbol() {
-    Symbol *s = create_symbol();
-    s->category = FUNCTION;
-    s->meta.param_count = 0;
-    s->param_list = NULL;
-    return s;
-}
-
-Symbol *create_array_symbol() {
-    Symbol *s = create_symbol();
-    s->category = ARRAY;
-    s->meta.array_size = 0;
-}
-
-int get_symbol_category(Symbol *s) {
-    return s->category;
-}
-
-int get_function_parameter_count(Symbol *s) {
-    if (s->category != FUNCTION) {
-        return -1;
-    }
-    return s->meta.param_count;
-}
-
-int get_array_size(Symbol *s) {
-    if (s->category != ARRAY) {
-        return -1;
-    }
-    return s->meta.array_size;
-}
-
 void push_symbol_type(Symbol *s, int t) {
     s->type_tree = push_type(s->type_tree, t);
 }
@@ -368,6 +348,10 @@ enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     TypeNode *tn1 = s1->type_tree;
     TypeNode *tn2 = s2->type_tree;
     return equal_types(tn1, tn2);
+}
+
+void set_symbol_name(Symbol *s, char *name) {
+    s->name = name;
 }
 
 
@@ -404,7 +388,19 @@ TypeNode *create_type_node(int type) {
     TypeNode *tn;
     util_emalloc((void **) &tn, sizeof(TypeNode));
     tn->type = type;
+    tn->next = NULL;
     return tn;
+}
+
+void set_array_size(TypeNode *tn, int size) {
+    tn->n.array_size = size;
+}
+
+int get_array_size(TypeNode *tn) {
+    if (tn->type != ARRAY) {
+        handle_symbol_error(STE_NOT_ARRAY, "array size requested from non-array");
+    }
+    return tn->n.array_size;
 }
 
 enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
@@ -430,15 +426,20 @@ enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
  * Parameters:
  *      e - the error value.
  *      data - string that will be inserted into the message printed to stderr
- *      line - line number causing error, if applicable (e.g. from input source)
  * Returns:
  *      None
  * Side effects:
  *      May terminate program depending on error type
  */
-void handle_symbol_error(enum symbol_error e, char *data, int line) {
+void handle_symbol_error(enum symbol_error e, char *data) {
     switch (e) {
         case STE_SUCCESS:
+            return;
+        case STE_NOT_ARRAY:
+            error(0, 0, "%s", data);
+            return;
+        case STE_DUPLICATE_SYMBOL:
+            error(0, 0, "%s: duplicate symbol", data);
             return;
         default:
             return;

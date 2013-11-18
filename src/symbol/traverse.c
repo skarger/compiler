@@ -24,7 +24,7 @@ void start_traversal(void *np) {
     /* pass the container across traversal so that new STs may be inserted */
     SymbolTableContainer *symbol_table_container = create_st_container();
     td->stc = symbol_table_container;
-    td->current_base_type = NULL;
+    td->current_base_type = NO_DATA_TYPE;
     traverse_node(np, td);
 }
 
@@ -60,15 +60,6 @@ void traverse_node(void *np, traversal_data *td) {
         #endif
     }
 
-    /*
-    if is a decl
-    note that we are processing a decl
-    first item is type spec - look for it
-    followed by 0 or more pointers
-    followed by an identifier
-    followed by array brackets or function param list
-    */
-
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:
             /* type_specifier */
@@ -81,29 +72,51 @@ void traverse_node(void *np, traversal_data *td) {
             traverse_node(n->children.child2, td);
             break;
         case DECL:
-            /* type_specifier */
-            td->current_base_type = create_base_type(n->children.child1);
-
-            /* initialized_declarator or initialized_declarator_list */
-            /* create a symbol for each declarator */
+            /* first child is a type_specifier */
+            /* save it because there might be multiple declarators in child2*/
+            td->current_base_type = n->data.attributes[TYPE_SPEC];
             traverse_node(n->children.child2, td);
-            /* add_symbol(); */
             break;
         case INIT_DECL_LIST:
+            /* we will create a symbol for each declarator we recurse into */
+            /* child1 may itself be a list of declarators or just one */
+            /* we do know that child2 is a single declarator */
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
-        case DIR_ABS_DECL:
-        case ABSTRACT_DECLARATOR:
+        case SIMPLE_DECLARATOR:
+            /* here we have the actual identifier for the symbol table entry */
+            /* first create a symbol if it does not already exist */
+            /* set its name */
+            /* the symbol should have all data, so put it in the table */
+            /* reset */
+            create_symbol_if_necessary(td);
+            set_symbol_name(td->current_symbol, n->data.str);
+            append_symbol(td->stc->current_st, td->current_symbol);
+            reset_current_symbol(td);
+            break;
         case POINTER_DECLARATOR:
+            /* pointer(s) */
+            traverse_node(n->children.child1, td);
+            /* direct declarator */
+            traverse_node(n->children.child2, td);
+            break;
+        case POINTER:
+            traverse_pointers(n, td);
+            break;
+        case FUNCTION_DECLARATOR:
+        case ARRAY_DECLARATOR:
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            break;
+        case ABSTRACT_DECLARATOR:
+        case DIR_ABS_DECL:
         case FUNCTION_DEFINITION:
         case PARAMETER_DECL:
         case CAST_EXPR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
         case PARAMETER_LIST:
-        case FUNCTION_DECLARATOR:
-        case ARRAY_DECLARATOR:
         case LABELED_STATEMENT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
@@ -142,9 +155,6 @@ void traverse_node(void *np, traversal_data *td) {
         case TYPE_SPECIFIER:
             /* printf("ts %d\n", n->data.attributes[TYPE_SPEC]); */
             break;
-        case POINTER:
-            traverse_pointers(n, td);
-            break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
             /* n->data.attributes[OPERATOR] */
@@ -154,7 +164,6 @@ void traverse_node(void *np, traversal_data *td) {
             traverse_node(n->children.child1, td);
             /* n->data.attributes[OPERATOR] */
             break;
-        case SIMPLE_DECLARATOR:
         case IDENTIFIER_EXPR:
             break;
         case IDENTIFIER:
@@ -246,19 +255,22 @@ void traverse_conditional_statement(void *np, traversal_data *td) {
     }
 }
 
-void traverse_pointers(void *np, traversal_data *td) {
-    Node *n = (Node *) np;
-    if (n == NULL || n->n_type != POINTER) {
-        return;
-    }
-    do {
+void traverse_pointers(Node *n, traversal_data *td) {
+    /* push pointers onto type tree */
+    while (n != NULL && n->n_type == POINTER) {
+        push_symbol_type(td->current_symbol, POINTER);
         n = n->children.child1;
-    } while (n != NULL && n->n_type == POINTER);
+    }
 }
 
-TypeNode *create_base_type(Node *n) {
-    int base_type = n->data.attributes[TYPE_SPEC];
-    TypeNode *base_tree = create_type_node(base_type);
-    push_type(base_tree, base_type);
-    return base_tree;
+void create_symbol_if_necessary(traversal_data *td) {
+    if (td->current_symbol == NULL) {
+        Symbol *s = create_symbol();
+        push_symbol_type(s, td->current_base_type);
+        td->current_symbol = s;
+    }
+}
+
+void reset_current_symbol(traversal_data *td) {
+    td->current_symbol = NULL;
 }

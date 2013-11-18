@@ -55,6 +55,7 @@ void test_symbol_data() {
     test_res = assert_equal_int(SIGNED_CHAR, tn->type);
     printf("%s TypeNode: initial type\n", get_test_result_name(test_res));
 
+    /* push_type */
     tn = push_type(tn, UNSIGNED_INT);
     test_res = assert_equal_int(UNSIGNED_INT, tn->type);
     printf("%s push_type: new type\n", get_test_result_name(test_res));
@@ -62,6 +63,19 @@ void test_symbol_data() {
     TypeNode *tn2 = tn->next;
     test_res = assert_equal_int(SIGNED_CHAR, tn2->type);
     printf("%s push_type: original type\n", get_test_result_name(test_res));
+
+    tn = push_type(tn, ARRAY);
+    test_res = assert_equal_int(ARRAY, tn->type);
+    printf("%s push_type: array type\n", get_test_result_name(test_res));
+
+    set_array_size(tn, 5);
+    test_res = assert_equal_int(5, get_array_size(tn));
+    printf("%s set_array_size: value \n", get_test_result_name(test_res));
+
+    tn = push_type(tn, FUNCTION);
+    test_res = assert_equal_int(FUNCTION, tn->type);
+    printf("%s push_type: function type\n", get_test_result_name(test_res));
+    /* end push type */
 
     FunctionParameter *fp = create_function_parameter();
     test_res = assert_equal_int(sizeof(*fp), sizeof(FunctionParameter));
@@ -121,23 +135,8 @@ void test_symbol_data() {
     test_res = assert_not_true(symbols_same_type(s1, s2));
     printf("%s symbols_same_type: not equal\n", get_test_result_name(test_res));
 
-    Symbol *ss = create_scalar_symbol();
-    test_res = assert_equal_int(SCALAR, get_symbol_category(ss));
-    printf("%s Symbol category: scalar\n", get_test_result_name(test_res));
 
-    Symbol *fs = create_function_symbol();
-    test_res = assert_equal_int(FUNCTION, get_symbol_category(fs));
-    printf("%s Symbol category: function\n", get_test_result_name(test_res));
 
-    test_res = assert_equal_int(0, get_function_parameter_count(fs));
-    printf("%s Symbol metadata: function parameter count \n", get_test_result_name(test_res));
-
-    Symbol *as = create_array_symbol();
-    test_res = assert_equal_int(ARRAY, get_symbol_category(as));
-    printf("%s Symbol category: array\n", get_test_result_name(test_res));
-
-    test_res = assert_equal_int(0, get_array_size(as));
-    printf("%s Symbol metadata: array size\n", get_test_result_name(test_res));
 }
 
 
@@ -162,8 +161,8 @@ void test_st_data() {
     test_res = (stc->symbol_tables[STATEMENT_LABELS] ==  NULL ? PASS : FAIL);
     printf("%s SymbolTableContainer: initialize statement labels\n", get_test_result_name(test_res));
 
-    test_res = (stc->current == NULL ? PASS : FAIL);
-    printf("%s SymbolTableContainer: initialize current\n", get_test_result_name(test_res));
+    test_res = (stc->current_st == NULL ? PASS : FAIL);
+    printf("%s SymbolTableContainer: initialize current_st\n", get_test_result_name(test_res));
 
     test_res = (should_create_new_st() == TRUE ? PASS : FAIL);
     printf("%s should_create_new_st: initially true\n", get_test_result_name(test_res));
@@ -187,8 +186,8 @@ void test_st_data() {
     test_res = (stc->symbol_tables[OTHER_NAMES] == st ? PASS : FAIL);
     printf("%s insert_symbol_table: insert into container\n", get_test_result_name(test_res));
 
-    test_res = (stc->current == st ? PASS : FAIL);
-    printf("%s insert_symbol_table: update current\n", get_test_result_name(test_res));
+    test_res = (stc->current_st == st ? PASS : FAIL);
+    printf("%s insert_symbol_table: update current_st\n", get_test_result_name(test_res));
 }
 
 void test_st_fsm() {

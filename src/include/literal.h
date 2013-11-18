@@ -3,6 +3,7 @@
 #define LITERAL_H
 
 enum data_type {
+    NO_DATA_TYPE,
     SIGNED_CHAR,
     UNSIGNED_CHAR,
     SIGNED_SHORT,

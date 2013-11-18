@@ -8,7 +8,8 @@
 
 struct traversal_data {
     SymbolTableContainer *stc;
-    TypeNode *current_base_type;
+    enum data_type current_base_type;
+    Symbol *current_symbol;
 };
 typedef struct traversal_data traversal_data;
 
@@ -18,7 +19,8 @@ void traverse_node(void *np, traversal_data *td);
 void traverse_direct_abstract_declarator(void *np, traversal_data *td);
 void traverse_conditional_statement(void *np, traversal_data *td);
 void traverse_iterative_statement(void *np, traversal_data *td);
-void traverse_pointers(void *np, traversal_data *td);
+void traverse_pointers(Node *np, traversal_data *td);
 
 /* symbol creation during traversal */
-TypeNode *create_base_type(Node *n);
+void create_symbol_if_necessary(traversal_data *td);
+

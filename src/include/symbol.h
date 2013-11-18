@@ -23,14 +23,40 @@
 
 /* possible type categories of symbols */
 enum type_category {
+    NO_CATEGORY,
     SCALAR,
     ARRAY,
     FUNCTION
 };
 
 /* data structures for symbol table management */
+union TypeNumericValue {
+    int param_count;
+    int array_size;
+};
+
+/*
+ * TypeNode
+ * Constitutes a "type tree", either by itself or chained with other TypeNodes
+ *
+ * It represents the type of either:
+ *  a scalar value,
+ *  a function return type
+ *  a function parameter type
+ *  an array element type
+ *
+ * Each TypeNode has a type value which can be either:
+ *  a category type: SCALAR, ARRAY, FUNCTION
+ *  a canonical integral type: SIGNED_CHAR, ..., UNSIGNED_LONG
+ *  a pointer type
+ *
+ * It may have a numeric value, which represents either:
+ *  the number of elements in an ARRAY
+ *  the number of parameters to a FUNCTION
+ */
 struct TypeNode {
     int type;
+    union TypeNumericValue n;
     struct TypeNode *next;
 };
 typedef struct TypeNode TypeNode;
@@ -41,11 +67,6 @@ struct FunctionParameter {
 };
 typedef struct FunctionParameter FunctionParameter;
 
-union SymbolMetadata {
-    int param_count;
-    int array_size;
-};
-
 /*
  * Symbol data structure
  * A symbol can represent a basic scalar value, a function, or an array.
@@ -53,9 +74,7 @@ union SymbolMetadata {
  */
 struct Symbol {
     char *name;          /* the name of the symbol */
-    int category;        /* type category: SCALAR, ARRAY, FUNCTION */
-    TypeNode *type_tree; /* basic type, func return type, array element type */
-    union SymbolMetadata meta;      /* function param count, array size */
+    TypeNode *type_tree;
     FunctionParameter *param_list;  /* function parameter list */
     struct Symbol *next;            /* adjacent item in symbol table */
 };
@@ -83,7 +102,7 @@ symbol_tables                                 |
      |
      | STATEMENT_LABELS: file, scope 0 (no statement label symbols)
                                      \
-                                       - function 1, scope 1  <- current
+                                       - function 1, scope 1  <- current_st
                                             |
                                             s1
                                             |
@@ -91,12 +110,12 @@ symbol_tables                                 |
 
 function_prototypes: f1 -- f2 -- f3
 
-symbol_tables: contains the root symbol tables for each overloading class
-current: points to the last symbol table appended
-function_prototypes: separate symbol table for tracking function declarations
 */
+    /* contains the root symbol tables for each overloading class */
     SymbolTable *symbol_tables[NUM_OC_CLASSES];
-    SymbolTable *current;
+    /* points to the last symbol table appended */
+    SymbolTable *current_st;
+    /* separate symbol table for tracking function declarations */
     SymbolTable *function_prototypes;
 };
 typedef struct SymbolTableContainer SymbolTableContainer;
@@ -115,6 +134,8 @@ enum scope_state {
  */
 enum symbol_error {
     STE_SUCCESS = 0,
+    STE_NOT_ARRAY = -1,
+    STE_DUPLICATE_SYMBOL = -2
 };
 
 
@@ -138,7 +159,7 @@ Symbol *create_function_symbol();
 Symbol *create_array_symbol();
 int get_function_parameter_count(Symbol *s);
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
-int get_array_size(Symbol *s);
+void append_symbol(SymbolTable *st, Symbol *s);
 
 
 /* helpers */
@@ -151,9 +172,9 @@ void set_function_parameter_name(FunctionParameter *fp, char *pname);
 void push_parameter_type(FunctionParameter *fp, int t);
 enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);
 
-int get_symbol_category(Symbol *s);
+
 
 /* error handling */
-void handle_symbol_error(enum symbol_error e, char *data, int line);
+void handle_symbol_error(enum symbol_error e, char *data);
 
 #endif
