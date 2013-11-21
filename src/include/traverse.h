@@ -23,4 +23,4 @@ void traverse_pointers(Node *np, traversal_data *td);
 
 /* symbol creation during traversal */
 void create_symbol_if_necessary(traversal_data *td);
-
+void reset_current_symbol();

@@ -13,7 +13,7 @@ VPATH = src
 TESTS = symbol-test
 EXECS = lexer parser
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
-src/symbol/symbol.c src/symbol/symbol-utils.c test/symbol/symbol-test.c
+src/symbol/symbol-utils.c test/symbol/symbol-test.c
 
 
 all : $(EXECS)

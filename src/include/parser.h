@@ -14,6 +14,7 @@
 /* define TRAVERSE to for 'make test-symbol-output' to pass */
 #define TRAVERSE
 #undef TRAVERSE
+#define TRAVERSE
 
 
 /*

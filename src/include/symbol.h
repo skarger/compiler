@@ -166,6 +166,8 @@ void append_symbol(SymbolTable *st, Symbol *s);
 TypeNode *create_type_node(int type);
 TypeNode *push_type(TypeNode *type_tree, int t);
 enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
+char *get_type_tree_name(int type);
+char *get_type_category_name(int type);
 
 FunctionParameter *create_function_parameter();
 void set_function_parameter_name(FunctionParameter *fp, char *pname);

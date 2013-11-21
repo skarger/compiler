@@ -403,6 +403,40 @@ int get_array_size(TypeNode *tn) {
     return tn->n.array_size;
 }
 
+void print_type_tree(TypeNode *tn) {
+    if (tn != NULL) {
+        printf("%s", get_type_tree_name(tn->type));
+        tn = tn->next;
+    }
+    while (tn != NULL) {
+        printf(" -> %s", get_type_tree_name(tn->type));
+        tn = tn->next;
+    }
+}
+
+char *get_type_tree_name(int type) {
+    char *type_name;
+    /* char, int, long ,etc. */
+    type_name = get_type_spec(type);
+    if (strcmp(type_name, "") == 0) {
+        /* array, function */
+        type_name = get_type_category_name(type);
+    }
+    return type_name;
+}
+
+char *get_type_category_name(int type) {
+    switch (type) {
+        case FUNCTION:
+            return "function";
+        case ARRAY:
+            return "array";
+        default:
+            return "";
+    }
+}
+
+
 enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
     while(t1 != NULL && t2 != NULL) {
         if (t1->type != t2->type) {
