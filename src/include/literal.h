@@ -4,6 +4,9 @@
 
 enum data_type {
     NO_DATA_TYPE,
+    SCALAR,
+    ARRAY,
+    FUNCTION,
     SIGNED_CHAR,
     UNSIGNED_CHAR,
     SIGNED_SHORT,

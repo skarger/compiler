@@ -36,7 +36,6 @@ void print_data_node(void *np);
 void print_direct_abstract_declarator(Node *n);
 void print_conditional_statement(void *np);
 void print_iterative_statement(void *np);
-char *get_type_spec(enum data_type type);
 char *get_node_name(enum node_type nt);
 char *get_operator_value(int op);
 int parenthesize(enum node_type nt);

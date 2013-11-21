@@ -21,13 +21,8 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
-/* possible type categories of symbols */
-enum type_category {
-    NO_CATEGORY,
-    SCALAR,
-    ARRAY,
-    FUNCTION
-};
+/* limit on the length of a type tree chain in string format */
+#define MAX_TYPE_TREE_STRLEN 512
 
 /* data structures for symbol table management */
 union TypeNumericValue {
@@ -168,6 +163,7 @@ TypeNode *push_type(TypeNode *type_tree, int t);
 enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
 char *get_type_tree_name(int type);
 char *get_type_category_name(int type);
+char *type_tree_to_string(TypeNode *tn);
 
 FunctionParameter *create_function_parameter();
 void set_function_parameter_name(FunctionParameter *fp, char *pname);

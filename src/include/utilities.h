@@ -14,5 +14,6 @@ enum util_error {
 
 void util_handle_error(enum util_error e, char *data);
 void util_emalloc(void **ptr, size_t n);
+char *get_type_spec(int type);
 
 #endif

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "../include/symbol.h"
 #include "../include/parse-tree.h"
 #include "../include/literal.h"
@@ -403,15 +405,38 @@ int get_array_size(TypeNode *tn) {
     return tn->n.array_size;
 }
 
-void print_type_tree(TypeNode *tn) {
+
+char *type_tree_to_string(TypeNode *tn) {
+    char *buf, *bp;
+    short remaining = MAX_TYPE_TREE_STRLEN;
+    short len;
+    util_emalloc((void **) &buf, MAX_TYPE_TREE_STRLEN + 1);
+    bp = buf;
     if (tn != NULL) {
-        printf("%s", get_type_tree_name(tn->type));
+        len = strlen(get_type_tree_name(tn->type));
+        if (remaining >= len) {
+            snprintf(bp, remaining, "%s", get_type_tree_name(tn->type));
+            bp += len;
+        } else {
+            goto finish;
+        }
+        remaining -= len;
         tn = tn->next;
     }
     while (tn != NULL) {
-        printf(" -> %s", get_type_tree_name(tn->type));
+        len = 4 + strlen(get_type_tree_name(tn->type)); /* room for " -> " */
+        if (remaining >= len) {
+            snprintf(bp, remaining, " -> %s", get_type_tree_name(tn->type));
+            bp += len;
+        } else {
+            goto finish;
+        }
+        remaining -= len;
         tn = tn->next;
     }
+    finish:
+        *bp = '\0';
+        return buf;
 }
 
 char *get_type_tree_name(int type) {

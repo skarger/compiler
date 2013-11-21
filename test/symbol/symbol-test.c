@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "../../src/include/symbol.h"
 #include "../../src/include/literal.h"
@@ -76,6 +75,10 @@ void test_symbol_data() {
     test_res = assert_equal_int(FUNCTION, tn->type);
     printf("%s push_type: function type\n", get_test_result_name(test_res));
     /* end push type */
+
+    char *expected_tt = "function -> array -> unsigned int -> signed char";
+    test_res = assert_equal_string(expected_tt, type_tree_to_string(tn));
+    printf("%s type_tree_to_string\n", get_test_result_name(test_res));
 
     FunctionParameter *fp = create_function_parameter();
     test_res = assert_equal_int(sizeof(*fp), sizeof(FunctionParameter));

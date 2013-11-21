@@ -7,7 +7,8 @@ lex.yy.o: lex.yy.c src/include/lexer.h src/include/literal.h y.tab.h
 lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
   src/lexer/../include/literal.h src/lexer/../../y.tab.h
 utilities.o: src/utilities/utilities.c \
-  src/utilities/../include/utilities.h
+  src/utilities/../include/utilities.h src/utilities/../include/literal.h \
+  src/utilities/../../y.tab.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \

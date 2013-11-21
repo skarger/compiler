@@ -14,6 +14,8 @@
 #include <error.h>
 #include <stdlib.h>
 #include "../include/utilities.h"
+#include "../include/literal.h"
+#include "../../y.tab.h"
 
 void util_emalloc(void **ptr, size_t n) {
     if ( (*ptr = malloc(n)) == NULL ) {
@@ -43,5 +45,30 @@ void util_handle_error(enum util_error e, char *data) {
             return;
         default:
             return;
+    }
+}
+
+char *get_type_spec(int type) {
+    switch (type) {
+        case VOID:
+            return "void";
+        case SIGNED_CHAR:
+            return "signed char";
+        case UNSIGNED_CHAR:
+            return "unsigned char";
+        case SIGNED_SHORT:
+            return "signed short";
+        case UNSIGNED_SHORT:
+            return "unsigned short";
+        case SIGNED_INT:
+            return "signed int";
+        case UNSIGNED_INT:
+            return "unsigned int";
+        case SIGNED_LONG:
+            return "signed long";
+        case UNSIGNED_LONG:
+            return "unsigned long";
+        default:
+            return "";
     }
 }

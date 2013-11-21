@@ -1177,30 +1177,7 @@ void print_pointers(Node *n) {
     } while (n != NULL && n->n_type == POINTER);
 }
 
-char *get_type_spec(enum data_type type) {
-    switch (type) {
-        case VOID:
-            return "void";
-        case SIGNED_CHAR:
-            return "char";
-        case UNSIGNED_CHAR:
-            return "unsigned char";
-        case SIGNED_SHORT:
-            return "short";
-        case UNSIGNED_SHORT:
-            return "unsigned short";
-        case SIGNED_INT:
-            return "int";
-        case UNSIGNED_INT:
-            return "unsigned int";
-        case SIGNED_LONG:
-            return "long";
-        case UNSIGNED_LONG:
-            return "unsigned long";
-        default:
-            return "";
-    }
-}
+
 
 char *get_operator_value(int op) {
     switch (op) {
