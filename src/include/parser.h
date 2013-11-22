@@ -16,7 +16,6 @@
 #undef TRAVERSE
 #define TRAVERSE
 
-
 /*
  * Errors that are caught in the parsing step.
  */

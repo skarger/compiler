@@ -50,6 +50,26 @@ char g ( int[10] );
 char g ( int a, int b );
 
 int main(void) {
+    unsigned char i;
+    unsigned short i;
+    unsigned short int i;
+    unsigned i;
+    unsigned int i;
+    unsigned long i;
+    unsigned long int i;
+
+    signed char i;
+    char i;
+    signed int i;
+    signed i;
+    int i;
+    signed short i;
+    short i;
+    signed long i;
+    long i;
+}
+
+int main(void) {
     char a[(int *) ++x], b[y || z];
 }
 

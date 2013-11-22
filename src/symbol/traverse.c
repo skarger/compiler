@@ -7,6 +7,9 @@
 #include "../include/parse-tree.h"
 #include "../../y.tab.h"
 
+static traversal_data * td = NULL;
+
+
 /*
  * start_traversal
  * Purpose: Kick off traversal of parse tree. Meant for parser to call.
@@ -17,14 +20,16 @@
  * Side-effects: Allocates heap memory
  */
 void start_traversal(void *np) {
-    traversal_data * td;
-    util_emalloc((void **) &td, sizeof(traversal_data));
-
-    /* create container for each symbol table that will be created */
-    /* pass the container across traversal so that new STs may be inserted */
-    SymbolTableContainer *symbol_table_container = create_st_container();
-    td->stc = symbol_table_container;
-    td->current_base_type = NO_DATA_TYPE;
+    FILE *output = stdout;
+    if (td == NULL) {
+        util_emalloc((void **) &td, sizeof(traversal_data));
+        /* create container for each symbol table that will be created */
+        /* pass the container across traversal so that new STs may be inserted */
+        SymbolTableContainer *symbol_table_container = create_st_container();
+        td->stc = symbol_table_container;
+        td->current_base_type = NO_DATA_TYPE;
+        td->outfile = output;
+    }
     traverse_node(np, td);
 }
 
@@ -33,15 +38,14 @@ void start_traversal(void *np) {
  * Purpose: Recursively traverse nodes of parse tree.
  *          Perform processing at nodes, e.g. update symbol table.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
+ *  np      Node * The node to start traversing from. Recursively traverses
  *          the children of np.
  *  td      traversal_data * symbol table related data
             to carry through traversals
  * Returns: None
  * Side-effects: None
  */
-void traverse_node(void *np, traversal_data *td) {
-    Node *n = (Node *) np;
+void traverse_node(Node *n, traversal_data *td) {
     if (n == NULL) {
         return;
     }
@@ -73,8 +77,9 @@ void traverse_node(void *np, traversal_data *td) {
             break;
         case DECL:
             /* first child is a type_specifier */
-            /* save it because there might be multiple declarators in child2*/
-            td->current_base_type = n->data.attributes[TYPE_SPEC];
+            /* save it because there might be multiple declarators in child2 */
+            td->current_base_type = 
+                n->children.child1->data.attributes[TYPE_SPEC];
             traverse_node(n->children.child2, td);
             break;
         case INIT_DECL_LIST:
@@ -93,9 +98,12 @@ void traverse_node(void *np, traversal_data *td) {
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
             append_symbol(td->stc->current_st, td->current_symbol);
+            print_symbol_table(td->outfile, td->stc->current_st);
+            /* print_symbol(td->outfile, td->current_symbol); */
             reset_current_symbol(td);
             break;
         case POINTER_DECLARATOR:
+            create_symbol_if_necessary(td);
             /* pointer(s) */
             traverse_node(n->children.child1, td);
             /* direct declarator */
@@ -273,4 +281,25 @@ void create_symbol_if_necessary(traversal_data *td) {
 
 void reset_current_symbol(traversal_data *td) {
     td->current_symbol = NULL;
+}
+
+void print_symbol(FILE *out, Symbol *s) {
+    fprintf(out, "/*\n");
+    fprintf(out, " * symbol: %s\n", get_symbol_name(s));
+    fprintf(out, " * type: %s\n", symbol_type_string(s));
+    /* if function: function params */
+    fprintf(out, " */\n");
+}
+
+void print_symbol_table(FILE *out, SymbolTable *st) {
+    fprintf(out, "/*\n");
+    fprintf(out, " * symbol table\n");
+    fprintf(out, " * scope: %s\n", get_st_scope(st));
+    fprintf(out, " * overloading class: %s\n", get_st_overloading_class(st));
+    fprintf(out, " */\n");
+    Symbol *cur = get_st_symbols(st);
+    while (cur != NULL) {
+        print_symbol(out, cur);
+        cur = cur->next;
+    }
 }

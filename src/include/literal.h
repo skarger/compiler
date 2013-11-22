@@ -2,21 +2,7 @@
 #ifndef LITERAL_H
 #define LITERAL_H
 
-enum data_type {
-    NO_DATA_TYPE,
-    SCALAR,
-    ARRAY,
-    FUNCTION,
-    SIGNED_CHAR,
-    UNSIGNED_CHAR,
-    SIGNED_SHORT,
-    UNSIGNED_SHORT,
-    SIGNED_INT,
-    UNSIGNED_INT,
-    SIGNED_LONG,
-    UNSIGNED_LONG,
-    OVERFLOW
-};
+#include "parse-tree.h"
 
 enum Boolean {
     FALSE = 0,

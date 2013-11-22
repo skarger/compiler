@@ -281,6 +281,32 @@ void initialize_st(SymbolTable *st) {
     st->symbols = NULL;
 }
 
+char *get_st_scope(SymbolTable *st) {
+    switch(st->scope) {
+        case TOP_LEVEL_SCOPE:
+            return "file";
+        case FUNCTION_BODY_SCOPE:
+            return "function";
+        default:
+            return "block";
+    }
+}
+
+char *get_st_overloading_class(SymbolTable *st) {
+    switch(st->oc) {
+        case OTHER_NAMES:
+            return "other names";
+        case STATEMENT_LABELS:
+            return "statement labels";
+        default:
+            return "";
+    }
+}
+
+Symbol *get_st_symbols(SymbolTable *st) {
+    return st->symbols;
+}
+
 /* append the symbol s to the symbol table st */
 void append_symbol(SymbolTable *st, Symbol *s) {
     Symbol *prev, *cur;
@@ -356,6 +382,13 @@ void set_symbol_name(Symbol *s, char *name) {
     s->name = name;
 }
 
+char *get_symbol_name(Symbol *s) {
+    return s->name;
+}
+
+char *symbol_type_string(Symbol *s) {
+    return type_tree_to_string(s->type_tree);
+}
 
 /* FunctionParameter helpers */
 FunctionParameter *create_function_parameter() {
@@ -405,7 +438,17 @@ int get_array_size(TypeNode *tn) {
     return tn->n.array_size;
 }
 
-
+/*
+ *  type_tree_to_string
+ *  Purpose:
+ *      create a string showing the type chain starting from the given TypeNode
+ *  Parameters:
+ *      tn - the starting TypeNode, e.g. a Symbol's type_tree
+ *  Returns:
+ *      pointer to created string
+ *  Side Effects:
+ *      Allocates heap storage
+ */
 char *type_tree_to_string(TypeNode *tn) {
     char *buf, *bp;
     short remaining = MAX_TYPE_TREE_STRLEN;

@@ -74,11 +74,11 @@ void test_symbol_data() {
     tn = push_type(tn, FUNCTION);
     test_res = assert_equal_int(FUNCTION, tn->type);
     printf("%s push_type: function type\n", get_test_result_name(test_res));
-    /* end push type */
 
     char *expected_tt = "function -> array -> unsigned int -> signed char";
     test_res = assert_equal_string(expected_tt, type_tree_to_string(tn));
     printf("%s type_tree_to_string\n", get_test_result_name(test_res));
+    /* end push type */
 
     FunctionParameter *fp = create_function_parameter();
     test_res = assert_equal_int(sizeof(*fp), sizeof(FunctionParameter));
@@ -105,6 +105,10 @@ void test_symbol_data() {
     Symbol *s = create_symbol();
     test_res = assert_equal_int(sizeof(*s), sizeof(Symbol));
     printf("%s Symbol: size\n", get_test_result_name(test_res));
+
+    set_symbol_name(s, "x");
+    test_res = assert_equal_string("x", get_symbol_name(s));
+    printf("%s Symbol: name\n", get_test_result_name(test_res));
 
     push_symbol_type(s, SIGNED_SHORT);
     test_res = assert_equal_int(SIGNED_SHORT, s->type_tree->type);

@@ -81,6 +81,24 @@ union NodeData {
     char *str;         /* IDENTIFIER, STRING_CONSTANT */
 };
 
+/* possible data types */
+/* used not only for base types but also for type categories like FUNCTION */
+enum data_type {
+    NO_DATA_TYPE,
+    SCALAR,
+    ARRAY,
+    FUNCTION,
+    SIGNED_CHAR,
+    UNSIGNED_CHAR,
+    SIGNED_SHORT,
+    UNSIGNED_SHORT,
+    SIGNED_INT,
+    UNSIGNED_INT,
+    SIGNED_LONG,
+    UNSIGNED_LONG,
+    OVERFLOW
+};
+
 /*
  * Node
  * The main data structure for the parse tree.

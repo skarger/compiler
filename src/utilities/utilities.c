@@ -1,3 +1,10 @@
+#include <error.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "../include/utilities.h"
+#include "../include/parse-tree.h"
+#include "../../y.tab.h"
+
 /*
  * util_emalloc
  * Purpose:
@@ -11,12 +18,6 @@
  *      Sets the value of ptr.
  *      Terminates program if malloc errors.
  */
-#include <error.h>
-#include <stdlib.h>
-#include "../include/utilities.h"
-#include "../include/literal.h"
-#include "../../y.tab.h"
-
 void util_emalloc(void **ptr, size_t n) {
     if ( (*ptr = malloc(n)) == NULL ) {
         util_handle_error(UE_MALLOC, "util_emalloc");
@@ -52,6 +53,8 @@ char *get_type_spec(int type) {
     switch (type) {
         case VOID:
             return "void";
+        case POINTER:
+            return "pointer";
         case SIGNED_CHAR:
             return "signed char";
         case UNSIGNED_CHAR:

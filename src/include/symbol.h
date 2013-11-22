@@ -22,7 +22,7 @@
 #define STATEMENT_LABELS 1
 
 /* limit on the length of a type tree chain in string format */
-#define MAX_TYPE_TREE_STRLEN 512
+#define MAX_TYPE_TREE_STRLEN 511
 
 /* data structures for symbol table management */
 union TypeNumericValue {
@@ -35,7 +35,7 @@ union TypeNumericValue {
  * Constitutes a "type tree", either by itself or chained with other TypeNodes
  *
  * It represents the type of either:
- *  a scalar value,
+ *  a scalar value
  *  a function return type
  *  a function parameter type
  *  an array element type
@@ -75,6 +75,13 @@ struct Symbol {
 };
 typedef struct Symbol Symbol;
 
+/*
+ * SymbolTable
+ * Maintains a list of symbols as well as the scope and overloading class
+ * of those symbols.
+ * Also has a pointer to the SymbolTable that encloses it.
+ * A source file will usually prompt the creation of several SymbolTables
+ */
 struct SymbolTable {
     Symbol *symbols;                /* list of symbols in symbol table     */
     int scope;                      /* scope level (file, function, etc.)  */
@@ -83,8 +90,11 @@ struct SymbolTable {
 };
 typedef struct SymbolTable SymbolTable;
 
-struct SymbolTableContainer {
 /*
+ * SymbolTableContainer
+ * The single container for all the SymbolTables created while
+ * compiling a source file
+
                        s2                s2                    s2
                        |                 |                     |
                        s1                s1                    s1
@@ -106,6 +116,7 @@ symbol_tables                                 |
 function_prototypes: f1 -- f2 -- f3
 
 */
+struct SymbolTableContainer {
     /* contains the root symbol tables for each overloading class */
     SymbolTable *symbol_tables[NUM_OC_CLASSES];
     /* points to the last symbol table appended */
@@ -147,6 +158,9 @@ SymbolTable *create_symbol_table();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
+char *get_st_overloading_class(SymbolTable *st);
+char *get_st_scope(SymbolTable *st);
+Symbol *get_st_symbols(SymbolTable *st);
 
 Symbol *create_symbol();
 Symbol *create_scalar_symbol();
@@ -155,7 +169,9 @@ Symbol *create_array_symbol();
 int get_function_parameter_count(Symbol *s);
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
 void append_symbol(SymbolTable *st, Symbol *s);
-
+void set_symbol_name(Symbol *s, char *name);
+char *get_symbol_name(Symbol *s);
+char *symbol_type_string(Symbol *s);
 
 /* helpers */
 TypeNode *create_type_node(int type);
