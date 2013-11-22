@@ -372,6 +372,15 @@ void push_symbol_type(Symbol *s, int t) {
     s->type_tree = push_type(s->type_tree, t);
 }
 
+/* set the size of the first element of this symbol's type_tree */
+void set_symbol_array_size(Symbol *s, int n) {
+    TypeNode *tn = s->type_tree;
+    if (tn->type != ARRAY) {
+        handle_symbol_error(STE_NOT_ARRAY, "setting array size on non-array");
+    }
+    set_array_size(tn, n);
+}
+
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     TypeNode *tn1 = s1->type_tree;
     TypeNode *tn2 = s2->type_tree;
@@ -450,36 +459,42 @@ int get_array_size(TypeNode *tn) {
  *      Allocates heap storage
  */
 char *type_tree_to_string(TypeNode *tn) {
+    /* buffer for printing type tree to and running pointer */
     char *buf, *bp;
-    short remaining = MAX_TYPE_TREE_STRLEN;
-    short len;
+    /* counters for ensuring we have enough space */
+    short temp, remaining_cur, remaining_buf = MAX_TYPE_TREE_STRLEN;
     util_emalloc((void **) &buf, MAX_TYPE_TREE_STRLEN + 1);
     bp = buf;
-    if (tn != NULL) {
-        len = strlen(get_type_tree_name(tn->type));
-        if (remaining >= len) {
-            snprintf(bp, remaining, "%s", get_type_tree_name(tn->type));
-            bp += len;
-        } else {
-            goto finish;
-        }
-        remaining -= len;
-        tn = tn->next;
-    }
     while (tn != NULL) {
-        len = 4 + strlen(get_type_tree_name(tn->type)); /* room for " -> " */
-        if (remaining >= len) {
-            snprintf(bp, remaining, " -> %s", get_type_tree_name(tn->type));
-            bp += len;
-        } else {
-            goto finish;
+        /* if there is room in the buffer for a type string, append this one */
+        if (remaining_buf > MAX_TYPE_STRLEN) {
+            remaining_cur = MAX_TYPE_STRLEN;
+            if (bp != buf) {
+                /* the string has a preceding item */
+                temp = snprintf(bp, remaining_cur, " -> ");
+                bp += temp;
+                remaining_cur -= temp;
+            }
+            temp = snprintf(bp, remaining_cur, "%s",
+                                get_type_tree_name(tn->type));
+            bp += temp;
+            remaining_cur -= temp;
+            if (tn->type == ARRAY) {
+                temp = snprintf(bp, remaining_cur, " (%d elements)",
+                            get_array_size(tn));
+                bp += temp;
+                remaining_cur -= temp;
+            } else if (tn->type == FUNCTION) {
+                /* TODO: function parameter count */
+                temp = snprintf(bp, remaining_cur, " (%d parameters)", 12345);
+                bp += temp;
+                remaining_cur -= temp;
+            }
+            remaining_buf -= MAX_TYPE_STRLEN;
         }
-        remaining -= len;
         tn = tn->next;
     }
-    finish:
-        *bp = '\0';
-        return buf;
+    return buf;
 }
 
 char *get_type_tree_name(int type) {

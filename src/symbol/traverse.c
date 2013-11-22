@@ -99,7 +99,6 @@ void traverse_node(Node *n, traversal_data *td) {
             set_symbol_name(td->current_symbol, n->data.str);
             append_symbol(td->stc->current_st, td->current_symbol);
             print_symbol_table(td->outfile, td->stc->current_st);
-            /* print_symbol(td->outfile, td->current_symbol); */
             reset_current_symbol(td);
             break;
         case POINTER_DECLARATOR:
@@ -113,9 +112,24 @@ void traverse_node(Node *n, traversal_data *td) {
             traverse_pointers(n, td);
             break;
         case FUNCTION_DECLARATOR:
-        case ARRAY_DECLARATOR:
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
+            break;
+        case ARRAY_DECLARATOR:
+            create_symbol_if_necessary(td);
+            push_symbol_type(td->current_symbol, ARRAY);
+
+            /* second child: constant expr, i.e. conditional expr */
+            /* need to resolve this to determine array size */
+            /* error if it cannot be resolved */
+            /* do this before processing first child because first child */
+            /* will reset the current symbol when it is resolved */
+            traverse_node(n->children.child2, td);
+            set_symbol_array_size(td->current_symbol, 0);
+
+            /* first child: direct declarator */
+            /* should ultimately lead to a simple declarator */
+            traverse_node(n->children.child1, td);
             break;
         case ABSTRACT_DECLARATOR:
         case DIR_ABS_DECL:

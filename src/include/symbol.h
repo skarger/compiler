@@ -23,6 +23,14 @@
 
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 511
+/*
+limit on individual type strings, e.g.
+"unsigned long -> "
+"array (1234567890 elements) -> "
+"function (12345 parameters) -> "
+*/
+#define MAX_TYPE_STRLEN 32
+
 
 /* data structures for symbol table management */
 union TypeNumericValue {
@@ -180,6 +188,7 @@ enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
 char *get_type_tree_name(int type);
 char *get_type_category_name(int type);
 char *type_tree_to_string(TypeNode *tn);
+void set_array_size(TypeNode *tn, int size);
 
 FunctionParameter *create_function_parameter();
 void set_function_parameter_name(FunctionParameter *fp, char *pname);
