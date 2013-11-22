@@ -475,13 +475,27 @@ signed_long_int: LONG
     | SIGNED LONG INT
     ;
 
-unsigned_type_specifier : UNSIGNED SHORT INT
+unsigned_type_specifier : unsigned_short_int
         {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_SHORT); }
-    | UNSIGNED INT
+    | unsigned_int
         {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_INT); }
-    | UNSIGNED LONG INT
+    | unsigned_long_int
         {  $$ = create_node(TYPE_SPECIFIER, UNSIGNED_LONG); }
     ;
+
+unsigned_short_int : UNSIGNED SHORT
+    | UNSIGNED SHORT INT
+    ;
+
+unsigned_int : UNSIGNED INT
+    | UNSIGNED
+    ;
+
+unsigned_long_int: UNSIGNED LONG
+    | UNSIGNED LONG INT
+    ;
+
+
 
 character_type_specifier : CHAR
         {  $$ = create_node(TYPE_SPECIFIER, SIGNED_CHAR); }
