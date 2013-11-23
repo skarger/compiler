@@ -7,7 +7,8 @@
 #include "../include/parse-tree.h"
 #include "../../y.tab.h"
 
-static traversal_data * td = NULL;
+/* external variable for traversal data. this is the defining declaration. */
+TraversalData *td = NULL;
 
 
 /*
@@ -22,7 +23,7 @@ static traversal_data * td = NULL;
 void start_traversal(void *np) {
     FILE *output = stdout;
     if (td == NULL) {
-        util_emalloc((void **) &td, sizeof(traversal_data));
+        util_emalloc((void **) &td, sizeof(TraversalData));
         /* create container for each symbol table that will be created */
         /* pass the container across traversal so that new STs may be inserted */
         SymbolTableContainer *symbol_table_container = create_st_container();
@@ -40,12 +41,12 @@ void start_traversal(void *np) {
  * Parameters:
  *  np      Node * The node to start traversing from. Recursively traverses
  *          the children of np.
- *  td      traversal_data * symbol table related data
+ *  td      TraversalData * symbol table related data
             to carry through traversals
  * Returns: None
  * Side-effects: None
  */
-void traverse_node(Node *n, traversal_data *td) {
+void traverse_node(Node *n, TraversalData *td) {
     if (n == NULL) {
         return;
     }
@@ -58,12 +59,6 @@ void traverse_node(Node *n, traversal_data *td) {
     if (should_create_new_st()) {
         SymbolTable *st = create_symbol_table();
         insert_symbol_table(st, td->stc);
-
-        #ifdef DEBUG
-        fprintf(output, "/* node type: %s, "
-            "creating a new symbol table at scope: %d */\n",
-            get_node_name(n->n_type), get_scope());
-        #endif
     }
 
     switch (n->n_type) {
@@ -100,7 +95,6 @@ void traverse_node(Node *n, traversal_data *td) {
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
             append_symbol(td->stc->current_st, td->current_symbol);
-            print_symbol_table(td->outfile, td->stc->current_st);
             reset_current_symbol(td);
             break;
         case POINTER_DECLARATOR:
@@ -131,7 +125,6 @@ void traverse_node(Node *n, traversal_data *td) {
                 /* TODO: error check that required sizes specified */
                 set_symbol_array_size(td->current_symbol, UNSPECIFIED_SIZE);
             }
-
             /* first child: direct declarator */
             /* should ultimately lead to a simple declarator */
             traverse_node(n->children.child1, td);
@@ -229,7 +222,7 @@ void traverse_node(Node *n, traversal_data *td) {
  * Returns: None
  * Side-effects: None
  */
-void traverse_iterative_statement(void *np, traversal_data *td) {
+void traverse_iterative_statement(void *np, TraversalData *td) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
@@ -262,7 +255,7 @@ void traverse_iterative_statement(void *np, traversal_data *td) {
  * Returns: None
  * Side-effects: None
  */
-void traverse_conditional_statement(void *np, traversal_data *td) {
+void traverse_conditional_statement(void *np, TraversalData *td) {
     Node *n = (Node *) np;
     if (n == NULL) {
         return;
@@ -282,7 +275,7 @@ void traverse_conditional_statement(void *np, traversal_data *td) {
     }
 }
 
-void traverse_pointers(Node *n, traversal_data *td) {
+void traverse_pointers(Node *n, TraversalData *td) {
     /* push pointers onto type tree */
     while (n != NULL && n->n_type == POINTER) {
         push_symbol_type(td->current_symbol, POINTER);
@@ -337,7 +330,7 @@ unsigned long resolve_binary_expr(Node *n) {
 }
 
 
-void create_symbol_if_necessary(traversal_data *td) {
+void create_symbol_if_necessary(TraversalData *td) {
     if (td->current_symbol == NULL) {
         Symbol *s = create_symbol();
         push_symbol_type(s, td->current_base_type);
@@ -345,7 +338,7 @@ void create_symbol_if_necessary(traversal_data *td) {
     }
 }
 
-void reset_current_symbol(traversal_data *td) {
+void reset_current_symbol(TraversalData *td) {
     td->current_symbol = NULL;
 }
 
@@ -369,3 +362,4 @@ void print_symbol_table(FILE *out, SymbolTable *st) {
         cur = cur->next;
     }
 }
+

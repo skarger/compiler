@@ -9,6 +9,7 @@
 
 /* define PRETTY_PRINT for parser tests */
 #define PRETTY_PRINT
+#undef PRETTY_PRINT
 
 /*
  * Errors that are caught in the parsing step.

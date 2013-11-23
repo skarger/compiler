@@ -11,8 +11,7 @@ lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
 utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h \
   src/utilities/../include/parse-tree.h src/utilities/../../y.tab.h
-parser-main.o: src/parser/parser-main.c \
-  src/parser/../include/parser-main.h
+parser-main.o: src/parser/parser-main.c
 traverse.o: src/symbol/traverse.c src/symbol/../include/traverse.h \
   src/symbol/../include/../include/parse-tree.h \
   src/symbol/../include/../include/symbol.h \
@@ -28,4 +27,9 @@ symbol-test.o: test/symbol/symbol-test.c \
   test/symbol/../../src/include/parse-tree.h \
   test/symbol/../../src/include/literal.h \
   test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
-symtab-test.o: test/symbol/symtab-test.c
+symtab-test.o: test/symbol/symtab-test.c \
+  test/symbol/../../src/include/traverse.h \
+  test/symbol/../../src/include/../include/parse-tree.h \
+  test/symbol/../../src/include/../include/symbol.h \
+  test/symbol/../../src/include/../include/parse-tree.h \
+  test/symbol/../../src/include/../include/literal.h

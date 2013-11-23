@@ -1,8 +1,8 @@
 #ifndef TRAVERSE_H
 #define TRAVERSE_H
 
-#undef  DEBUG
 #define DEBUG
+#undef  DEBUG
 
 #include <stdio.h>
 #include "../include/parse-tree.h"
@@ -11,28 +11,29 @@
 #define TRAVERSE
 
 
-struct traversal_data {
+struct TraversalData {
     SymbolTableContainer *stc;
     enum data_type current_base_type;
     Symbol *current_symbol;
     FILE *outfile;
 };
-typedef struct traversal_data traversal_data;
+typedef struct TraversalData TraversalData;
 
 
 /* tree traversal */
-void traverse_node(Node *n, traversal_data *td);
-void traverse_direct_abstract_declarator(void *np, traversal_data *td);
-void traverse_conditional_statement(void *np, traversal_data *td);
-void traverse_iterative_statement(void *np, traversal_data *td);
-void traverse_pointers(Node *np, traversal_data *td);
+void traverse_node(Node *n, TraversalData *td);
+void traverse_direct_abstract_declarator(void *np, TraversalData *td);
+void traverse_conditional_statement(void *np, TraversalData *td);
+void traverse_iterative_statement(void *np, TraversalData *td);
+void traverse_pointers(Node *np, TraversalData *td);
 unsigned long resolve_constant_expr(Node *n);
 
 void print_symbol(FILE *out, Symbol *s);
 void print_symbol_table(FILE *out, SymbolTable *st);
 
 /* symbol creation during traversal */
-void create_symbol_if_necessary(traversal_data *td);
+void create_symbol_if_necessary(TraversalData *td);
 void reset_current_symbol();
+
 
 #endif

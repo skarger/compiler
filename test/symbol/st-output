@@ -1,0 +1,41 @@
+/*
+ * symbol table
+ * scope: file
+ * overloading class: other names
+ */
+/*
+ * symbol: x
+ * type: signed int
+ */
+/*
+ * symbol: c
+ * type: signed char
+ */
+/*
+ * symbol: a
+ * type: array (5 elements) -> signed int
+ */
+/*
+ * symbol: b
+ * type: array (5 elements) -> array (10 elements) -> signed int
+ */
+/*
+ * symbol: cp
+ * type: pointer -> signed char
+ */
+/*
+ * symbol: cpa
+ * type: array (3 elements) -> pointer -> signed char
+ */
+/*
+ * symbol: d
+ * type: array (20 elements) -> signed int
+ */
+/*
+ * symbol: e
+ * type: array (10 elements) -> signed int
+ */
+/*
+ * symbol: f
+ * type: array (1 elements) -> signed int
+ */

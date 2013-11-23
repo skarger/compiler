@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../../src/include/traverse.h"
+
 /* define TRAVERSE to for 'make test-symbol-output' to pass */
 #define TRAVERSE
+
+extern TraversalData *td;
+
+void symtab_test(SymbolTableContainer *stc);
+
 
 FILE *output;
 int main(int argc, char *argv[]) {
@@ -27,9 +34,9 @@ int main(int argc, char *argv[]) {
     yyin = input;
 
     /* do the work */
-
     rv = yyparse();
-
+    /* td should now be set after parsing */
+    symtab_test(td->stc);
 
     /* cleanup */
     if (output != stdout) {
@@ -40,4 +47,9 @@ int main(int argc, char *argv[]) {
     }
 
     return rv;
+}
+
+void symtab_test(SymbolTableContainer *stc) {
+    print_symbol_table(output, td->stc->current_st);
+    return;
 }

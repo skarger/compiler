@@ -1,0 +1,10 @@
+int x;
+char c;
+int a[5];
+int b[5][10];
+char *cp;
+char *cpa[3];
+int d[1 ? 20 : 10];
+int e[0 ? 20 : 10];
+int f[0 || 1];
+

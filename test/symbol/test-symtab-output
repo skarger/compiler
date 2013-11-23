@@ -1,0 +1,10 @@
+./symtab-test test/symbol/st-input test/symbol/st-output
+diff test/symbol/st-expected test/symbol/st-output
+
+if [ $? -eq 0 ]
+then
+    echo "TESTS PASS"
+else
+    echo "TESTS FAIL"
+fi
+
