@@ -323,6 +323,8 @@ unsigned long resolve_binary_expr(Node *n) {
     switch (n->data.attributes[OPERATOR]) {
         case LOGICAL_OR:
             return child1 || child2;
+        case LOGICAL_AND:
+            return child1 && child2;
         default:
             /* error */
             return 0;

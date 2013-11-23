@@ -39,3 +39,11 @@
  * symbol: f
  * type: array (1 elements) -> signed int
  */
+/*
+ * symbol: g
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: h
+ * type: array (1 elements) -> signed int
+ */
