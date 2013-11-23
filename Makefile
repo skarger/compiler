@@ -10,10 +10,11 @@ YFLAGS += -d
 VPATH = src
 
 
-TESTS = symbol-test
-EXECS = lexer parser
+TESTS = symbol-test symtab-test
+EXECS = lexer parser-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
-src/symbol/symbol-utils.c test/symbol/symbol-test.c
+src/parser/parser-main.c src/symbol/traverse.c \
+src/symbol/symbol-utils.c test/symbol/symbol-test.c test/symbol/symtab-test.c
 
 
 all : $(EXECS)
@@ -49,8 +50,11 @@ y.tab.c : src/parser/parser.y lex.yy.c
 y.tab.o :
 	$(CC) -c y.tab.c
 
-parser : y.tab.o utilities.o traverse.o symbol-utils.o
-	$(CC) y.tab.o utilities.o traverse.o symbol-utils.o -o $@
+parser-main.o : src/parser/parser-main.c
+	$(CC) -c src/parser/parser-main.c -o $@
+
+parser-main : parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o
+	$(CC) parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
@@ -70,3 +74,8 @@ symbol-test : symbol-utils.o symbol-test.o utilities.o
 test-symbol-output : test/symbol/test-symbol-output parser
 	test/symbol/test-symbol-output
 
+symtab-test.o : test/symbol/symtab-test.c
+	$(CC) -c test/symbol/symtab-test.c
+
+symtab-test : symtab-test.o y.tab.o traverse.o symbol-utils.o utilities.o
+	$(CC) symtab-test.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@

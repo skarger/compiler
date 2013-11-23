@@ -11,6 +11,14 @@ lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
 utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h \
   src/utilities/../include/parse-tree.h src/utilities/../../y.tab.h
+parser-main.o: src/parser/parser-main.c \
+  src/parser/../include/parser-main.h
+traverse.o: src/symbol/traverse.c src/symbol/../include/traverse.h \
+  src/symbol/../include/../include/parse-tree.h \
+  src/symbol/../include/../include/symbol.h \
+  src/symbol/../include/../include/parse-tree.h \
+  src/symbol/../include/../include/literal.h \
+  src/symbol/../include/parse-tree.h src/symbol/../../y.tab.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
@@ -20,3 +28,4 @@ symbol-test.o: test/symbol/symbol-test.c \
   test/symbol/../../src/include/parse-tree.h \
   test/symbol/../../src/include/literal.h \
   test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
+symtab-test.o: test/symbol/symtab-test.c

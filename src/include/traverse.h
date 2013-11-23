@@ -8,7 +8,7 @@
 #include "../include/parse-tree.h"
 #include "../include/symbol.h"
 
-
+#define TRAVERSE
 
 
 struct traversal_data {

@@ -1,0 +1,29 @@
+
+int main(void) {
+    ;
+}
+
+int f(char *c, int x) {
+    ;
+}
+
+char g(int a) {
+    x = a;
+
+    {
+        int x;
+        x = 0;
+    }
+}
+
+int x;
+char h(int x) {
+
+    {
+        int x;
+    }
+
+    {
+        int x;
+    }
+}

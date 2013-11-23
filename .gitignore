@@ -33,6 +33,6 @@ lex.yy.c
 
 # binaries
 lexer
-parser
-symbol
+parser-main
+symtab-test
 symbol-test

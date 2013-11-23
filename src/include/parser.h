@@ -9,12 +9,6 @@
 
 /* define PRETTY_PRINT for parser tests */
 #define PRETTY_PRINT
-#undef  PRETTY_PRINT
-
-/* define TRAVERSE to for 'make test-symbol-output' to pass */
-#define TRAVERSE
-#undef TRAVERSE
-#define TRAVERSE
 
 /*
  * Errors that are caught in the parsing step.
