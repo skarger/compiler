@@ -21,12 +21,16 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
+/* type metadata related */
+#define UNSPECIFIED_SIZE 0
+
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 511
 /*
 limit on individual type strings, e.g.
 "unsigned long -> "
 "array (1234567890 elements) -> "
+"array (unspecified size) ->"
 "function (12345 parameters) -> "
 */
 #define MAX_TYPE_STRLEN 32

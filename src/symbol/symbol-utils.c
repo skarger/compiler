@@ -480,8 +480,12 @@ char *type_tree_to_string(TypeNode *tn) {
             bp += temp;
             remaining_cur -= temp;
             if (tn->type == ARRAY) {
-                temp = snprintf(bp, remaining_cur, " (%d elements)",
-                            get_array_size(tn));
+                if (get_array_size(tn) == UNSPECIFIED_SIZE) {
+                    temp = snprintf(bp, remaining_cur, " (unspecified size)");
+                } else {
+                    temp = snprintf(bp, remaining_cur, " (%d elements)",
+                                        get_array_size(tn));
+                }
                 bp += temp;
                 remaining_cur -= temp;
             } else if (tn->type == FUNCTION) {

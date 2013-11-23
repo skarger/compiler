@@ -50,6 +50,8 @@ void traverse_node(Node *n, traversal_data *td) {
         return;
     }
 
+    unsigned long array_size;
+
     /* this node may or may not imply a scope transition */
     transition_scope(n, START);
 
@@ -118,14 +120,17 @@ void traverse_node(Node *n, traversal_data *td) {
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
             push_symbol_type(td->current_symbol, ARRAY);
-
             /* second child: constant expr, i.e. conditional expr */
             /* need to resolve this to determine array size */
-            /* error if it cannot be resolved */
             /* do this before processing first child because first child */
             /* will reset the current symbol when it is resolved */
-            traverse_node(n->children.child2, td);
-            set_symbol_array_size(td->current_symbol, 0);
+            if (n->children.child2 != NULL) {
+                array_size = resolve_constant_expr(n->children.child2);
+                set_symbol_array_size(td->current_symbol, array_size);
+            } else {
+                /* TODO: error check that required sizes specified */
+                set_symbol_array_size(td->current_symbol, UNSPECIFIED_SIZE);
+            }
 
             /* first child: direct declarator */
             /* should ultimately lead to a simple declarator */
@@ -284,6 +289,53 @@ void traverse_pointers(Node *n, traversal_data *td) {
         n = n->children.child1;
     }
 }
+
+unsigned long resolve_constant_expr(Node *n) {
+    unsigned long resolve_conditional_expr(Node *n);
+    unsigned long resolve_binary_expr(Node *n);
+
+    /* error if it cannot be resolved */
+    switch (n->n_type) {
+        case CONDITIONAL_EXPR:
+            return resolve_conditional_expr(n);
+        case BINARY_EXPR:
+            return resolve_binary_expr(n);
+        /* base cases */
+        case CHAR_CONSTANT:
+            return n->data.ch;
+            break;
+        case NUMBER_CONSTANT:
+            return n->data.num;
+            break;
+        case STRING_CONSTANT:
+        default:
+            /* error */
+            return 0;
+    }
+}
+
+/* helpers for resolve constant expr */
+unsigned long resolve_conditional_expr(Node *n) {
+    unsigned long child1, child2, child3;
+    child1 = resolve_constant_expr(n->children.child1);
+    child2 = resolve_constant_expr(n->children.child2);
+    child3 = resolve_constant_expr(n->children.child3);
+    return child1 ? child2 : child3;
+}
+
+unsigned long resolve_binary_expr(Node *n) {
+    unsigned long child1, child2;
+    child1 = resolve_constant_expr(n->children.child1);
+    child2 = resolve_constant_expr(n->children.child2);
+    switch (n->data.attributes[OPERATOR]) {
+        case LOGICAL_OR:
+            return child1 || child2;
+        default:
+            /* error */
+            return 0;
+    }
+}
+
 
 void create_symbol_if_necessary(traversal_data *td) {
     if (td->current_symbol == NULL) {
