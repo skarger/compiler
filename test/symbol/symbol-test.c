@@ -9,6 +9,7 @@ char *get_overloading_class_name(int oc);
 void test_transition(Node *n, enum node_type nt, int action,
         enum scope_state expected_state, int expected_scope, int expected_oc);
 void test_st_fsm();
+void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expected_oc);
 void test_st_data();
 void test_symbol_data();
 
@@ -75,7 +76,8 @@ void test_symbol_data() {
     test_res = assert_equal_int(FUNCTION, tn->type);
     printf("%s push_type: function type\n", get_test_result_name(test_res));
 
-    char *expected_tt = "function -> array -> unsigned int -> signed char";
+    char *expected_tt = "function (12345 parameters) -> array (5 elements) -> "
+                        "unsigned int -> signed char";
     test_res = assert_equal_string(expected_tt, type_tree_to_string(tn));
     printf("%s type_tree_to_string\n", get_test_result_name(test_res));
     /* end push type */
@@ -203,8 +205,8 @@ void test_st_fsm() {
     initialize_fsm();
     enum scope_state cur = get_state();
     int oc = get_overloading_class();
-    printf("initial state: %25s scope: %d overloading class: %16s\n",
-            get_scope_state_name(cur), get_scope(), get_overloading_class_name(oc));
+    printf("initial state:\n");
+    verify_st_fsm(TOP_LEVEL, 0, OTHER_NAMES);
 
     Node *n = malloc(sizeof(Node));
 
@@ -256,17 +258,25 @@ void test_transition(Node *n, enum node_type nt, int action,
 
     n->n_type = nt;
     transition_scope(n, action);
+    verify_st_fsm(expected_state, expected_scope, expected_oc);
+}
+
+void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expected_oc) {
+    int test_state, test_scope, test_oc;
+
     enum scope_state cur = get_state();
     int scope = get_scope();
     int oc = get_overloading_class();
-    printf("current state: %25s scope: %d overloading class: %16s | ",
-            get_scope_state_name(cur), get_scope(), get_overloading_class_name(oc));
 
     test_state = (cur == expected_state ? PASS : FAIL);
     test_scope = (scope == expected_scope ? PASS : FAIL);
     test_oc    = (oc == expected_oc ? PASS : FAIL);
-    printf("state: %s ", get_test_result_name(test_state));
-    printf("scope: %s ", get_test_result_name(test_scope));
-    printf("overld. class: %s ", get_test_result_name(test_oc));
-    printf("\n");
+
+    printf("%s current state: %s\n", get_test_result_name(test_state),
+                                    get_scope_state_name(cur));
+    printf("%s scope: %s\n", get_test_result_name(test_scope),
+                            get_scope_state_name(cur));
+    printf("%s overloading class: %s\n", get_test_result_name(test_oc),
+                                        get_overloading_class_name(oc));
+
 }
