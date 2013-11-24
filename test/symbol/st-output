@@ -207,3 +207,31 @@
  * symbol: bwnf
  * type: array (unspecified size) -> signed int
  */
+/*
+ * symbol: pre
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: post
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: subs
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: fc
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: ide
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: stre
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: empty
+ * type: array (unspecified size) -> signed int
+ */

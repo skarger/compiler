@@ -6,11 +6,14 @@
 #include "../include/traverse.h"
 #include "../include/parse-tree.h"
 #include "../include/utilities.h"
+#include "../include/literal.h"
 #include "../../y.tab.h"
 
 /* external variable for traversal data. this is the defining declaration. */
 TraversalData *td = NULL;
 
+/* file helper procs */
+enum Boolean invalid_operand(long operand);
 
 /*
  * start_traversal
@@ -305,58 +308,71 @@ unsigned long resolve_constant_expr(Node *n) {
 
     /* error if it cannot be resolved */
     switch (n->n_type) {
+        /* base cases */
+        case CHAR_CONSTANT:
+            return n->data.ch;
+        case NUMBER_CONSTANT:
+            return n->data.num;
+        /* recursive cases */
         case CONDITIONAL_EXPR:
             return resolve_conditional_expr(n);
         case BINARY_EXPR:
             return resolve_binary_expr(n);
         case UNARY_EXPR:
             return resolve_unary_expr(n);
-        /* base cases */
-        case CHAR_CONSTANT:
-            return n->data.ch;
-        case NUMBER_CONSTANT:
-            return n->data.num;
+        /* error cases */
+        case PREFIX_EXPR:
+        case POSTFIX_EXPR:
+        case SUBSCRIPT_EXPR:
+        case FUNCTION_CALL:
+        case IDENTIFIER_EXPR:
+            return VARIABLE_VALUE;
         case STRING_CONSTANT:
+            return NON_INTEGRAL_VALUE;
         default:
-            /* error */
             return UNSPECIFIED_VALUE;
+    }
+}
+
+enum Boolean invalid_operand(long operand) {
+    switch (operand) {
+        case NON_INTEGRAL_VALUE:
+        case VARIABLE_VALUE:
+        case UNSPECIFIED_VALUE:
+            return TRUE;
+        default:
+            return FALSE;
     }
 }
 
 /* helpers for resolve constant expr */
 unsigned long resolve_conditional_expr(Node *n) {
     unsigned long child1, child2, child3;
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    if (invalid_operand(child2)) {
+        return child2;
+    }
+    if (invalid_operand(child3)) {
+        return child3;
+    }
     child1 = resolve_constant_expr(n->children.child1);
     child2 = resolve_constant_expr(n->children.child2);
     child3 = resolve_constant_expr(n->children.child3);
     return child1 ? child2 : child3;
 }
 
-unsigned long resolve_unary_expr(Node *n) {
-    unsigned long child1;
-    child1 = resolve_constant_expr(n->children.child1);
-    switch (n->data.attributes[OPERATOR]) {
-        case MINUS:
-            return -child1;
-        case PLUS:
-            return +child1;
-        case LOGICAL_NOT:
-            return !child1;
-        case BITWISE_NOT:
-            return ~child1;
-        case AMPERSAND:
-            return NON_INTEGRAL_VALUE;
-        case ASTERISK:
-            return VARIABLE_VALUE;
-        default:
-            return UNSPECIFIED_VALUE;
-    }
-}
-
 unsigned long resolve_binary_expr(Node *n) {
     unsigned long child1, child2;
     child1 = resolve_constant_expr(n->children.child1);
     child2 = resolve_constant_expr(n->children.child2);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    if (invalid_operand(child2)) {
+        return child2;
+    }
     switch (n->data.attributes[OPERATOR]) {
         case LOGICAL_OR:
             return child1 || child2;
@@ -414,6 +430,29 @@ unsigned long resolve_binary_expr(Node *n) {
     }
 }
 
+unsigned long resolve_unary_expr(Node *n) {
+    unsigned long child1;
+    child1 = resolve_constant_expr(n->children.child1);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    switch (n->data.attributes[OPERATOR]) {
+        case MINUS:
+            return -child1;
+        case PLUS:
+            return +child1;
+        case LOGICAL_NOT:
+            return !child1;
+        case BITWISE_NOT:
+            return ~child1;
+        case AMPERSAND:
+            return NON_INTEGRAL_VALUE;
+        case ASTERISK:
+            return VARIABLE_VALUE;
+        default:
+            return UNSPECIFIED_VALUE;
+    }
+}
 
 void create_symbol_if_necessary(TraversalData *td) {
     if (td->current_symbol == NULL) {
