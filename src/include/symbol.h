@@ -21,7 +21,7 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
-/* type metadata related */
+/* array related */
 #define UNSPECIFIED_SIZE -1
 
 /* limit on the length of a type tree chain in string format */
@@ -154,7 +154,8 @@ enum symbol_error {
     STE_SUCCESS = 0,
     STE_NOT_ARRAY = -1,
     STE_DUPLICATE_SYMBOL = -2,
-    STE_ARRAY_SIZE = -3
+    STE_ARRAY_SIZE = -3,
+    STE_VARIABLE_ARRAY_SIZE = -4
 };
 
 

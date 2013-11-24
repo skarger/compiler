@@ -935,7 +935,8 @@ void pretty_print(void *np) {
             pretty_print(n->children.child2);
             break;
         case TYPE_SPECIFIER:
-            fprintf(output, "%s", get_type_spec(n->data.attributes[TYPE_SPEC]));
+            fprintf(output, "%s",
+                    util_get_type_spec(n->data.attributes[TYPE_SPEC]));
             break;
         case POINTER:
             print_pointers(n);

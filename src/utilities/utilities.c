@@ -1,6 +1,7 @@
 #include <error.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "../include/utilities.h"
 #include "../include/parse-tree.h"
 #include "../../y.tab.h"
@@ -49,7 +50,17 @@ void util_handle_error(enum util_error e, char *data) {
     }
 }
 
-char *get_type_spec(int type) {
+char *util_compose_numeric_message(char *fmt, long num) {
+    char *buf;
+    short base_mesg_len = strlen(fmt);
+    /* room for sign, digits, and message */
+    short final_mesg_len = 1 + MAX_MESSAGE_DIGITS + base_mesg_len;
+    util_emalloc((void **) &buf, final_mesg_len + 1); /* room for null byte */
+    snprintf(buf, final_mesg_len + 1, fmt, num);
+    return buf;
+}
+
+char *util_get_type_spec(int type) {
     switch (type) {
         case VOID:
             return "void";

@@ -53,7 +53,7 @@
  */
 /*
  * symbol: bwof
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: bwxort
@@ -61,7 +61,7 @@
  */
 /*
  * symbol: bwxorf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: bwat
@@ -69,7 +69,7 @@
  */
 /*
  * symbol: bwaf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: eqt
@@ -77,7 +77,7 @@
  */
 /*
  * symbol: eqf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: neqt
@@ -85,7 +85,7 @@
  */
 /*
  * symbol: neqf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: ltt
@@ -93,7 +93,7 @@
  */
 /*
  * symbol: ltf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: ltet
@@ -101,7 +101,7 @@
  */
 /*
  * symbol: ltef
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: gtt
@@ -109,7 +109,7 @@
  */
 /*
  * symbol: gtf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: gtet
@@ -117,7 +117,7 @@
  */
 /*
  * symbol: gtef
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: blst
@@ -125,7 +125,7 @@
  */
 /*
  * symbol: blsf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: brst
@@ -133,7 +133,7 @@
  */
 /*
  * symbol: brsf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: plt
@@ -141,7 +141,7 @@
  */
 /*
  * symbol: plf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: mit
@@ -149,7 +149,7 @@
  */
 /*
  * symbol: mif
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: mut
@@ -157,7 +157,7 @@
  */
 /*
  * symbol: muf
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: dit
@@ -165,7 +165,7 @@
  */
 /*
  * symbol: dif
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: ret
@@ -173,5 +173,13 @@
  */
 /*
  * symbol: ref
- * type: array (0 elements) -> signed int
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: largearr1
+ * type: array (2147483647 elements) -> signed int
+ */
+/*
+ * symbol: largearr2
+ * type: array (unspecified size) -> signed int
  */

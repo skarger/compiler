@@ -504,7 +504,7 @@ char *type_tree_to_string(TypeNode *tn) {
 char *get_type_tree_name(int type) {
     char *type_name;
     /* char, int, long ,etc. */
-    type_name = get_type_spec(type);
+    type_name = util_get_type_spec(type);
     if (strcmp(type_name, "") == 0) {
         /* array, function */
         type_name = get_type_category_name(type);
@@ -564,6 +564,10 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_ARRAY_SIZE:
             error(0, 0, "%s: array size must be positive", data);
+            return;
+        case STE_VARIABLE_ARRAY_SIZE:
+            error(0, 0, "%s: variable size not permitted", data);
+            return;
         default:
             return;
     }

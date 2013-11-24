@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "../include/traverse.h"
 #include "../include/parse-tree.h"
+#include "../include/utilities.h"
 #include "../../y.tab.h"
 
 /* external variable for traversal data. this is the defining declaration. */
@@ -120,8 +121,13 @@ void traverse_node(Node *n, TraversalData *td) {
             /* will reset the current symbol when it is resolved */
             if (n->children.child2 != NULL) {
                 array_size = resolve_constant_expr(n->children.child2);
-                if ( array_size <= 0) {
-                    handle_symbol_error(STE_ARRAY_SIZE, "array declarator");
+                /* TODO: support unsigned long array bounds */
+                /* this will incorrectly error for unsigned longs > LONG_MAX */
+                if ((signed long) array_size <= 0) {
+                    char *err = util_compose_numeric_message("array bound %ld",
+                                                            array_size);
+                    handle_symbol_error(STE_ARRAY_SIZE, err);
+                    array_size = UNSPECIFIED_SIZE;
                 }
                 set_symbol_array_size(td->current_symbol, array_size);
             } else {
@@ -289,6 +295,7 @@ void traverse_pointers(Node *n, TraversalData *td) {
 unsigned long resolve_constant_expr(Node *n) {
     unsigned long resolve_conditional_expr(Node *n);
     unsigned long resolve_binary_expr(Node *n);
+    unsigned long resolve_unary_expr(Node *n);
 
     /* error if it cannot be resolved */
     switch (n->n_type) {
@@ -296,17 +303,17 @@ unsigned long resolve_constant_expr(Node *n) {
             return resolve_conditional_expr(n);
         case BINARY_EXPR:
             return resolve_binary_expr(n);
+        case UNARY_EXPR:
+            return resolve_unary_expr(n);
         /* base cases */
         case CHAR_CONSTANT:
             return n->data.ch;
-            break;
         case NUMBER_CONSTANT:
             return n->data.num;
-            break;
         case STRING_CONSTANT:
         default:
             /* error */
-            return 0;
+            return UNSPECIFIED_SIZE;
     }
 }
 
@@ -317,6 +324,23 @@ unsigned long resolve_conditional_expr(Node *n) {
     child2 = resolve_constant_expr(n->children.child2);
     child3 = resolve_constant_expr(n->children.child3);
     return child1 ? child2 : child3;
+}
+
+unsigned long resolve_unary_expr(Node *n) {
+    unsigned long child1;
+    child1 = resolve_constant_expr(n->children.child1);
+    switch (n->data.attributes[OPERATOR]) {
+        case MINUS:
+            return -child1;
+        case PLUS:
+        case LOGICAL_NOT:
+        case BITWISE_NOT:
+        case AMPERSAND:
+        case ASTERISK:
+            return UNSPECIFIED_SIZE;
+        default:
+            return UNSPECIFIED_SIZE;
+    }
 }
 
 unsigned long resolve_binary_expr(Node *n) {
@@ -360,11 +384,24 @@ unsigned long resolve_binary_expr(Node *n) {
             return child1 / child2;
         case REMAINDER:
             return child1 % child2;
+        /* value of assignment and comma expression is the value of the RHS */
+        case ASSIGN:
+        case ADD_ASSIGN:
+        case SUBTRACT_ASSIGN:
+        case MULTIPLY_ASSIGN:
+        case DIVIDE_ASSIGN:
+        case REMAINDER_ASSIGN:
+        case BITWISE_LSHIFT_ASSIGN:
+        case BITWISE_RSHIFT_ASSIGN:
+        case BITWISE_AND_ASSIGN:
+        case BITWISE_XOR_ASSSIGN:
+        case BITWISE_OR_ASSIGN:
         case COMMA:
-            return child1 , child2;
+            handle_symbol_error(STE_VARIABLE_ARRAY_SIZE, "array bound");
+            return UNSPECIFIED_SIZE;
         default:
             /* error */
-            return 0;
+            return UNSPECIFIED_SIZE;
     }
 }
 
