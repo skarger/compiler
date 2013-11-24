@@ -115,11 +115,21 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_pointers(n, td);
             break;
         case FUNCTION_DECLARATOR:
+            create_symbol_if_necessary(td);
+            if (symbol_outer_type(td->current_symbol) == ARRAY) {
+                handle_symbol_error(STE_FUNC_RET_ARRAY, "function declarator");
+            } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+                handle_symbol_error(STE_FUNC_RET_FUNC, "function declarator");
+            }
+            push_symbol_type(td->current_symbol, FUNCTION);
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
+            if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+                handle_symbol_error(STE_ARRAY_OF_FUNC, "array declarator");
+            }
             push_symbol_type(td->current_symbol, ARRAY);
             /* second child: constant expr */
             /* need to resolve this to determine array size */

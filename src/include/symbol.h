@@ -159,7 +159,10 @@ enum symbol_error {
     STE_NON_POSITIVE_ARRAY_SIZE = -3,
     STE_VARIABLE_ARRAY_SIZE = -4,
     STE_ARRAY_SIZE_TYPE = -5,
-    STE_ARRAY_SIZE_MISSING = -6
+    STE_ARRAY_SIZE_MISSING = -6,
+    STE_ARRAY_OF_FUNC = 7,
+    STE_FUNC_RET_ARRAY = -8,
+    STE_FUNC_RET_FUNC = -9
 };
 
 
@@ -191,6 +194,7 @@ void set_symbol_name(Symbol *s, char *name);
 char *get_symbol_name(Symbol *s);
 char *symbol_type_string(Symbol *s);
 enum Boolean all_array_bounds_specified(Symbol *s);
+int symbol_outer_type(Symbol *s);
 
 /* helpers */
 TypeNode *create_type_node(int type);

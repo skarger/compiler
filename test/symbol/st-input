@@ -56,3 +56,6 @@ int fc[f(1)];
 int ide[y];
 int stre["abc"];
 int empty[];
+int aoff[10](void);
+int fra(void)[10];
+int frf(void)(void);

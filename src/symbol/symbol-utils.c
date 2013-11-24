@@ -381,6 +381,10 @@ void set_symbol_array_size(Symbol *s, int n) {
     set_array_size(tn, n);
 }
 
+int symbol_outer_type(Symbol *s) {
+    return s->type_tree->type;
+}
+
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     TypeNode *tn1 = s1->type_tree;
     TypeNode *tn2 = s2->type_tree;
@@ -584,6 +588,15 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_ARRAY_SIZE_MISSING:
             error(0, 0, "%s: array size required", data);
+            return;
+        case STE_ARRAY_OF_FUNC:
+            error(0, 0, "%s: arrays cannot contain functions", data);
+            return;
+        case STE_FUNC_RET_ARRAY:
+            error(0, 0, "%s: functions cannot return arrays", data);
+            return;
+        case STE_FUNC_RET_FUNC:
+            error(0, 0, "%s: functions cannot return functions", data);
             return;
         default:
             return;
