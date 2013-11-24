@@ -13,8 +13,9 @@
 TraversalData *td = NULL;
 
 /* file helper procs */
-enum Boolean invalid_operand(long operand);
+long resolve_array_size(TraversalData *td, Node *n);
 enum Boolean array_bound_optional(TraversalData *td);
+enum Boolean invalid_operand(long operand);
 
 /*
  * start_traversal
@@ -96,8 +97,8 @@ void traverse_node(Node *n, TraversalData *td) {
             /* here we have the actual identifier for the symbol table entry */
             /* first create a symbol if it does not already exist */
             /* set its name */
-            /* the symbol should have all data, so put it in the table */
-            /* reset */
+            /* the symbol should have all data at this point */
+            /* put it in the table and reset */
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
             append_symbol(td->stc->current_st, td->current_symbol);
@@ -120,36 +121,14 @@ void traverse_node(Node *n, TraversalData *td) {
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
             push_symbol_type(td->current_symbol, ARRAY);
-            /* second child: constant expr, i.e. conditional expr */
+            /* second child: constant expr */
             /* need to resolve this to determine array size */
-            /* do this before processing first child because first child */
-            /* will reset the current symbol when it is resolved */
-            if (n->children.child2 != NULL) {
-                array_size = resolve_constant_expr(n->children.child2);
-                /* TODO: support unsigned long array bounds */
-                /* this will incorrectly error for unsigned longs > LONG_MAX */
-                if (array_size == VARIABLE_VALUE) {
-                    handle_symbol_error(STE_VARIABLE_ARRAY_SIZE, "array bound");
-                    array_size = UNSPECIFIED_VALUE;
-                } else if (array_size == NON_INTEGRAL_VALUE) {
-                    handle_symbol_error(STE_ARRAY_SIZE_TYPE, "array bound");
-                    array_size = UNSPECIFIED_VALUE;
-                } else if ((signed long) array_size <= 0) {
-                    char *err = util_compose_numeric_message("array bound %ld",
-                                                            array_size);
-                    handle_symbol_error(STE_NON_POSITIVE_ARRAY_SIZE, err);
-                    array_size = UNSPECIFIED_VALUE;
-                }
-                set_symbol_array_size(td->current_symbol, array_size);
-            } else {
-                if (!array_bound_optional(td)) {
-                    handle_symbol_error(STE_ARRAY_SIZE_MISSING,
-                                    "array type has incomplete element type");
-                }
-                set_symbol_array_size(td->current_symbol, UNSPECIFIED_VALUE);
-            }
+            /* do this before processing first child since we will reset the */
+            /* current symbol after the first child is resolved */
+            array_size = resolve_array_size(td, n->children.child2);
+            set_symbol_array_size(td->current_symbol, array_size);
             /* first child: direct declarator */
-            /* should ultimately lead to a simple declarator */
+            /* should lead to a simple declarator and put symbol into table */
             traverse_node(n->children.child1, td);
             break;
         case PARAMETER_DECL:
@@ -309,6 +288,46 @@ void traverse_pointers(Node *n, TraversalData *td) {
         push_symbol_type(td->current_symbol, POINTER);
         n = n->children.child1;
     }
+}
+
+/*
+ * resolve_array_size
+ * Purpose:
+ *      Resolve a constant expression as an array bound into an integer value
+ * Parameters:
+ *      td: pointer to the the running traversal data structure, which will
+ *          be inspected to determine if array bound is required
+ *      n:  the Node * representing the constant expression
+ * Returns:
+ *      The size of the array as a long int.
+ *      NOTE: will incorrectly error for unsigned long array bounds > LONG_MAX
+ * Side Effects:
+ *      Will emit errors for various unacceptable array bound specifiers
+ */
+long resolve_array_size(TraversalData *td, Node *n) {
+    unsigned long array_size;
+    if (n != NULL) {
+        array_size = resolve_constant_expr(n);
+        if (array_size == VARIABLE_VALUE) {
+            handle_symbol_error(STE_VARIABLE_ARRAY_SIZE, "array bound");
+            array_size = UNSPECIFIED_VALUE;
+        } else if (array_size == NON_INTEGRAL_VALUE) {
+            handle_symbol_error(STE_ARRAY_SIZE_TYPE, "array bound");
+            array_size = UNSPECIFIED_VALUE;
+        } else if ((signed long) array_size <= 0) {
+            char *err = util_compose_numeric_message("array bound %ld",
+                                                    array_size);
+            handle_symbol_error(STE_NON_POSITIVE_ARRAY_SIZE, err);
+            array_size = UNSPECIFIED_VALUE;
+        }
+    } else {
+        if (!array_bound_optional(td)) {
+            handle_symbol_error(STE_ARRAY_SIZE_MISSING,
+                            "array type has incomplete element type");
+        }
+        array_size = UNSPECIFIED_VALUE;
+    }
+    return (signed long) array_size;
 }
 
 unsigned long resolve_constant_expr(Node *n) {
