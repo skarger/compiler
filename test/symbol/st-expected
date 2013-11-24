@@ -47,3 +47,131 @@
  * symbol: h
  * type: array (1 elements) -> signed int
  */
+/*
+ * symbol: bwot
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: bwof
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: bwxort
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: bwxorf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: bwat
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: bwaf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: eqt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: eqf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: neqt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: neqf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: ltt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: ltf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: ltet
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: ltef
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: gtt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: gtf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: gtet
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: gtef
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: blst
+ * type: array (2 elements) -> signed int
+ */
+/*
+ * symbol: blsf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: brst
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: brsf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: plt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: plf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: mit
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: mif
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: mut
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: muf
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: dit
+ * type: array (2 elements) -> signed int
+ */
+/*
+ * symbol: dif
+ * type: array (0 elements) -> signed int
+ */
+/*
+ * symbol: ret
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: ref
+ * type: array (0 elements) -> signed int
+ */

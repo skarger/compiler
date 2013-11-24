@@ -22,7 +22,7 @@
 #define STATEMENT_LABELS 1
 
 /* type metadata related */
-#define UNSPECIFIED_SIZE 0
+#define UNSPECIFIED_SIZE -1
 
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 511
@@ -153,7 +153,8 @@ enum scope_state {
 enum symbol_error {
     STE_SUCCESS = 0,
     STE_NOT_ARRAY = -1,
-    STE_DUPLICATE_SYMBOL = -2
+    STE_DUPLICATE_SYMBOL = -2,
+    STE_ARRAY_SIZE = -3
 };
 
 

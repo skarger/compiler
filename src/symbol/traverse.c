@@ -120,6 +120,9 @@ void traverse_node(Node *n, TraversalData *td) {
             /* will reset the current symbol when it is resolved */
             if (n->children.child2 != NULL) {
                 array_size = resolve_constant_expr(n->children.child2);
+                if ( array_size <= 0) {
+                    handle_symbol_error(STE_ARRAY_SIZE, "array declarator");
+                }
                 set_symbol_array_size(td->current_symbol, array_size);
             } else {
                 /* TODO: error check that required sizes specified */
@@ -325,6 +328,40 @@ unsigned long resolve_binary_expr(Node *n) {
             return child1 || child2;
         case LOGICAL_AND:
             return child1 && child2;
+        case BITWISE_OR:
+            return child1 | child2;
+        case BITWISE_XOR:
+            return child1 ^ child2;
+        case AMPERSAND:
+            return child1 & child2;
+        case EQUAL:
+            return child1 == child2;
+        case NOT_EQUAL:
+            return child1 != child2;
+        case LESS_THAN:
+            return child1 < child2;
+        case LESS_THAN_EQUAL:
+            return child1 <= child2;
+        case GREATER_THAN:
+            return child1 > child2;
+        case GREATER_THAN_EQUAL:
+            return child1 >= child2;
+        case BITWISE_LSHIFT:
+            return child1 << child2;
+        case BITWISE_RSHIFT:
+            return child1 >> child2;
+        case PLUS:
+            return child1 + child2;
+        case MINUS:
+            return child1 - child2;
+        case ASTERISK:
+            return child1 * child2;
+        case DIVIDE:
+            return child1 / child2;
+        case REMAINDER:
+            return child1 % child2;
+        case COMMA:
+            return child1 , child2;
         default:
             /* error */
             return 0;

@@ -562,6 +562,8 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_DUPLICATE_SYMBOL:
             error(0, 0, "%s: duplicate symbol", data);
             return;
+        case STE_ARRAY_SIZE:
+            error(0, 0, "%s: array size must be positive", data);
         default:
             return;
     }
