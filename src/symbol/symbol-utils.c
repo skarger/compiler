@@ -399,6 +399,17 @@ char *symbol_type_string(Symbol *s) {
     return type_tree_to_string(s->type_tree);
 }
 
+enum Boolean all_array_bounds_specified(Symbol *s) {
+    TypeNode *tn = s->type_tree;
+    while (tn != NULL) {
+        if (tn->type == ARRAY && tn->n.array_size == UNSPECIFIED_VALUE) {
+            return FALSE;
+        }
+        tn = tn->next;
+    }
+    return TRUE;
+}
+
 /* FunctionParameter helpers */
 FunctionParameter *create_function_parameter() {
     FunctionParameter *fp;
@@ -570,6 +581,9 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_ARRAY_SIZE_TYPE:
             error(0, 0, "%s: array size must be an integer", data);
+            return;
+        case STE_ARRAY_SIZE_MISSING:
+            error(0, 0, "%s: array size required", data);
             return;
         default:
             return;

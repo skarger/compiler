@@ -158,7 +158,8 @@ enum symbol_error {
     STE_DUPLICATE_SYMBOL = -2,
     STE_NON_POSITIVE_ARRAY_SIZE = -3,
     STE_VARIABLE_ARRAY_SIZE = -4,
-    STE_ARRAY_SIZE_TYPE = -5
+    STE_ARRAY_SIZE_TYPE = -5,
+    STE_ARRAY_SIZE_MISSING = -6
 };
 
 
@@ -189,6 +190,7 @@ void append_symbol(SymbolTable *st, Symbol *s);
 void set_symbol_name(Symbol *s, char *name);
 char *get_symbol_name(Symbol *s);
 char *symbol_type_string(Symbol *s);
+enum Boolean all_array_bounds_specified(Symbol *s);
 
 /* helpers */
 TypeNode *create_type_node(int type);
@@ -198,6 +200,7 @@ char *get_type_tree_name(int type);
 char *get_type_category_name(int type);
 char *type_tree_to_string(TypeNode *tn);
 void set_array_size(TypeNode *tn, int size);
+
 
 FunctionParameter *create_function_parameter();
 void set_function_parameter_name(FunctionParameter *fp, char *pname);

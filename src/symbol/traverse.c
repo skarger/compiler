@@ -14,6 +14,7 @@ TraversalData *td = NULL;
 
 /* file helper procs */
 enum Boolean invalid_operand(long operand);
+enum Boolean array_bound_optional(TraversalData *td);
 
 /*
  * start_traversal
@@ -33,6 +34,7 @@ void start_traversal(void *np) {
         SymbolTableContainer *symbol_table_container = create_st_container();
         td->stc = symbol_table_container;
         td->current_base_type = NO_DATA_TYPE;
+        td->processing_parameter_decl = FALSE;
         td->outfile = output;
     }
     traverse_node(np, td);
@@ -140,17 +142,25 @@ void traverse_node(Node *n, TraversalData *td) {
                 }
                 set_symbol_array_size(td->current_symbol, array_size);
             } else {
-                /* TODO: error check that required sizes specified */
+                if (!array_bound_optional(td)) {
+                    handle_symbol_error(STE_ARRAY_SIZE_MISSING,
+                                    "array type has incomplete element type");
+                }
                 set_symbol_array_size(td->current_symbol, UNSPECIFIED_VALUE);
             }
             /* first child: direct declarator */
             /* should ultimately lead to a simple declarator */
             traverse_node(n->children.child1, td);
             break;
+        case PARAMETER_DECL:
+            td->processing_parameter_decl = TRUE;
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            td->processing_parameter_decl = FALSE;
+            break;
         case ABSTRACT_DECLARATOR:
         case DIR_ABS_DECL:
         case FUNCTION_DEFINITION:
-        case PARAMETER_DECL:
         case CAST_EXPR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
@@ -452,6 +462,11 @@ unsigned long resolve_unary_expr(Node *n) {
         default:
             return UNSPECIFIED_VALUE;
     }
+}
+
+enum Boolean array_bound_optional(TraversalData *td) {
+    return (td->processing_parameter_decl &&
+            all_array_bounds_specified(td->current_symbol));
 }
 
 void create_symbol_if_necessary(TraversalData *td) {
