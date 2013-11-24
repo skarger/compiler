@@ -480,7 +480,7 @@ char *type_tree_to_string(TypeNode *tn) {
             bp += temp;
             remaining_cur -= temp;
             if (tn->type == ARRAY) {
-                if (get_array_size(tn) == UNSPECIFIED_SIZE) {
+                if (get_array_size(tn) == UNSPECIFIED_VALUE) {
                     temp = snprintf(bp, remaining_cur, " (unspecified size)");
                 } else {
                     temp = snprintf(bp, remaining_cur, " (%d elements)",
@@ -562,11 +562,14 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_DUPLICATE_SYMBOL:
             error(0, 0, "%s: duplicate symbol", data);
             return;
-        case STE_ARRAY_SIZE:
+        case STE_NON_POSITIVE_ARRAY_SIZE:
             error(0, 0, "%s: array size must be positive", data);
             return;
         case STE_VARIABLE_ARRAY_SIZE:
             error(0, 0, "%s: variable size not permitted", data);
+            return;
+        case STE_ARRAY_SIZE_TYPE:
+            error(0, 0, "%s: array size must be an integer", data);
             return;
         default:
             return;

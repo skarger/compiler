@@ -22,7 +22,9 @@
 #define STATEMENT_LABELS 1
 
 /* array related */
-#define UNSPECIFIED_SIZE -1
+#define UNSPECIFIED_VALUE -2147483647
+#define VARIABLE_VALUE -2147483646
+#define NON_INTEGRAL_VALUE -2147483645
 
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 511
@@ -154,8 +156,9 @@ enum symbol_error {
     STE_SUCCESS = 0,
     STE_NOT_ARRAY = -1,
     STE_DUPLICATE_SYMBOL = -2,
-    STE_ARRAY_SIZE = -3,
-    STE_VARIABLE_ARRAY_SIZE = -4
+    STE_NON_POSITIVE_ARRAY_SIZE = -3,
+    STE_VARIABLE_ARRAY_SIZE = -4,
+    STE_ARRAY_SIZE_TYPE = -5
 };
 
 

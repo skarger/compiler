@@ -123,16 +123,22 @@ void traverse_node(Node *n, TraversalData *td) {
                 array_size = resolve_constant_expr(n->children.child2);
                 /* TODO: support unsigned long array bounds */
                 /* this will incorrectly error for unsigned longs > LONG_MAX */
-                if ((signed long) array_size <= 0) {
+                if (array_size == VARIABLE_VALUE) {
+                    handle_symbol_error(STE_VARIABLE_ARRAY_SIZE, "array bound");
+                    array_size = UNSPECIFIED_VALUE;
+                } else if (array_size == NON_INTEGRAL_VALUE) {
+                    handle_symbol_error(STE_ARRAY_SIZE_TYPE, "array bound");
+                    array_size = UNSPECIFIED_VALUE;
+                } else if ((signed long) array_size <= 0) {
                     char *err = util_compose_numeric_message("array bound %ld",
                                                             array_size);
-                    handle_symbol_error(STE_ARRAY_SIZE, err);
-                    array_size = UNSPECIFIED_SIZE;
+                    handle_symbol_error(STE_NON_POSITIVE_ARRAY_SIZE, err);
+                    array_size = UNSPECIFIED_VALUE;
                 }
                 set_symbol_array_size(td->current_symbol, array_size);
             } else {
                 /* TODO: error check that required sizes specified */
-                set_symbol_array_size(td->current_symbol, UNSPECIFIED_SIZE);
+                set_symbol_array_size(td->current_symbol, UNSPECIFIED_VALUE);
             }
             /* first child: direct declarator */
             /* should ultimately lead to a simple declarator */
@@ -313,7 +319,7 @@ unsigned long resolve_constant_expr(Node *n) {
         case STRING_CONSTANT:
         default:
             /* error */
-            return UNSPECIFIED_SIZE;
+            return UNSPECIFIED_VALUE;
     }
 }
 
@@ -333,13 +339,17 @@ unsigned long resolve_unary_expr(Node *n) {
         case MINUS:
             return -child1;
         case PLUS:
+            return +child1;
         case LOGICAL_NOT:
+            return !child1;
         case BITWISE_NOT:
+            return ~child1;
         case AMPERSAND:
+            return NON_INTEGRAL_VALUE;
         case ASTERISK:
-            return UNSPECIFIED_SIZE;
+            return VARIABLE_VALUE;
         default:
-            return UNSPECIFIED_SIZE;
+            return UNSPECIFIED_VALUE;
     }
 }
 
@@ -397,11 +407,10 @@ unsigned long resolve_binary_expr(Node *n) {
         case BITWISE_XOR_ASSSIGN:
         case BITWISE_OR_ASSIGN:
         case COMMA:
-            handle_symbol_error(STE_VARIABLE_ARRAY_SIZE, "array bound");
-            return UNSPECIFIED_SIZE;
+            return VARIABLE_VALUE;
         default:
             /* error */
-            return UNSPECIFIED_SIZE;
+            return VARIABLE_VALUE;
     }
 }
 

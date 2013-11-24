@@ -183,3 +183,27 @@
  * symbol: largearr2
  * type: array (unspecified size) -> signed int
  */
+/*
+ * symbol: umi
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: upl
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: lnt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: lnf
+ * type: array (unspecified size) -> signed int
+ */
+/*
+ * symbol: bwnt
+ * type: array (1 elements) -> signed int
+ */
+/*
+ * symbol: bwnf
+ * type: array (unspecified size) -> signed int
+ */
