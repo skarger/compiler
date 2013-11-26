@@ -226,7 +226,10 @@ other_open_statement: labeled_statement
     ;
 
 labeled_statement : identifier COLON statement
-        { $$ = create_node(LABELED_STATEMENT, $1, $3); }
+        {
+            set_node_type($1, NAMED_LABEL);
+            $$ = create_node(LABELED_STATEMENT, $1, $3);
+        }
     ;
 
 while_statement : WHILE LEFT_PAREN expr RIGHT_PAREN statement
@@ -633,6 +636,7 @@ int has_operator(enum node_type nt) {
 int has_literal_data(enum node_type nt) {
     switch (nt) {
         case SIMPLE_DECLARATOR:
+        case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
         case NUMBER_CONSTANT:
@@ -656,6 +660,7 @@ void set_literal_data(Node *n, YYSTYPE data) {
     switch (n->n_type) {
         /* passed in data is yylval */
         case SIMPLE_DECLARATOR:
+        case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
             n->data.str =
@@ -968,6 +973,7 @@ void pretty_print(void *np) {
                     get_operator_value(n->data.attributes[OPERATOR]));
             break;
         case SIMPLE_DECLARATOR:
+        case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
         case CHAR_CONSTANT:
@@ -1122,6 +1128,7 @@ void print_data_node(void *np) {
     Node *n = (Node *) np;
     switch (n->n_type) {
         case SIMPLE_DECLARATOR:
+        case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
             fprintf(output, "%s", n->data.str);
@@ -1272,6 +1279,7 @@ char *get_node_name(enum node_type nt) {
         CASE_FOR(COMPOUND_STATEMENT);
         CASE_FOR(POINTER_DECLARATOR);
         CASE_FOR(SIMPLE_DECLARATOR);
+        CASE_FOR(NAMED_LABEL);
         CASE_FOR(IF_THEN);
         CASE_FOR(IF_THEN_ELSE);
         CASE_FOR(WHILE_STATEMENT);

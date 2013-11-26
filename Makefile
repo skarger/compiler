@@ -64,6 +64,9 @@ traverse.o : src/symbol/traverse.c
 
 
 # tests
+test-parser-output : parser-main
+	./test/parser/test-parser-output
+
 symbol-test.o : test/symbol/symbol-test.c
 	$(CC) -c test/symbol/symbol-test.c
 

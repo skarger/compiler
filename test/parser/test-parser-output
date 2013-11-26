@@ -1,0 +1,12 @@
+#!/bin/bash
+
+./parser-main test/parser/test_input_valid test/parser/test_output
+./parser-main test/parser/test_output test/parser/second_output
+diff test/parser/test_output test/parser/second_output
+if [ $? -eq 0 ]
+then
+    echo "TESTS PASSED"
+else
+    echo "TESTS FAILED"
+fi
+
