@@ -145,15 +145,15 @@ function_declarator : direct_declarator LEFT_PAREN parameter_list RIGHT_PAREN
         { $$ = create_node(FUNCTION_DECLARATOR, $1, $3); }
     | direct_declarator LEFT_PAREN RIGHT_PAREN
         {
-            yyerror("function must have a parameter list, even if it is (void)"); yyerrok;
+            yyerror("function must have a parameter list even if it is (void)");
+            yyerrok;
             $$ = create_node(FUNCTION_DECLARATOR, NULL, NULL);
         }
     ;
 
 /* void may only appear by itself in a parameter list, which is why it
    is part of its production rather than being part of parameter_decl */
-parameter_list : void_type_specifier
-    | parameter_decl
+parameter_list : parameter_decl
     | parameter_list COMMA parameter_decl
         { $$ = create_node(PARAMETER_LIST, $1, $3); }
     ;
@@ -165,14 +165,17 @@ parameter_decl : integer_type_specifier declarator
     | integer_type_specifier
     | void_type_specifier declarator
         {
-            yyerror("void may not appear with any other function parameters"); yyerrok;
+            yyerror("void may not appear with any other function parameters");
+            yyerrok;
             $$ = create_node(PARAMETER_DECL, $1, $2);
         }
     | void_type_specifier abstract_declarator
         {
-            yyerror("void may not appear with any other function parameters"); yyerrok;
+            yyerror("void may not appear with any other function parameters");
+            yyerrok;
             $$ = create_node(PARAMETER_DECL, $1, $2);
         }
+    | void_type_specifier
     ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
