@@ -94,15 +94,23 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             break;
         case SIMPLE_DECLARATOR:
-            /* here we have the actual identifier for the symbol table entry */
-            /* first create a symbol if it does not already exist */
-            /* set its name */
-            /* the symbol should have all data at this point */
-            /* put it in the table and reset */
-            create_symbol_if_necessary(td);
-            set_symbol_name(td->current_symbol, n->data.str);
-            append_symbol(td->stc->current_st, td->current_symbol);
-            reset_current_symbol(td);
+            /* here we have either:
+             * the name of a function parameter
+             * an identifier that should become a symbol table entry
+            */
+            if (td->processing_parameter_decl) {
+                FunctionParameter *fp = last_parameter(td->current_symbol);
+                set_function_parameter_name(fp, n->data.str);
+            } else {
+                /* first create a symbol if it does not already exist */
+                /* set its name */
+                /* the symbol should have all data at this point */
+                /* put it in the table and reset */
+                create_symbol_if_necessary(td);
+                set_symbol_name(td->current_symbol, n->data.str);
+                append_symbol(td->stc->current_st, td->current_symbol);
+                reset_current_symbol(td);
+            }
             break;
         case POINTER_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -122,8 +130,36 @@ void traverse_node(Node *n, TraversalData *td) {
                 handle_symbol_error(STE_FUNC_RET_FUNC, "function declarator");
             }
             push_symbol_type(td->current_symbol, FUNCTION);
+            /* second child: parameters */
+            /* process parameters first */
+            traverse_node(n->children.child2, td);
+            /* first child: direct declarator */
+            /* should lead to a simple declarator and put symbol into table */
+            /* check that matches prototype if present */
+            traverse_node(n->children.child1, td);
+            break;
+        case PARAMETER_LIST:
+            /* if it's just a type specifier reach down and grab it */
+            /* first child: parameter list, parameter_decl, void type spec */
+            /* traverse_node(n->children.child1, td); */
+            append_function_parameter_to_symbol(td->current_symbol);
+            set_function_parameter_name(last_parameter(td->current_symbol), "x");
+            push_symbol_parameter_type(td->current_symbol, SIGNED_CHAR);
+            push_symbol_parameter_type(td->current_symbol, POINTER);
+            append_function_parameter_to_symbol(td->current_symbol);
+            set_function_parameter_name(last_parameter(td->current_symbol), "y");
+            push_symbol_parameter_type(td->current_symbol, UNSIGNED_LONG);
+            /* second child: parameter decl */
+            /* traverse_node(n->children.child2, td); */
+            break;
+        case PARAMETER_DECL:
+            td->processing_parameter_decl = TRUE;
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
+            td->processing_parameter_decl = FALSE;
+            break;
+        case TYPE_SPECIFIER:
+            /* printf("ts %d\n", n->data.attributes[TYPE_SPEC]); */
             break;
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -141,19 +177,12 @@ void traverse_node(Node *n, TraversalData *td) {
             /* should lead to a simple declarator and put symbol into table */
             traverse_node(n->children.child1, td);
             break;
-        case PARAMETER_DECL:
-            td->processing_parameter_decl = TRUE;
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
-            td->processing_parameter_decl = FALSE;
-            break;
         case ABSTRACT_DECLARATOR:
         case DIR_ABS_DECL:
         case FUNCTION_DEFINITION:
         case CAST_EXPR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
-        case PARAMETER_LIST:
         case LABELED_STATEMENT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
@@ -189,12 +218,8 @@ void traverse_node(Node *n, TraversalData *td) {
             /* n->data.attributes[OPERATOR] */
             traverse_node(n->children.child2, td);
             break;
-        case TYPE_SPECIFIER:
-            /* printf("ts %d\n", n->data.attributes[TYPE_SPEC]); */
-            break;
         case UNARY_EXPR:
         case PREFIX_EXPR:
-            /* n->data.attributes[OPERATOR] */
             traverse_node(n->children.child1, td);
             break;
         case POSTFIX_EXPR:
@@ -324,6 +349,9 @@ long resolve_array_size(TraversalData *td, Node *n) {
         } else if (array_size == NON_INTEGRAL_VALUE) {
             handle_symbol_error(STE_ARRAY_SIZE_TYPE, "array bound");
             array_size = UNSPECIFIED_VALUE;
+        } else if (array_size == CAST_VALUE) {
+            handle_symbol_error(STE_CAST_ARRAY_SIZE, "array bound");
+            array_size = UNSPECIFIED_VALUE;
         } else if ((signed long) array_size <= 0) {
             char *err = util_compose_numeric_message("array bound %ld",
                                                     array_size);
@@ -360,6 +388,8 @@ unsigned long resolve_constant_expr(Node *n) {
         case UNARY_EXPR:
             return resolve_unary_expr(n);
         /* error cases */
+        case CAST_EXPR:
+            return CAST_VALUE;
         case PREFIX_EXPR:
         case POSTFIX_EXPR:
         case SUBSCRIPT_EXPR:
@@ -510,11 +540,23 @@ void reset_current_symbol(TraversalData *td) {
     td->current_symbol = NULL;
 }
 
+void print_symbol_param_list(FILE *out, Symbol *s) {
+    FunctionParameter *fp = first_parameter(s);
+    fprintf(out, " * parameters:\n");
+    while (fp != NULL) {
+        fprintf(out, " * name: %s, type: %s\n",
+                get_parameter_name(fp), parameter_type_string(fp));
+        fp = fp->next;
+    }
+}
+
 void print_symbol(FILE *out, Symbol *s) {
     fprintf(out, "/*\n");
     fprintf(out, " * symbol: %s\n", get_symbol_name(s));
     fprintf(out, " * type: %s\n", symbol_type_string(s));
-    /* if function: function params */
+    if (symbol_outer_type(s) == FUNCTION) {
+        print_symbol_param_list(out, s);
+    }
     fprintf(out, " */\n");
 }
 

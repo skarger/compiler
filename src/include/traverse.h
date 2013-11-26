@@ -31,6 +31,7 @@ unsigned long resolve_constant_expr(Node *n);
 
 void print_symbol(FILE *out, Symbol *s);
 void print_symbol_table(FILE *out, SymbolTable *st);
+void print_symbol_param_list(FILE *out, Symbol *s);
 
 /* symbol creation during traversal */
 void create_symbol_if_necessary(TraversalData *td);

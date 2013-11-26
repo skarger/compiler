@@ -242,8 +242,10 @@
 /*
  * symbol: fra
  * type: function (12345 parameters) -> array (10 elements) -> signed int
+ * parameters:
  */
 /*
  * symbol: frf
  * type: function (12345 parameters) -> function (12345 parameters) -> signed int
+ * parameters:
  */

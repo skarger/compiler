@@ -21,10 +21,16 @@
 #define OTHER_NAMES 0
 #define STATEMENT_LABELS 1
 
-/* array related */
-#define UNSPECIFIED_VALUE -2147483647
-#define VARIABLE_VALUE -2147483646
-#define NON_INTEGRAL_VALUE -2147483645
+/* array bound related */
+/* choosing these constants since they are invalid array bounds anyway */
+#define UNSPECIFIED_VALUE   -2147483647
+#define VARIABLE_VALUE      -2147483646
+#define NON_INTEGRAL_VALUE  -2147483645
+#define CAST_VALUE          -2147483644
+
+/* function related */
+#define PARAM_NAME 0
+#define PARAM_TYPE 1
 
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 511
@@ -73,6 +79,7 @@ typedef struct TypeNode TypeNode;
 struct FunctionParameter {
     char *name;
     TypeNode *type_tree;
+    struct FunctionParameter *next;
 };
 typedef struct FunctionParameter FunctionParameter;
 
@@ -162,7 +169,9 @@ enum symbol_error {
     STE_ARRAY_SIZE_MISSING = -6,
     STE_ARRAY_OF_FUNC = 7,
     STE_FUNC_RET_ARRAY = -8,
-    STE_FUNC_RET_FUNC = -9
+    STE_FUNC_RET_FUNC = -9,
+    STE_CAST_ARRAY_SIZE = -10,
+    STE_NULL_PARAM = -11
 };
 
 
@@ -195,6 +204,7 @@ char *get_symbol_name(Symbol *s);
 char *symbol_type_string(Symbol *s);
 enum Boolean all_array_bounds_specified(Symbol *s);
 int symbol_outer_type(Symbol *s);
+void append_function_parameter_to_symbol(Symbol *s);
 
 /* helpers */
 TypeNode *create_type_node(int type);
@@ -207,6 +217,8 @@ void set_array_size(TypeNode *tn, int size);
 
 
 FunctionParameter *create_function_parameter();
+FunctionParameter *first_parameter(Symbol *);
+FunctionParameter *last_parameter(Symbol *s);
 void set_function_parameter_name(FunctionParameter *fp, char *pname);
 void push_parameter_type(FunctionParameter *fp, int t);
 enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);

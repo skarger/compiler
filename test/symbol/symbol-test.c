@@ -245,8 +245,6 @@ void test_st_fsm() {
     initialize_fsm();
     n->n_type = TOP_LEVEL;
     test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    /* set the type to void to make the node match a possible function param */
-    n->data.attributes[TYPE_SPEC] = VOID;
     test_transition(n, TYPE_SPECIFIER, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
@@ -274,8 +272,7 @@ void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expe
 
     printf("%s current state: %s\n", get_test_result_name(test_state),
                                     get_scope_state_name(cur));
-    printf("%s scope: %s\n", get_test_result_name(test_scope),
-                            get_scope_state_name(cur));
+    printf("%s scope: %d\n", get_test_result_name(test_scope), scope);
     printf("%s overloading class: %s\n", get_test_result_name(test_oc),
                                         get_overloading_class_name(oc));
 

@@ -63,6 +63,7 @@ char *get_overloading_class_name(int oc);
 void initialize_st_container(SymbolTableContainer *stc);
 void initialize_st(SymbolTable *st);
 
+
 static void set_state(int state) {
     current_state = state;
 }
@@ -206,7 +207,7 @@ void scope_fsm_end(Node *n) {
  */
 int node_is_function_param(Node *n) {
     return (n->n_type == PARAMETER_LIST || n->n_type == PARAMETER_DECL ||
-        (n->n_type == TYPE_SPECIFIER && n->data.attributes[TYPE_SPEC] == VOID));
+            n->n_type == TYPE_SPECIFIER);
 }
 
 int node_begins_statement_label(Node *n) {
@@ -364,12 +365,48 @@ Symbol *create_symbol() {
     util_emalloc((void **) &s, sizeof(Symbol));
     s->name = "";
     s->type_tree = NULL;
+    s->param_list = NULL;
     s->next = NULL;
     return s;
 }
 
 void push_symbol_type(Symbol *s, int t) {
     s->type_tree = push_type(s->type_tree, t);
+}
+
+void append_function_parameter_to_symbol(Symbol *s) {
+    FunctionParameter *fp = last_parameter(s);
+    if (fp == NULL) {
+        s->param_list = create_function_parameter();
+        return;
+    } else {
+        fp->next = create_function_parameter();
+    }
+}
+
+void push_symbol_parameter_type(Symbol *s, int t) {
+    /* push onto the front of the last parameter of this symbol's param list */
+    FunctionParameter *fp = last_parameter(s);
+    if (fp == NULL) {
+        handle_symbol_error(STE_NULL_PARAM, "push_symbol_parameter_type");
+        return;
+    }
+    push_parameter_type(fp, t);
+}
+
+FunctionParameter *first_parameter(Symbol *s) {
+    return s->param_list;
+}
+
+FunctionParameter *last_parameter(Symbol *s) {
+     FunctionParameter *fp = s->param_list;
+    if (fp == NULL) {
+        return NULL;
+    }
+    while (fp->next != NULL) {
+        fp = fp->next;
+    }
+    return fp;
 }
 
 /* set the size of the first element of this symbol's type_tree */
@@ -424,6 +461,14 @@ FunctionParameter *create_function_parameter() {
 
 void set_function_parameter_name(FunctionParameter *fp, char *pname) {
     fp->name = pname;
+}
+
+char *get_parameter_name(FunctionParameter *fp) {
+    return fp->name;
+}
+
+char *parameter_type_string(FunctionParameter *fp) {
+    return type_tree_to_string(fp->type_tree);
 }
 
 void push_parameter_type(FunctionParameter *fp, int t) {
@@ -597,6 +642,12 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_FUNC_RET_FUNC:
             error(0, 0, "%s: functions cannot return functions", data);
+            return;
+        case STE_CAST_ARRAY_SIZE:
+            error(0, 0, "%s: cast expression array bounds not supported", data);
+            return;
+        case STE_NULL_PARAM:
+            error(0, 0, "%s: trying to manipulate null parameter", data);
             return;
         default:
             return;
