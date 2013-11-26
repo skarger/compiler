@@ -134,10 +134,9 @@ void traverse_node(Node *n, TraversalData *td) {
                 td->processing_parameters = TRUE;
                 traverse_node(n->children.child2, td);
                 td->processing_parameters = FALSE;
-                /* first child: direct declarator */
-                /* should lead to simple declarator and put symbol into table */
-                traverse_node(n->children.child1, td);
             }
+            /* first child: direct declarator */
+            traverse_node(n->children.child1, td);
             break;
         case PARAMETER_LIST:
             /* first child: parameter list, parameter_decl, or type spec */
@@ -180,10 +179,9 @@ void traverse_node(Node *n, TraversalData *td) {
                 /* reset the current symbol after the first child is resolved */
                 array_size = resolve_array_size(td, n->children.child2);
                 set_symbol_array_size(td->current_symbol, array_size);
-                /* first child: direct declarator */
-                /* should lead to simple declarator and put symbol into table */
-                traverse_node(n->children.child1, td);
             }
+            /* first child: direct declarator */
+            traverse_node(n->children.child1, td);
             break;
         case DIR_ABS_DECL:
             /* first child: direct_abstract_declarator */

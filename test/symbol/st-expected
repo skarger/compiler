@@ -288,6 +288,48 @@
  * name: , type: signed int
  */
 /*
+ * symbol: fn7
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: a, type: pointer -> signed int
+ */
+/*
+ * symbol: fn8
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> signed int
+ */
+/*
+ * symbol: fn9
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> pointer -> signed int
+ */
+/*
+ * symbol: fn10
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> pointer -> pointer -> signed int
+ */
+/*
+ * symbol: fn11
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> signed int
+ */
+/*
+ * symbol: fn12
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> pointer -> signed int
+ */
+/*
+ * symbol: fn13
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: pointer -> pointer -> pointer -> signed int
+ */
+/*
  * symbol: errfn1
  * type: function (1 parameter) -> array (10 elements) -> signed char
  * parameters:
