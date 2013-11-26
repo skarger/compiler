@@ -195,10 +195,16 @@ void traverse_node(Node *n, TraversalData *td) {
                 push_symbol_type(td->current_symbol, ARRAY);
             }
             break;
-        case CAST_EXPR:
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
+        case NAMED_LABEL:
+            /* have an identifier that should become a symbol table entry */
+            /* put it in the table and reset */
+            td->current_base_type = NAMED_LABEL;
+            create_symbol_if_necessary(td);
+            set_symbol_name(td->current_symbol, n->data.str);
+            append_symbol(td->stc->current_st, td->current_symbol);
+            reset_current_symbol(td);
             break;
+        case CAST_EXPR:
         case ABSTRACT_DECLARATOR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:

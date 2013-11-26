@@ -66,6 +66,8 @@ char *util_get_type_spec(int type) {
             return "void";
         case POINTER:
             return "pointer";
+        case NAMED_LABEL:
+            return "named label";
         case SIGNED_CHAR:
             return "signed char";
         case UNSIGNED_CHAR:
