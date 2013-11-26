@@ -15,7 +15,7 @@ struct TraversalData {
     SymbolTableContainer *stc;
     enum data_type current_base_type;
     Symbol *current_symbol;
-    enum Boolean processing_parameter_decl;
+    enum Boolean processing_parameters;
     FILE *outfile;
 };
 typedef struct TraversalData TraversalData;

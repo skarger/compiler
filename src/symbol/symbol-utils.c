@@ -375,12 +375,17 @@ void push_symbol_type(Symbol *s, int t) {
 }
 
 void append_function_parameter_to_symbol(Symbol *s) {
+    if (symbol_outer_type(s) != FUNCTION) {
+        handle_symbol_error(STE_NOT_FUNCTION, "adding param to non-function");
+    }
     FunctionParameter *fp = last_parameter(s);
     if (fp == NULL) {
         s->param_list = create_function_parameter();
+        s->type_tree->n.param_count = 1;
         return;
     } else {
         fp->next = create_function_parameter();
+        s->type_tree->n.param_count++;
     }
 }
 
@@ -411,11 +416,10 @@ FunctionParameter *last_parameter(Symbol *s) {
 
 /* set the size of the first element of this symbol's type_tree */
 void set_symbol_array_size(Symbol *s, int n) {
-    TypeNode *tn = s->type_tree;
-    if (tn->type != ARRAY) {
+    if (symbol_outer_type(s) != ARRAY) {
         handle_symbol_error(STE_NOT_ARRAY, "setting array size on non-array");
     }
-    set_array_size(tn, n);
+    set_array_size(s->type_tree, n);
 }
 
 int symbol_outer_type(Symbol *s) {
@@ -507,6 +511,14 @@ int get_array_size(TypeNode *tn) {
     return tn->n.array_size;
 }
 
+int get_parameter_count(TypeNode *tn) {
+    if (tn->type != FUNCTION) {
+        handle_symbol_error(STE_NOT_FUNCTION,
+                            "parameter count requested from non-function");
+    }
+    return tn->n.param_count;
+}
+
 /*
  *  type_tree_to_string
  *  Purpose:
@@ -549,8 +561,8 @@ char *type_tree_to_string(TypeNode *tn) {
                 bp += temp;
                 remaining_cur -= temp;
             } else if (tn->type == FUNCTION) {
-                /* TODO: function parameter count */
-                temp = snprintf(bp, remaining_cur, " (%d parameters)", 12345);
+                temp = snprintf(bp, remaining_cur, " (%d parameters)",
+                                        get_parameter_count(tn));
                 bp += temp;
                 remaining_cur -= temp;
             }
@@ -648,6 +660,12 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_NULL_PARAM:
             error(0, 0, "%s: trying to manipulate null parameter", data);
+            return;
+        case STE_FUNCTION_POINTER:
+            error(0, 0, "%s: function pointers not supported", data);
+            return;
+        case STE_NOT_FUNCTION:
+            error(0, 0, "%s", data);
             return;
         default:
             return;

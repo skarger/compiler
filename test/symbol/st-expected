@@ -235,3 +235,20 @@
  * symbol: empty
  * type: array (unspecified size) -> signed int
  */
+/*
+ * symbol: aoff
+ * type: array (10 elements) -> function (1 parameters) -> signed int
+ */
+/*
+ * symbol: fra
+ * type: function (1 parameters) -> array (10 elements) -> signed int
+ * parameters:
+ * name: , type: void
+ */
+/*
+ * symbol: frf
+ * type: function (1 parameters) -> function (1 parameters) -> signed int
+ * parameters:
+ * name: , type: void
+ * name: , type: void
+ */

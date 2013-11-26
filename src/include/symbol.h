@@ -171,7 +171,9 @@ enum symbol_error {
     STE_FUNC_RET_ARRAY = -8,
     STE_FUNC_RET_FUNC = -9,
     STE_CAST_ARRAY_SIZE = -10,
-    STE_NULL_PARAM = -11
+    STE_NULL_PARAM = -11,
+    STE_FUNCTION_POINTER = -12,
+    STE_NOT_FUNCTION = -13
 };
 
 
@@ -214,6 +216,8 @@ char *get_type_tree_name(int type);
 char *get_type_category_name(int type);
 char *type_tree_to_string(TypeNode *tn);
 void set_array_size(TypeNode *tn, int size);
+int get_array_size(TypeNode *tn);
+int get_parameter_count(TypeNode *tn);
 
 
 FunctionParameter *create_function_parameter();
