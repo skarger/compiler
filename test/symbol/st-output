@@ -37,19 +37,19 @@
  */
 /*
  * symbol: f
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: g
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: h
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: bwot
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: bwof
@@ -57,7 +57,7 @@
  */
 /*
  * symbol: bwxort
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: bwxorf
@@ -65,7 +65,7 @@
  */
 /*
  * symbol: bwat
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: bwaf
@@ -73,7 +73,7 @@
  */
 /*
  * symbol: eqt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: eqf
@@ -81,7 +81,7 @@
  */
 /*
  * symbol: neqt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: neqf
@@ -89,7 +89,7 @@
  */
 /*
  * symbol: ltt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: ltf
@@ -97,7 +97,7 @@
  */
 /*
  * symbol: ltet
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: ltef
@@ -105,7 +105,7 @@
  */
 /*
  * symbol: gtt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: gtf
@@ -113,7 +113,7 @@
  */
 /*
  * symbol: gtet
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: gtef
@@ -129,7 +129,7 @@
  */
 /*
  * symbol: brst
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: brsf
@@ -137,7 +137,7 @@
  */
 /*
  * symbol: plt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: plf
@@ -145,7 +145,7 @@
  */
 /*
  * symbol: mit
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: mif
@@ -153,7 +153,7 @@
  */
 /*
  * symbol: mut
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: muf
@@ -169,7 +169,7 @@
  */
 /*
  * symbol: ret
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: ref
@@ -189,11 +189,11 @@
  */
 /*
  * symbol: upl
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: lnt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: lnf
@@ -201,7 +201,7 @@
  */
 /*
  * symbol: bwnt
- * type: array (1 elements) -> signed int
+ * type: array (1 element) -> signed int
  */
 /*
  * symbol: bwnf
@@ -232,23 +232,71 @@
  * type: array (unspecified size) -> signed int
  */
 /*
+ * symbol: fne
+ * type: array (10 elements) -> function (1 parameter) -> signed int
+ */
+/*
  * symbol: empty
  * type: array (unspecified size) -> signed int
  */
 /*
  * symbol: aoff
- * type: array (10 elements) -> function (1 parameters) -> signed int
+ * type: array (10 elements) -> function (1 parameter) -> signed int
  */
 /*
  * symbol: fra
- * type: function (1 parameters) -> array (10 elements) -> signed int
+ * type: function (1 parameter) -> array (10 elements) -> signed int
  * parameters:
  * name: , type: void
  */
 /*
- * symbol: frf
- * type: function (1 parameters) -> function (1 parameters) -> signed int
+ * symbol: fn1
+ * type: function (1 parameter) -> signed char
  * parameters:
  * name: , type: void
+ */
+/*
+ * symbol: fn2
+ * type: function (1 parameter) -> pointer -> signed char
+ * parameters:
  * name: , type: void
+ */
+/*
+ * symbol: fn3
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: a, type: signed int
+ */
+/*
+ * symbol: fn4
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: ul, type: unsigned long
+ */
+/*
+ * symbol: fn5
+ * type: function (3 parameters) -> pointer -> signed char
+ * parameters:
+ * name: a, type: signed int
+ * name: b, type: signed char
+ * name: c, type: signed short
+ */
+/*
+ * symbol: fn6
+ * type: function (1 parameter) -> signed char
+ * parameters:
+ * name: , type: signed int
+ */
+/*
+ * symbol: errfn1
+ * type: function (1 parameter) -> array (10 elements) -> signed char
+ * parameters:
+ * name: i, type: signed int
+ */
+/*
+ * symbol: errfn2
+ * type: function (1 parameter) -> function (1 parameter) -> signed char
+ * parameters:
+ * name: j, type: signed int
+ * name: i, type: signed int
  */

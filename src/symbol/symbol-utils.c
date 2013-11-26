@@ -532,9 +532,9 @@ int get_parameter_count(TypeNode *tn) {
  */
 char *type_tree_to_string(TypeNode *tn) {
     /* buffer for printing type tree to and running pointer */
-    char *buf, *bp;
+    char *buf, *bp, *paren_str;
     /* counters for ensuring we have enough space */
-    short temp, remaining_cur, remaining_buf = MAX_TYPE_TREE_STRLEN;
+    int tempcnt, num, tf, remaining_cur, remaining_buf = MAX_TYPE_TREE_STRLEN;
     util_emalloc((void **) &buf, MAX_TYPE_TREE_STRLEN + 1);
     bp = buf;
     while (tn != NULL) {
@@ -543,28 +543,32 @@ char *type_tree_to_string(TypeNode *tn) {
             remaining_cur = MAX_TYPE_STRLEN;
             if (bp != buf) {
                 /* the string has a preceding item */
-                temp = snprintf(bp, remaining_cur, " -> ");
-                bp += temp;
-                remaining_cur -= temp;
+                tempcnt = snprintf(bp, remaining_cur, " -> ");
+                bp += tempcnt;
+                remaining_cur -= tempcnt;
             }
-            temp = snprintf(bp, remaining_cur, "%s",
+            tempcnt = snprintf(bp, remaining_cur, "%s",
                                 get_type_tree_name(tn->type));
-            bp += temp;
-            remaining_cur -= temp;
+            bp += tempcnt;
+            remaining_cur -= tempcnt;
             if (tn->type == ARRAY) {
                 if (get_array_size(tn) == UNSPECIFIED_VALUE) {
-                    temp = snprintf(bp, remaining_cur, " (unspecified size)");
+                    tempcnt = snprintf(bp, remaining_cur, " (unspecified size)");
                 } else {
-                    temp = snprintf(bp, remaining_cur, " (%d elements)",
-                                        get_array_size(tn));
+                    num = get_array_size(tn);
+                    tf = (num == 1 || num == -1);
+                    paren_str = tf ? " (%d element)" : " (%d elements)";
+                    tempcnt = snprintf(bp, remaining_cur, paren_str, num);
                 }
-                bp += temp;
-                remaining_cur -= temp;
+                bp += tempcnt;
+                remaining_cur -= tempcnt;
             } else if (tn->type == FUNCTION) {
-                temp = snprintf(bp, remaining_cur, " (%d parameters)",
-                                        get_parameter_count(tn));
-                bp += temp;
-                remaining_cur -= temp;
+                num = get_parameter_count(tn);
+                tf = (num == 1 || num == -1);
+                paren_str = tf ? " (%d parameter)" : " (%d parameters)";
+                tempcnt = snprintf(bp, remaining_cur, paren_str, num);
+                bp += tempcnt;
+                remaining_cur -= tempcnt;
             }
             remaining_buf -= MAX_TYPE_STRLEN;
         }
