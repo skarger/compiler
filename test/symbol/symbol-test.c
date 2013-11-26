@@ -6,7 +6,7 @@
 
 char *get_test_result_name(int res);
 char *get_overloading_class_name(int oc);
-void test_transition(Node *n, enum node_type nt, int action,
+void test_transition(Node *n, enum data_type nt, int action,
         enum scope_state expected_state, int expected_scope, int expected_oc);
 void test_st_fsm();
 void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expected_oc);
@@ -250,7 +250,7 @@ void test_st_fsm() {
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 }
 
-void test_transition(Node *n, enum node_type nt, int action,
+void test_transition(Node *n, enum data_type nt, int action,
         enum scope_state expected_state, int expected_scope, int expected_oc) {
     int test_state, test_scope, test_oc;
 

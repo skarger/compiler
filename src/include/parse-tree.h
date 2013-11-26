@@ -5,11 +5,31 @@
 /* output file for printing results */
 extern FILE *output;
 
-/* Nodes have a type corresponding to the grammar. Sometimes the type is
- * equivalent to a lexical token, but often the type has a higher-level
- * semantic value that the parser ascertains.
+/* possible data types
+ * used for:
+ * type categories (SCALAR, FUNCTION, ARRAY)
+ * integral types (SIGNED_CHAR, etc.)
+ * node types of productions defined by the grammar
  */
-enum node_type {
+enum data_type {
+    NO_DATA_TYPE,
+    SIGNED_CHAR,
+    UNSIGNED_CHAR,
+    SIGNED_SHORT,
+    UNSIGNED_SHORT,
+    SIGNED_INT,
+    UNSIGNED_INT,
+    SIGNED_LONG,
+    UNSIGNED_LONG,
+    OVERFLOW,
+    SCALAR,
+    ARRAY,
+    FUNCTION,
+    /*
+     * Nodes have a type corresponding to the grammar. Sometimes the type is
+     * equivalent to a lexical token, but often the type has a higher-level
+     * semantic value that the parser ascertains.
+     */
     FUNCTION_DEFINITION,
     FUNCTION_DEF_SPEC,
     DECL_OR_STMT_LIST,
@@ -82,30 +102,12 @@ union NodeData {
     char *str;         /* IDENTIFIER, STRING_CONSTANT */
 };
 
-/* possible data types */
-/* used not only for base types but also for type categories like FUNCTION */
-enum data_type {
-    NO_DATA_TYPE,
-    SCALAR,
-    ARRAY,
-    FUNCTION,
-    SIGNED_CHAR,
-    UNSIGNED_CHAR,
-    SIGNED_SHORT,
-    UNSIGNED_SHORT,
-    SIGNED_INT,
-    UNSIGNED_INT,
-    SIGNED_LONG,
-    UNSIGNED_LONG,
-    OVERFLOW
-};
-
 /*
  * Node
  * The main data structure for the parse tree.
  */
 struct Node {
-    enum node_type n_type;
+    enum data_type n_type;
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
     struct {

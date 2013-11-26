@@ -569,7 +569,7 @@ void yyerror(char *s) {
  * Returns: A reference to the created node
  * Side effects: Allocates and sets heap storage
  */
-void *create_node(enum node_type nt, ...) {
+void *create_node(enum data_type nt, ...) {
     Node *n = construct_node(nt);
     Node *child1, *child2, *child3, *child4;
     initialize_children(n);
@@ -621,7 +621,7 @@ void *create_node(enum node_type nt, ...) {
 
 
 /* helpers for create_node */
-int has_operator(enum node_type nt) {
+int has_operator(enum data_type nt) {
     switch (nt) {
         case BINARY_EXPR:
         case UNARY_EXPR:
@@ -633,7 +633,7 @@ int has_operator(enum node_type nt) {
     }
 }
 
-int has_literal_data(enum node_type nt) {
+int has_literal_data(enum data_type nt) {
     switch (nt) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
@@ -682,7 +682,7 @@ void set_literal_data(Node *n, YYSTYPE data) {
     }
 }
 
-int number_of_children(enum node_type nt) {
+int number_of_children(enum data_type nt) {
     switch (nt) {
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
@@ -794,11 +794,11 @@ void initialize_children(Node *n) {
  * construct_node
  * Purpose: Construct a new node and set its type to the passed type.
  * Parameters:
- *  nt       enum node_type The type of node to construct.
+ *  nt       enum data_type The type of node to construct.
  * Returns: A void pointer to the constructed node
  * Side-effects: Allocates heap memory
  */
-void *construct_node(enum node_type nt) {
+void *construct_node(enum data_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
@@ -807,7 +807,7 @@ void *construct_node(enum node_type nt) {
 
 
 
-void set_node_type(Node *n, enum node_type nt) {
+void set_node_type(Node *n, enum data_type nt) {
     n->n_type = nt;
 }
 
@@ -992,7 +992,7 @@ void pretty_print(void *np) {
     }
 }
 
-int parenthesize(enum node_type nt) {
+int parenthesize(enum data_type nt) {
 
     switch (nt) {
         /* declarator */
@@ -1249,13 +1249,13 @@ char *get_operator_value(int op) {
  *   Get the name of a node discovered by yyparse
  *
  * Parameters:
- *   nt - enum node_type - the node type returned by yyparse
+ *   nt - enum data_type - the node type returned by yyparse
  *
  * Return: A pointer to the zero-terminated the node name.
  * Side effects: none
  *
  */
-char *get_node_name(enum node_type nt) {
+char *get_node_name(enum data_type nt) {
     /* try for a lexer token */
     char *tok = get_token_name(nt);
     if (strlen(tok) > 0) {

@@ -141,7 +141,7 @@ void transition_scope(Node *n, int action) {
  * side effects: updates internal representation of scope
  */
 void scope_fsm_start(Node *n) {
-    enum node_type nt = n->n_type;
+    enum data_type nt = n->n_type;
 
     if (nt == FUNCTION_DEFINITION && get_state() == TOP_LEVEL) {
         set_state(FUNCTION_DEF);
@@ -176,7 +176,7 @@ void scope_fsm_start(Node *n) {
  * side effects: updates internal representation of scope
  */
 void scope_fsm_end(Node *n) {
-    enum node_type nt = n->n_type;
+    enum data_type nt = n->n_type;
 
     if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
         /* end of function definition */
