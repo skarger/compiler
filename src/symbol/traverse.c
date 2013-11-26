@@ -84,13 +84,13 @@ void traverse_node(Node *n, TraversalData *td) {
         case INIT_DECL_LIST:
             /* we will create a symbol for each declarator we recurse into */
             /* child1 may itself be a list of declarators or just one */
-            /* we do know that child2 is a single declarator */
+            /* child2 is a single declarator */
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
         case SIMPLE_DECLARATOR:
             /* here we have either: */
-            /* the name of a function parameter */
+            /* the name of a function parameter, or */
             /* an identifier that should become a symbol table entry */
             if (td->processing_parameters) {
                 FunctionParameter *fp = last_parameter(td->current_symbol);
@@ -141,7 +141,7 @@ void traverse_node(Node *n, TraversalData *td) {
             break;
         case PARAMETER_LIST:
             /* first child: parameter list, parameter_decl, or type spec */
-            /* we are guaranteed to find a type spec for any parameter */
+            /* we are grammatically guaranteed to find a type spec eventually */
             /* so it is there that the parameter will be created */
             traverse_node(n->children.child1, td);
             /* second child: parameter decl or type spec */
@@ -185,9 +185,23 @@ void traverse_node(Node *n, TraversalData *td) {
                 traverse_node(n->children.child1, td);
             }
             break;
-        case ABSTRACT_DECLARATOR:
         case DIR_ABS_DECL:
+            /* first child: direct_abstract_declarator */
+            traverse_node(n->children.child1, td);
+            /* second child: constant_expr */
+            if (td->processing_parameters) {
+                /* intentionally converting type from ARRAY to POINTER */
+                push_symbol_parameter_type(td->current_symbol, POINTER);
+            } else {
+                array_size = resolve_array_size(td, n->children.child2);
+                push_symbol_type(td->current_symbol, ARRAY);
+            }
+            break;
         case CAST_EXPR:
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            break;
+        case ABSTRACT_DECLARATOR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
         case LABELED_STATEMENT:
@@ -223,7 +237,6 @@ void traverse_node(Node *n, TraversalData *td) {
             break;
         case BINARY_EXPR:
             traverse_node(n->children.child1, td);
-            /* n->data.attributes[OPERATOR] */
             traverse_node(n->children.child2, td);
             break;
         case UNARY_EXPR:
@@ -232,7 +245,6 @@ void traverse_node(Node *n, TraversalData *td) {
             break;
         case POSTFIX_EXPR:
             traverse_node(n->children.child1, td);
-            /* n->data.attributes[OPERATOR] */
             break;
         case IDENTIFIER_EXPR:
             break;
