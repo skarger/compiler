@@ -36,7 +36,7 @@ void print_symbol_param_list(FILE *out, Symbol *s);
 /* symbol creation during traversal */
 void create_symbol_if_necessary(TraversalData *td);
 void reset_current_symbol();
-enum Boolean current_symbol_valid(TraversalData *td);
+void validate_current_symbol(TraversalData *td);
 
 
 #endif

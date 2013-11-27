@@ -30,15 +30,15 @@
 #define PARAM_TYPE 1
 
 /* limit on the length of a type tree chain in string format */
-#define MAX_TYPE_TREE_STRLEN 511
+#define MAX_TYPE_TREE_STRLEN 1023
 /*
  * limit on individual type strings, e.g.
  * "unsigned long -> "
- * "array (1234567890 elements) -> "
+ * "array (1234567890 elements) of -> "
  * "array (unspecified size) ->"
- * "function (12345 parameters) -> "
+ * "function (12345 parameters) returning -> "
  * */
-#define MAX_TYPE_STRLEN 32
+#define MAX_TYPE_STRLEN 48
 
 enum scope_state {
     TOP_LEVEL,
@@ -120,6 +120,7 @@ FunctionParameter *create_function_parameter();
 FunctionParameter *first_parameter(Symbol *);
 FunctionParameter *last_parameter(Symbol *s);
 void set_function_parameter_name(FunctionParameter *fp, char *pname);
+char *get_parameter_name(FunctionParameter *fp);
 void push_parameter_type(FunctionParameter *fp, int t);
 enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);
 

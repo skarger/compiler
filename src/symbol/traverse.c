@@ -98,12 +98,12 @@ void traverse_node(Node *n, TraversalData *td) {
                 set_function_parameter_name(fp, n->data.str);
             } else {
                 /* the symbol should have all data by this point */
-                /* put it in the table and reset */
+                /* put it in the table and parse tree, then reset */
                 create_symbol_if_necessary(td);
                 set_symbol_name(td->current_symbol, n->data.str);
-                if (current_symbol_valid(td)) {
-                    append_symbol(td->stc->current_st, td->current_symbol);
-                }
+                validate_current_symbol(td);
+                append_symbol(td->stc->current_st, td->current_symbol);
+                set_symbol_table_entry(n, td->current_symbol);
                 reset_current_symbol(td);
             }
             break;
@@ -581,7 +581,8 @@ void reset_current_symbol(TraversalData *td) {
     td->current_symbol = NULL;
 }
 
-enum Boolean current_symbol_valid(TraversalData *td) {
+/* only checks functions, are there any other cases? */
+void validate_current_symbol(TraversalData *td) {
     if (symbol_outer_type(td->current_symbol) == FUNCTION) {
         Symbol *prototype;
         prototype = find_prototype(td->stc->function_prototypes,
@@ -589,25 +590,26 @@ enum Boolean current_symbol_valid(TraversalData *td) {
         if (prototype != NULL) {
             if (!symbols_same_type(td->current_symbol, prototype)) {
                 handle_symbol_error(STE_PROTO_MISMATCH, "func decl");
-                return FALSE;
             }
         }
     }
-    return TRUE;
 }
 
 void print_symbol_param_list(FILE *out, Symbol *s) {
     FunctionParameter *fp = first_parameter(s);
+    char *param_name;
     fprintf(out, " * parameters:\n");
     while (fp != NULL) {
+        param_name = get_parameter_name(fp);
+        param_name = strcmp(param_name, "") == 0 ? "(none)" : param_name;
         fprintf(out, " * name: %s, type: %s\n",
-                get_parameter_name(fp), parameter_type_string(fp));
+                param_name, parameter_type_string(fp));
         fp = fp->next;
     }
 }
 
 void print_symbol(FILE *out, Symbol *s) {
-    fprintf(out, "/*\n");
+    fprintf(out, "\n/*\n");
     fprintf(out, " * symbol: %s\n", get_symbol_name(s));
     fprintf(out, " * type: %s\n", symbol_type_string(s));
     if (symbol_outer_type(s) == FUNCTION) {

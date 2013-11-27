@@ -811,7 +811,9 @@ void set_node_type(Node *n, enum data_type nt) {
     n->n_type = nt;
 }
 
-
+void set_symbol_table_entry(Node *n, Symbol *s) {
+    n->st_entry = s;
+}
 
 
 /* Printing Functions */
@@ -1112,8 +1114,6 @@ void print_conditional_statement(void *np) {
     }
 }
 
-
-
 /*
  * print_data_node
  * Purpose: Helper function for pretty_print.
@@ -1131,6 +1131,7 @@ void print_data_node(void *np) {
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
+            print_symbol(output, n->st_entry);
             fprintf(output, "%s", n->data.str);
             break;
         case STRING_CONSTANT:

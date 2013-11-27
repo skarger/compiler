@@ -9,7 +9,7 @@
 
 /* define PRETTY_PRINT for parser tests */
 #define PRETTY_PRINT
-#undef PRETTY_PRINT
+
 
 /*
  * Errors that are caught in the parsing step.
@@ -47,6 +47,7 @@ void set_node_type(Node *n, enum data_type nt);
 int has_literal_data(enum data_type nt);
 int has_operator(enum data_type nt);
 int number_of_children(enum data_type nt);
+void set_symbol_table_entry(Node *n, Symbol *s);
 
 /* error handling */
 void handle_parser_error(enum parser_error e, char *data, int line);

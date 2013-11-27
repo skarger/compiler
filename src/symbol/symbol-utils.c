@@ -361,8 +361,8 @@ void append_symbol(SymbolTable *st, Symbol *s) {
     /* in a separate symbol table so they will not be flagged here */
     while (cur != NULL) {
         if (strcmp(cur->name, s->name) == 0) {
+            /* we do not return here to allow printing of invalid symbols */
             handle_symbol_error(STE_DUPLICATE_SYMBOL, "append_symbol");
-            return;
         }
         prev = cur;
         cur = cur->next;
@@ -646,11 +646,12 @@ char *type_tree_to_string(TypeNode *tn) {
             remaining_cur -= tempcnt;
             if (tn->type == ARRAY) {
                 if (get_array_size(tn) == UNSPECIFIED_VALUE) {
-                    tempcnt = snprintf(bp, remaining_cur, " (unspecified size)");
+                    tempcnt = snprintf(bp, remaining_cur,
+                                            " (unspecified size) of");
                 } else {
                     num = get_array_size(tn);
                     tf = (num == 1 || num == -1);
-                    paren_str = tf ? " (%d element)" : " (%d elements)";
+                    paren_str = tf ? " (%d element) of" : " (%d elements) of";
                     tempcnt = snprintf(bp, remaining_cur, paren_str, num);
                 }
                 bp += tempcnt;
@@ -658,7 +659,8 @@ char *type_tree_to_string(TypeNode *tn) {
             } else if (tn->type == FUNCTION) {
                 num = get_parameter_count(tn);
                 tf = (num == 1 || num == -1);
-                paren_str = tf ? " (%d parameter)" : " (%d parameters)";
+                paren_str = tf ? " (%d parameter) returning" :
+                                 " (%d parameters) returning";
                 tempcnt = snprintf(bp, remaining_cur, paren_str, num);
                 bp += tempcnt;
                 remaining_cur -= tempcnt;
@@ -729,42 +731,42 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             error(0, 0, "%s", data);
             return;
         case STE_DUPLICATE_SYMBOL:
-            error(0, 0, "%s: duplicate symbol", data);
+            error(0, 0, "error: %s: duplicate symbol", data);
             return;
         case STE_NON_POSITIVE_ARRAY_SIZE:
-            error(0, 0, "%s: array size must be positive", data);
+            error(0, 0, "error: %s: array size must be positive", data);
             return;
         case STE_VARIABLE_ARRAY_SIZE:
-            error(0, 0, "%s: variable size not permitted", data);
+            error(0, 0, "error: %s: variable size not permitted", data);
             return;
         case STE_ARRAY_SIZE_TYPE:
-            error(0, 0, "%s: array size must be an integer", data);
+            error(0, 0, "error: %s: array size must be an integer", data);
             return;
         case STE_ARRAY_SIZE_MISSING:
-            error(0, 0, "%s: array size required", data);
+            error(0, 0, "error: %s: array size required", data);
             return;
         case STE_ARRAY_OF_FUNC:
-            error(0, 0, "%s: arrays cannot contain functions", data);
+            error(0, 0, "error: %s: arrays cannot contain functions", data);
             return;
         case STE_FUNC_RET_ARRAY:
-            error(0, 0, "%s: functions cannot return arrays", data);
+            error(0, 0, "error: %s: functions cannot return arrays", data);
             return;
         case STE_FUNC_RET_FUNC:
-            error(0, 0, "%s: functions cannot return functions", data);
+            error(0, 0, "error: %s: functions cannot return functions", data);
             return;
         case STE_CAST_ARRAY_SIZE:
-            error(0, 0, "%s: cast expression array bounds not supported", data);
+            error(0, 0, "error: %s: cast expressions not supported", data);
             return;
         case STE_NULL_PARAM:
-            error(0, 0, "%s: trying to manipulate null parameter", data);
+            error(0, 0, "error: %s: trying to manipulate null parameter", data);
             return;
         case STE_FUNCTION_POINTER:
-            error(0, 0, "%s: function pointers not supported", data);
+            error(0, 0, "error: %s: function pointers not supported", data);
             return;
         case STE_NOT_FUNCTION:
-            error(0, 0, "%s", data);
+            error(0, 0, "error: %s", data);
         case STE_PROTO_MISMATCH:
-            error(0, 0, "%s", "redeclaration of function");
+            error(0, 0, "error: %s", "redeclaration of function");
             return;
         default:
             return;
