@@ -106,7 +106,7 @@ struct SymbolTableContainer {
     /* contains the root symbol tables for each overloading class */
     SymbolTable *symbol_tables[NUM_OC_CLASSES];
     /* points to the last symbol table appended */
-    SymbolTable *current_st;
+    SymbolTable *current_st[NUM_OC_CLASSES];
     /* separate symbol table for tracking function declarations */
     SymbolTable *function_prototypes;
 };

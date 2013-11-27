@@ -14,34 +14,6 @@
  * while traversing parse tree.
  */
 
-/*
-* transitions
-TOP_LEVEL -> FUNCTION_DEF
-    node: FUNCTION_DEFINITION
-FUNCTION_DEF -> FUNCTION_DEF_PARAMETERS
-    node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER)
-FUNCTION_DEF_PARAMETERS -> FUNCTION_BODY
-    node: start of COMPOUND_STATEMENT
-FUNCTION_BODY -> TOP_LEVEL
-    node: end of COMPOUND_STATEMENT
-
-FUNCTION_BODY -> BLOCK
-    node: start of COMPOUND_STATEMENT
-BLOCK -> FUNCTION_BODY
-    node: end of COMPOUND_STATEMENT
-
-BLOCK -> BLOCK
-    node: start of COMPOUND_STATEMENT
-BLOCK -> BLOCK
-    node: end of COMPOUND_STATEMENT
-
-OTHER_NAMES -> STATEMENT_LABELS
-    node: ( LABELED_STATEMENT | GOTO_STATEMENT )
-STATEMENT_LABELS -> OTHER_NAMES
-    node: IDENTIFIER
-
-*/
-
 static int current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
@@ -153,14 +125,28 @@ enum Boolean fsm_is_ready() {
  * returns: none
  * side effects: none
  */
-void transition_scope(Node *n, int action) {
+void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
+    int pre_scope, post_scope, oc;
     if (!fsm_is_ready()) {
         initialize_fsm();
     }
+    pre_scope = get_scope();
     if (action == START) {
         scope_fsm_start(n);
     } else {
         scope_fsm_end(n);
+    }
+    post_scope = get_scope();
+    /* if we must create a new symbol table it should become the current one */
+    /* or, if we moved to an enclosing scope then we must update the         */
+    /* current symbol table to be the one enclosing the old one              */
+    if (should_create_new_st()) {
+        SymbolTable *st = create_symbol_table();
+        insert_symbol_table(st, stc);
+        set_current_st(st, stc);
+    } else if (post_scope < pre_scope) {
+        oc = get_overloading_class();
+        set_current_st(stc->current_st[oc]->enclosing, stc);
     }
 }
 
@@ -301,7 +287,8 @@ SymbolTableContainer *create_st_container() {
 void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
-    stc->current_st = (SymbolTable *) NULL;
+    stc->current_st[OTHER_NAMES] = (SymbolTable *) NULL;
+    stc->current_st[STATEMENT_LABELS] = (SymbolTable *) NULL;
     stc->function_prototypes = create_function_prototypes();
 }
 
@@ -407,14 +394,19 @@ void append_symbol(SymbolTable *st, Symbol *s) {
  *      Updates the current symbol table pointer of the ST container.
  */
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
-    SymbolTable *enc = stc->current_st;
+    /* oc is OTHER_NAMES or STATEMENT_LABELS */
+    int oc = st_overloading_class(new);
+    SymbolTable *enc = stc->current_st[oc];
     if (enc == NULL) {
-        /* new->oc is OTHER_NAMES or STATEMENT_LABELS */
-        stc->symbol_tables[new->oc] = new;
+        stc->symbol_tables[oc] = new;
     }
     /* link new to its enclosing scope (even if it is NULL) */
     new->enclosing = enc;
-    stc->current_st = new;
+}
+
+void set_current_st(SymbolTable *st, SymbolTableContainer *stc) {
+    int oc = st_overloading_class(st);
+    stc->current_st[oc] = st;
 }
 
 Symbol *find_prototype(SymbolTable *prototypes, char *name) {

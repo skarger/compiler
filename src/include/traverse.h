@@ -36,8 +36,8 @@ void print_symbol_param_list(FILE *out, Symbol *s);
 /* symbol creation during traversal */
 void create_symbol_if_necessary(TraversalData *td);
 void reset_current_symbol();
-void validate_current_symbol(TraversalData *td);
-void record_symbol(Node *n, TraversalData *td);
+void validate_current_symbol(TraversalData *td, int oc);
+void record_symbol(Node *n, TraversalData *td, int oc);
 
 
 #endif

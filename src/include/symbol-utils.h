@@ -76,7 +76,7 @@ enum symbol_error {
 int get_state();
 int get_scope();
 int get_overloading_class();
-void transition_scope(Node *n, int action);
+void transition_scope(Node *n, int action, SymbolTableContainer *stc);
 
 /* symbol table management functions */
 SymbolTableContainer *create_st_container();
@@ -85,6 +85,7 @@ SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
+void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
 int st_scope(SymbolTable *st);
 char *st_scope_name(SymbolTable *st);
 int st_overloading_class(SymbolTable *st);

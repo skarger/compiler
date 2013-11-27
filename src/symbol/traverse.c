@@ -62,13 +62,8 @@ void traverse_node(Node *n, TraversalData *td) {
     unsigned long array_size;
 
     /* this node may or may not imply a scope transition */
-    transition_scope(n, START);
-
-    if (should_create_new_st()) {
-        SymbolTable *st = create_symbol_table();
-        insert_symbol_table(st, td->stc);
-    }
-
+    transition_scope(n, START, td->stc);
+            int oc = get_overloading_class();
     switch (n->n_type) {
         case FUNCTION_DEF_SPEC:
             /* first child: type_specifier */
@@ -101,7 +96,7 @@ void traverse_node(Node *n, TraversalData *td) {
                 /* all relevant data has been assembled in the current symbol */
                 create_symbol_if_necessary(td);
                 set_symbol_name(td->current_symbol, n->data.str);
-                record_symbol(n, td);
+                record_symbol(n, td, OTHER_NAMES);
             }
             break;
         case POINTER_DECLARATOR:
@@ -196,7 +191,7 @@ void traverse_node(Node *n, TraversalData *td) {
             td->current_base_type = NAMED_LABEL;
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
-            record_symbol(n, td);
+            record_symbol(n, td, STATEMENT_LABELS);
             break;
         case CAST_EXPR:
         case ABSTRACT_DECLARATOR:
@@ -268,7 +263,7 @@ void traverse_node(Node *n, TraversalData *td) {
         default:
             break;
     }
-    transition_scope(n, END);
+    transition_scope(n, END, td->stc);
 }
 
 /*
@@ -576,8 +571,9 @@ void reset_current_symbol(TraversalData *td) {
 }
 
 /* only checks functions, are there any other cases? */
-void validate_current_symbol(TraversalData *td) {
+void validate_current_symbol(TraversalData *td, int oc) {
     if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+        /* check that it matches its prototype if present */
         Symbol *prototype;
         prototype = find_prototype(td->stc->function_prototypes,
                                     get_symbol_name(td->current_symbol));
@@ -586,14 +582,18 @@ void validate_current_symbol(TraversalData *td) {
                 handle_symbol_error(STE_PROTO_MISMATCH, "func decl");
             }
         }
+        /* functions may be declared only at file scope */
+        if (st_scope(td->stc->current_st[oc]) != TOP_LEVEL_SCOPE) {
+            handle_symbol_error(STE_FUNC_DECL_SCOPE, "function decl");
+        }
     }
 }
 
-void record_symbol(Node *n, TraversalData *td) {
+void record_symbol(Node *n, TraversalData *td, int oc) {
     /* have an identifier that should become a symbol table entry */
-    validate_current_symbol(td);
+    validate_current_symbol(td, oc);
     /* add to appropriate symbol table */
-    append_symbol(td->stc->current_st, td->current_symbol);
+    append_symbol(td->stc->current_st[oc], td->current_symbol);
     /* add to parse tree */
     set_symbol_table_entry(n, td->current_symbol);
     reset_current_symbol(td);
@@ -626,7 +626,7 @@ void print_symbol(FILE *out, Symbol *s) {
 
 void print_symbol_table(FILE *out, SymbolTable *st) {
     fprintf(out, " * symbol table:\n");
-    fprintf(out, " * scope: %s\n", get_st_scope(st));
-    fprintf(out, " * overloading class: %s\n", get_st_overloading_class(st));
+    fprintf(out, " * scope: %s\n", st_scope_name(st));
+    fprintf(out, " * overloading class: %s\n", st_overloading_class_name(st));
 }
 

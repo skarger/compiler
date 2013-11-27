@@ -15,6 +15,8 @@ void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expe
 void test_st_data();
 void test_symbol_data();
 
+static SymbolTableContainer *stc;
+
 int main() {
     test_st_fsm();
     printf("\n");
@@ -153,7 +155,7 @@ void test_symbol_data() {
 
 
 void test_st_data() {
-    int test_res;
+    int test_res, oc;
 
     printf("*** Testing Symbol Table data methods ***\n");
 
@@ -172,7 +174,8 @@ void test_st_data() {
     test_res = (stc->symbol_tables[STATEMENT_LABELS] ==  NULL ? PASS : FAIL);
     printf("%s SymbolTableContainer: initialize statement labels\n", get_test_result_name(test_res));
 
-    test_res = (stc->current_st == NULL ? PASS : FAIL);
+    oc = get_overloading_class();
+    test_res = (stc->current_st[oc] == NULL ? PASS : FAIL);
     printf("%s SymbolTableContainer: initialize current_st\n", get_test_result_name(test_res));
 
     test_res = (should_create_new_st() == TRUE ? PASS : FAIL);
@@ -197,7 +200,8 @@ void test_st_data() {
     test_res = (stc->symbol_tables[OTHER_NAMES] == st ? PASS : FAIL);
     printf("%s insert_symbol_table: insert into container\n", get_test_result_name(test_res));
 
-    test_res = (stc->current_st == st ? PASS : FAIL);
+    oc = get_overloading_class();
+    test_res = (stc->current_st[oc] == st ? PASS : FAIL);
     printf("%s insert_symbol_table: update current_st\n", get_test_result_name(test_res));
 }
 
@@ -207,6 +211,8 @@ void test_st_fsm() {
     initialize_fsm();
     enum scope_state cur = get_state();
     int oc = get_overloading_class();
+    stc = create_st_container();
+
     printf("     initial state:\n");
     verify_st_fsm(TOP_LEVEL, 0, OTHER_NAMES);
 
@@ -265,7 +271,7 @@ void test_transition(Node *n, enum data_type nt, int action,
     int test_state, test_scope, test_oc;
 
     n->n_type = nt;
-    transition_scope(n, action);
+    transition_scope(n, action, stc);
     verify_st_fsm(expected_state, expected_scope, expected_oc);
 }
 
