@@ -5,11 +5,11 @@
 #undef  DEBUG
 
 #include <stdio.h>
-#include "../include/parse-tree.h"
-#include "../include/symbol.h"
+#include "parse-tree.h"
+#include "symbol.h"
+#include "literal.h"
 
 #define TRAVERSE
-
 
 struct TraversalData {
     SymbolTableContainer *stc;

@@ -1,4 +1,4 @@
-./symtab-test test/symbol/st-input test/symbol/st-output
+./symbol-main test/symbol/st-input test/symbol/st-output
 diff test/symbol/st-expected test/symbol/st-output
 
 if [ $? -eq 0 ]

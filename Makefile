@@ -10,11 +10,11 @@ YFLAGS += -d
 VPATH = src
 
 
-TESTS = symbol-test symtab-test test/symbol/st-output
-EXECS = lexer parser-main
+TESTS = symbol-test test/symbol/st-output
+EXECS = lexer parser-main symbol-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/symbol/traverse.c \
-src/symbol/symbol-utils.c test/symbol/symbol-test.c test/symbol/symtab-test.c
+src/symbol/symbol-utils.c test/symbol/symbol-test.c src/symbol/symbol-main.c
 
 
 all : $(EXECS)
@@ -77,12 +77,12 @@ symbol-test : symbol-utils.o symbol-test.o utilities.o
 test-symbol-output : test/symbol/test-symbol-output parser
 	test/symbol/test-symbol-output
 
-symtab-test.o : test/symbol/symtab-test.c
-	$(CC) -c test/symbol/symtab-test.c
+symbol-main.o : src/symbol/symbol-main.c
+	$(CC) -c src/symbol/symbol-main.c
 
-symtab-test : symtab-test.o y.tab.o traverse.o symbol-utils.o utilities.o
-	$(CC) symtab-test.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@
+symbol-main : symbol-main.o y.tab.o traverse.o symbol-utils.o utilities.o
+	$(CC) symbol-main.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@
 
-test-symtab-output : symtab-test
+test-symtab-output : symbol-main
 	./test/symbol/test-symtab-output
 

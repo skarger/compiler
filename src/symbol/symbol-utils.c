@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../include/symbol.h"
+#include "../include/symbol-utils.h"
 #include "../include/parse-tree.h"
 #include "../include/literal.h"
 #include "../include/utilities.h"

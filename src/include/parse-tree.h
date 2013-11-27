@@ -1,3 +1,5 @@
+#include "symbol.h"
+
 /* contains data definitions for parse tree nodes. */
 #ifndef PARSE_TREE_H
 #define PARSE_TREE_H
@@ -107,7 +109,7 @@ union NodeData {
  * The main data structure for the parse tree.
  */
 struct Node {
-    enum data_type n_type;
+    enum data_type n_type;  /* node type */
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
     struct {
@@ -116,6 +118,7 @@ struct Node {
         Node *child3;
         Node *child4;
     } children;
+    Symbol *st_entry;       /* symbol table entry */
 };
 
 #endif

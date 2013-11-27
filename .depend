@@ -1,36 +1,33 @@
 y.tab.o: y.tab.c src/include/lexer.h src/include/literal.h \
-  src/include/parse-tree.h src/include/parser.h src/include/utilities.h \
-  src/include/traverse.h src/include/../include/parse-tree.h \
-  src/include/../include/symbol.h src/include/../include/parse-tree.h \
-  src/include/../include/literal.h src/include/symbol.h lex.yy.c y.tab.h
+  src/include/parse-tree.h src/include/symbol.h src/include/parser.h \
+  src/include/utilities.h src/include/traverse.h lex.yy.c y.tab.h
 lex.yy.o: lex.yy.c src/include/lexer.h src/include/literal.h \
-  src/include/parse-tree.h y.tab.h
+  src/include/parse-tree.h src/include/symbol.h y.tab.h
 lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
   src/lexer/../include/literal.h src/lexer/../include/parse-tree.h \
-  src/lexer/../../y.tab.h
+  src/lexer/../include/symbol.h src/lexer/../../y.tab.h
 utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h \
-  src/utilities/../include/parse-tree.h src/utilities/../../y.tab.h
+  src/utilities/../include/parse-tree.h src/utilities/../include/symbol.h \
+  src/utilities/../../y.tab.h
 parser-main.o: src/parser/parser-main.c
 traverse.o: src/symbol/traverse.c src/symbol/../include/traverse.h \
-  src/symbol/../include/../include/parse-tree.h \
-  src/symbol/../include/../include/symbol.h \
-  src/symbol/../include/../include/parse-tree.h \
-  src/symbol/../include/../include/literal.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/utilities.h \
+  src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
+  src/symbol/../include/literal.h src/symbol/../include/parse-tree.h \
+  src/symbol/../include/symbol-utils.h src/symbol/../include/utilities.h \
   src/symbol/../include/literal.h src/symbol/../../y.tab.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
+  src/symbol/../include/symbol-utils.h src/symbol/../include/parse-tree.h \
+  src/symbol/../include/symbol.h src/symbol/../include/literal.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
   src/symbol/../include/utilities.h src/symbol/../../y.tab.h
 symbol-test.o: test/symbol/symbol-test.c \
   test/symbol/../../src/include/symbol.h \
-  test/symbol/../../src/include/parse-tree.h \
   test/symbol/../../src/include/literal.h \
-  test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
-symtab-test.o: test/symbol/symtab-test.c \
-  test/symbol/../../src/include/traverse.h \
-  test/symbol/../../src/include/../include/parse-tree.h \
-  test/symbol/../../src/include/../include/symbol.h \
-  test/symbol/../../src/include/../include/parse-tree.h \
-  test/symbol/../../src/include/../include/literal.h
+  test/symbol/../../src/include/parse-tree.h \
+  test/symbol/../../src/include/symbol.h test/symbol/../../y.tab.h
+symbol-main.o: src/symbol/symbol-main.c \
+  src/symbol/../../src/include/traverse.h \
+  src/symbol/../../src/include/parse-tree.h \
+  src/symbol/../../src/include/symbol.h \
+  src/symbol/../../src/include/literal.h

@@ -6,7 +6,6 @@
 #include "src/include/parser.h"
 #include "src/include/utilities.h"
 #include "src/include/traverse.h"
-#include "src/include/symbol.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H
@@ -802,6 +801,7 @@ void *construct_node(enum data_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
+    n->st_entry = NULL;
     return n;
 }
 

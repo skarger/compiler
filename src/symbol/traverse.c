@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "../include/traverse.h"
 #include "../include/parse-tree.h"
+#include "../include/symbol-utils.h"
 #include "../include/utilities.h"
 #include "../include/literal.h"
 #include "../../y.tab.h"
