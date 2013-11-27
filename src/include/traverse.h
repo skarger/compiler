@@ -37,6 +37,7 @@ void print_symbol_param_list(FILE *out, Symbol *s);
 void create_symbol_if_necessary(TraversalData *td);
 void reset_current_symbol();
 void validate_current_symbol(TraversalData *td);
+void record_symbol(Node *n, TraversalData *td);
 
 
 #endif

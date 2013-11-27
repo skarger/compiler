@@ -97,14 +97,11 @@ void traverse_node(Node *n, TraversalData *td) {
                 FunctionParameter *fp = last_parameter(td->current_symbol);
                 set_function_parameter_name(fp, n->data.str);
             } else {
-                /* the symbol should have all data by this point */
-                /* put it in the table and parse tree, then reset */
+                /* any enclosing declarators have been traversed already */
+                /* all relevant data has been assembled in the current symbol */
                 create_symbol_if_necessary(td);
                 set_symbol_name(td->current_symbol, n->data.str);
-                validate_current_symbol(td);
-                append_symbol(td->stc->current_st, td->current_symbol);
-                set_symbol_table_entry(n, td->current_symbol);
-                reset_current_symbol(td);
+                record_symbol(n, td);
             }
             break;
         case POINTER_DECLARATOR:
@@ -196,13 +193,10 @@ void traverse_node(Node *n, TraversalData *td) {
             }
             break;
         case NAMED_LABEL:
-            /* have an identifier that should become a symbol table entry */
-            /* put it in the table and reset */
             td->current_base_type = NAMED_LABEL;
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
-            append_symbol(td->stc->current_st, td->current_symbol);
-            reset_current_symbol(td);
+            record_symbol(n, td);
             break;
         case CAST_EXPR:
         case ABSTRACT_DECLARATOR:
@@ -593,6 +587,16 @@ void validate_current_symbol(TraversalData *td) {
             }
         }
     }
+}
+
+void record_symbol(Node *n, TraversalData *td) {
+    /* have an identifier that should become a symbol table entry */
+    validate_current_symbol(td);
+    /* add to appropriate symbol table */
+    append_symbol(td->stc->current_st, td->current_symbol);
+    /* add to parse tree */
+    set_symbol_table_entry(n, td->current_symbol);
+    reset_current_symbol(td);
 }
 
 void print_symbol_param_list(FILE *out, Symbol *s) {
