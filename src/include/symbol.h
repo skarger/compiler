@@ -7,6 +7,7 @@
 /* give names to fundamental scope levels. deeper levels need no name */
 #define TOP_LEVEL_SCOPE 0
 #define FUNCTION_BODY_SCOPE 1
+#define STATEMENT_LABEL_SCOPE 1
 
 /* indicator for whether we are starting or ending the traversal of a node */
 #define START 1
@@ -91,8 +92,9 @@ typedef struct FunctionParameter FunctionParameter;
 struct Symbol {
     char *name;          /* the name of the symbol */
     TypeNode *type_tree;
-    FunctionParameter *param_list;  /* function parameter list */
-    struct Symbol *next;            /* adjacent item in symbol table */
+    FunctionParameter *param_list;      /* function parameter list */
+    struct Symbol *next;                /* adjacent item in symbol table */
+    struct SymbolTable *symbol_table;   /* the symbol's symbol table */
 };
 typedef struct Symbol Symbol;
 
@@ -173,7 +175,8 @@ enum symbol_error {
     STE_CAST_ARRAY_SIZE = -10,
     STE_NULL_PARAM = -11,
     STE_FUNCTION_POINTER = -12,
-    STE_NOT_FUNCTION = -13
+    STE_NOT_FUNCTION = -13,
+    STE_PROTO_MISMATCH = -14
 };
 
 
@@ -187,6 +190,7 @@ void transition_scope(Node *n, int action);
 /* symbol table management functions */
 SymbolTableContainer *create_st_container();
 SymbolTable *create_symbol_table();
+SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
@@ -203,10 +207,13 @@ enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
 void append_symbol(SymbolTable *st, Symbol *s);
 void set_symbol_name(Symbol *s, char *name);
 char *get_symbol_name(Symbol *s);
+SymbolTable *get_symbol_table(Symbol *s);
 char *symbol_type_string(Symbol *s);
 enum Boolean all_array_bounds_specified(Symbol *s);
 int symbol_outer_type(Symbol *s);
 void append_function_parameter_to_symbol(Symbol *s);
+Symbol *find_prototype(SymbolTable *prototypes, char *name);
+Symbol *find_symbol(SymbolTable *st, char *name);
 
 /* helpers */
 TypeNode *create_type_node(int type);

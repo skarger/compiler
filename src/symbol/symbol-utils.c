@@ -62,6 +62,7 @@ char *get_overloading_class_name(int oc);
 /* symbol table */
 void initialize_st_container(SymbolTableContainer *stc);
 void initialize_st(SymbolTable *st);
+SymbolTable *new_st();
 
 
 static void set_state(int state) {
@@ -78,6 +79,11 @@ static void set_scope(int s) {
 }
 
 static void set_overloading_class(int oc) {
+    /* TODO: this doesn't work correctly */
+    /* need to handle other names vs for statement labels */
+    if (oc != overloading_class) {
+        create_new_st = TRUE;
+    }
     overloading_class = oc;
 }
 
@@ -105,6 +111,18 @@ enum Boolean should_create_new_st() {
     return create_new_st;
 }
 
+/*
+ * initialize_fsm
+ * Purpose:
+ *      Prepare scope tracking finite state machine for use.
+ *      Must be called before calling transition_scope the first time.
+ * Parameters:
+ *      None
+ * Returns:
+ *      None
+ * Side Effects:
+ *      Sets the values of static variables in this file
+ */
 void initialize_fsm() {
     set_state(TOP_LEVEL);
     set_scope(TOP_LEVEL_SCOPE);
@@ -261,7 +279,7 @@ void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
     stc->current_st = (SymbolTable *) NULL;
-    stc->function_prototypes = NULL;
+    stc->function_prototypes = create_function_prototypes();
 }
 
 /* symbol table */
@@ -269,10 +287,20 @@ void initialize_st_container(SymbolTableContainer *stc) {
  * create_symbol_table
  */
 SymbolTable *create_symbol_table() {
+    SymbolTable *st = new_st();
+    complete_st_creation();
+    return st;
+}
+
+SymbolTable *create_function_prototypes() {
+    return new_st();
+}
+
+/* private helper */
+SymbolTable *new_st() {
     SymbolTable *st;
     util_emalloc( (void **) &st, sizeof(SymbolTable));
     initialize_st(st);
-    complete_st_creation();
     return st;
 }
 
@@ -280,6 +308,7 @@ void initialize_st(SymbolTable *st) {
     st->scope = get_scope();
     st->oc = get_overloading_class();
     st->symbols = NULL;
+    st->enclosing = NULL;
 }
 
 char *get_st_scope(SymbolTable *st) {
@@ -312,10 +341,10 @@ Symbol *get_st_symbols(SymbolTable *st) {
 void append_symbol(SymbolTable *st, Symbol *s) {
     Symbol *prev, *cur;
     prev = cur = st->symbols;
+    /* check for duplicates */
+    /* forward declarations, i.e. function prototypes, will only exist */
+    /* in a separate symbol table so they will not be flagged here */
     while (cur != NULL) {
-        /* check for duplicates */
-        /* forward declarations, i.e. function prototypes, will only exist */
-        /* in a separate symbol table so they will not be flagged here */
         if (strcmp(cur->name, s->name) == 0) {
             handle_symbol_error(STE_DUPLICATE_SYMBOL, "append_symbol");
             return;
@@ -323,11 +352,13 @@ void append_symbol(SymbolTable *st, Symbol *s) {
         prev = cur;
         cur = cur->next;
     }
+    /* no problems found. append the symbol */
     if (prev != NULL) {
         prev->next = s;
     } else {
         st->symbols = s;
     }
+    s->symbol_table = st;
 }
 
 /*
@@ -358,6 +389,23 @@ void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
     stc->current_st = new;
 }
 
+Symbol *find_prototype(SymbolTable *prototypes, char *name) {
+    return find_symbol(prototypes, name);
+}
+
+Symbol *find_symbol(SymbolTable *st, char *name) {
+    if (st == NULL) {
+        return (Symbol *) NULL;
+    }
+    Symbol *cur = st->symbols;
+    while (cur != NULL) {
+        if (strcmp(cur->name, name) == 0) {
+            return cur;
+        }
+        cur = cur->next;
+    }
+    return find_symbol(st->enclosing, name);
+}
 
 /* Symbol functions */
 Symbol *create_symbol() {
@@ -366,6 +414,7 @@ Symbol *create_symbol() {
     s->name = "";
     s->type_tree = NULL;
     s->param_list = NULL;
+    s->symbol_table = NULL;
     s->next = NULL;
     return s;
 }
@@ -427,9 +476,34 @@ int symbol_outer_type(Symbol *s) {
 }
 
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
+    if (s1 == NULL || s2 == NULL) {
+        if (s1 == NULL && s2 == NULL) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
     TypeNode *tn1 = s1->type_tree;
     TypeNode *tn2 = s2->type_tree;
-    return equal_types(tn1, tn2);
+    enum Boolean equal = equal_types(tn1, tn2);
+    if (!equal) {
+        return FALSE;
+    }
+    if (symbol_outer_type(s1) == FUNCTION) {
+        /* and we know s2 is a FUNCTION from the check above */
+        FunctionParameter *fp1 = first_parameter(s1);
+        FunctionParameter *fp2 = first_parameter(s2);
+        while (fp1 != NULL && fp2 != NULL) {
+            equal = equal && parameters_same_type(fp1, fp2);
+            if (!equal) {
+                return FALSE;
+            }
+        }
+        if (fp1 != NULL || fp2 != NULL) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 void set_symbol_name(Symbol *s, char *name) {
@@ -438,6 +512,10 @@ void set_symbol_name(Symbol *s, char *name) {
 
 char *get_symbol_name(Symbol *s) {
     return s->name;
+}
+
+SymbolTable *get_symbol_table(Symbol *s) {
+    return s->symbol_table;
 }
 
 char *symbol_type_string(Symbol *s) {
@@ -670,6 +748,8 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_NOT_FUNCTION:
             error(0, 0, "%s", data);
+        case STE_PROTO_MISMATCH:
+            error(0, 0, "%s", "redeclaration of function");
             return;
         default:
             return;

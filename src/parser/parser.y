@@ -37,20 +37,20 @@ void yyerror(char *s);
 %%      /*  beginning  of  rules  section  */
 translation_unit : top_level_decl
         {
-            #ifdef PRETTY_PRINT
-            pretty_print($1);
-            #endif
             #ifdef TRAVERSE
             start_traversal($1);
+            #endif
+            #ifdef PRETTY_PRINT
+            pretty_print($1);
             #endif
         }
     | translation_unit top_level_decl
         {
-            #ifdef PRETTY_PRINT
-            pretty_print($2);
-            #endif
             #ifdef TRAVERSE
             start_traversal($2);
+            #endif
+            #ifdef PRETTY_PRINT
+            pretty_print($2);
             #endif
         }
     ;

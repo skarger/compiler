@@ -100,10 +100,9 @@ void traverse_node(Node *n, TraversalData *td) {
                 /* put it in the table and reset */
                 create_symbol_if_necessary(td);
                 set_symbol_name(td->current_symbol, n->data.str);
-                if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-                    /* check that matches prototype if present */
+                if (current_symbol_valid(td)) {
+                    append_symbol(td->stc->current_st, td->current_symbol);
                 }
-                append_symbol(td->stc->current_st, td->current_symbol);
                 reset_current_symbol(td);
             }
             break;
@@ -581,6 +580,21 @@ void reset_current_symbol(TraversalData *td) {
     td->current_symbol = NULL;
 }
 
+enum Boolean current_symbol_valid(TraversalData *td) {
+    if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+        Symbol *prototype;
+        prototype = find_prototype(td->stc->function_prototypes,
+                                    get_symbol_name(td->current_symbol));
+        if (prototype != NULL) {
+            if (!symbols_same_type(td->current_symbol, prototype)) {
+                handle_symbol_error(STE_PROTO_MISMATCH, "func decl");
+                return FALSE;
+            }
+        }
+    }
+    return TRUE;
+}
+
 void print_symbol_param_list(FILE *out, Symbol *s) {
     FunctionParameter *fp = first_parameter(s);
     fprintf(out, " * parameters:\n");
@@ -598,19 +612,14 @@ void print_symbol(FILE *out, Symbol *s) {
     if (symbol_outer_type(s) == FUNCTION) {
         print_symbol_param_list(out, s);
     }
+    fprintf(out, " *\n");
+    print_symbol_table(out, get_symbol_table(s));
     fprintf(out, " */\n");
 }
 
 void print_symbol_table(FILE *out, SymbolTable *st) {
-    fprintf(out, "/*\n");
-    fprintf(out, " * symbol table\n");
+    fprintf(out, " * symbol table:\n");
     fprintf(out, " * scope: %s\n", get_st_scope(st));
     fprintf(out, " * overloading class: %s\n", get_st_overloading_class(st));
-    fprintf(out, " */\n");
-    Symbol *cur = get_st_symbols(st);
-    while (cur != NULL) {
-        print_symbol(out, cur);
-        cur = cur->next;
-    }
 }
 
