@@ -45,14 +45,19 @@ STATEMENT_LABELS -> OTHER_NAMES
 static int current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
+enum Boolean fsm_initialized = FALSE;
 
 /* upon entering a new scope level we should create a new symbol table */
 /* this may occur more than once at that scope level (siblings) */
-static enum Boolean create_new_st = TRUE;
+/* also we must track the need to create a new symbol table separately */
+/* for statement labels and other names */
+static enum Boolean create_new_st[NUM_OC_CLASSES];
 
 /* helper functions */
 
 /* scope finite state machine */
+void initialize_fsm();
+enum Boolean fsm_is_ready();
 void scope_fsm_start(Node *n);
 void scope_fsm_end(Node *n);
 int node_is_function_param(Node *);
@@ -70,8 +75,13 @@ static void set_state(int state) {
 }
 
 static void new_scope() {
+    if (get_scope() == TOP_LEVEL_SCOPE) {
+        /* must be entering a function */
+        /* this is the only time we create a new statement label scope */
+        create_new_st[STATEMENT_LABELS] = TRUE;
+    }
+    create_new_st[OTHER_NAMES] = TRUE;
     scope++;
-    create_new_st = TRUE;
 }
 
 static void set_scope(int s) {
@@ -79,11 +89,6 @@ static void set_scope(int s) {
 }
 
 static void set_overloading_class(int oc) {
-    /* TODO: this doesn't work correctly */
-    /* need to handle other names vs for statement labels */
-    if (oc != overloading_class) {
-        create_new_st = TRUE;
-    }
     overloading_class = oc;
 }
 
@@ -92,7 +97,7 @@ static void previous_scope() {
 }
 
 static void complete_st_creation() {
-    create_new_st = FALSE;
+    create_new_st[get_overloading_class()] = FALSE;
 }
 
 int get_state() {
@@ -108,14 +113,13 @@ int get_overloading_class() {
 }
 
 enum Boolean should_create_new_st() {
-    return create_new_st;
+    return create_new_st[get_overloading_class()];
 }
 
 /*
  * initialize_fsm
  * Purpose:
  *      Prepare scope tracking finite state machine for use.
- *      Must be called before calling transition_scope the first time.
  * Parameters:
  *      None
  * Returns:
@@ -127,6 +131,13 @@ void initialize_fsm() {
     set_state(TOP_LEVEL);
     set_scope(TOP_LEVEL_SCOPE);
     set_overloading_class(OTHER_NAMES);
+    create_new_st[OTHER_NAMES] = TRUE;
+    create_new_st[STATEMENT_LABELS] = TRUE;
+    fsm_initialized = TRUE;
+}
+
+enum Boolean fsm_is_ready() {
+    return fsm_initialized;
 }
 
 /*
@@ -140,6 +151,9 @@ void initialize_fsm() {
  * side effects: none
  */
 void transition_scope(Node *n, int action) {
+    if (!fsm_is_ready()) {
+        initialize_fsm();
+    }
     if (action == START) {
         scope_fsm_start(n);
     } else {

@@ -184,7 +184,6 @@ enum symbol_error {
 int get_state();
 int get_scope();
 int get_overloading_class();
-void initialize_fsm();
 void transition_scope(Node *n, int action);
 
 /* symbol table management functions */

@@ -50,6 +50,6 @@ int main(int argc, char *argv[]) {
 }
 
 void symtab_test(SymbolTableContainer *stc) {
-    print_symbol_table(output, td->stc->current_st);
+    print_symbol(output, td->stc->current_st->symbols);
     return;
 }
