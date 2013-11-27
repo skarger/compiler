@@ -42,9 +42,10 @@
 
 enum scope_state {
     TOP_LEVEL,
-    FUNCTION_DEF,
-    FUNCTION_DEF_PARAMETERS,
-    FUNCTION_BODY,
+    FUNC_DEF,
+    FUNC_DEF_DECL,
+    FUNC_DEF_PARAM,
+    FUNC_BODY,
     BLOCK
 };
 
@@ -66,7 +67,8 @@ enum symbol_error {
     STE_NULL_PARAM = -11,
     STE_FUNCTION_POINTER = -12,
     STE_NOT_FUNCTION = -13,
-    STE_PROTO_MISMATCH = -14
+    STE_PROTO_MISMATCH = -14,
+    STE_FUNC_DECL_SCOPE = -15
 };
 
 
@@ -83,9 +85,10 @@ SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
-char *get_st_overloading_class(SymbolTable *st);
-char *get_st_scope(SymbolTable *st);
-Symbol *get_st_symbols(SymbolTable *st);
+int st_scope(SymbolTable *st);
+char *st_scope_name(SymbolTable *st);
+int st_overloading_class(SymbolTable *st);
+char *st_overloading_class_name(SymbolTable *st);
 
 Symbol *create_symbol();
 Symbol *create_scalar_symbol();

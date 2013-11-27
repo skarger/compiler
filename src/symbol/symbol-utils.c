@@ -16,11 +16,10 @@
 
 /*
 * transitions
-* Functions may be declared only at file scope.
 TOP_LEVEL -> FUNCTION_DEF
     node: FUNCTION_DEFINITION
 FUNCTION_DEF -> FUNCTION_DEF_PARAMETERS
-    node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER == VOID)
+    node: (PARAMETER_LIST | PARAMETER_DECL | TYPE_SPECIFIER)
 FUNCTION_DEF_PARAMETERS -> FUNCTION_BODY
     node: start of COMPOUND_STATEMENT
 FUNCTION_BODY -> TOP_LEVEL
@@ -76,12 +75,15 @@ static void set_state(int state) {
 }
 
 static void new_scope() {
-    if (get_scope() == TOP_LEVEL_SCOPE) {
-        /* must be entering a function */
+    if (get_state() == FUNC_BODY) {
         /* this is the only time we create a new statement label scope */
         create_new_st[STATEMENT_LABELS] = TRUE;
     }
-    create_new_st[OTHER_NAMES] = TRUE;
+    if (get_scope() != FUNC_BODY) {
+        /* always create a new other names symbol table except for function */
+        /* body because the needed ST was already created for its params */
+        create_new_st[OTHER_NAMES] = TRUE;
+    }
     scope++;
 }
 
@@ -177,19 +179,21 @@ void scope_fsm_start(Node *n) {
     enum data_type nt = n->n_type;
 
     if (nt == FUNCTION_DEFINITION && get_state() == TOP_LEVEL) {
-        set_state(FUNCTION_DEF);
-    } else if (node_is_function_param(n) && get_state() == FUNCTION_DEF) {
+        set_state(FUNC_DEF);
+    } else if (nt == FUNCTION_DECLARATOR && get_state() == FUNC_DEF) {
+        set_state(FUNC_DEF_DECL);
+    } else if (node_is_function_param(n) && get_state() == FUNC_DEF_DECL) {
+        set_state(FUNC_DEF_PARAM);
         new_scope();
-        set_state(FUNCTION_DEF_PARAMETERS);
-    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_DEF_PARAMETERS) {
-        set_state(FUNCTION_BODY);
-        /* already entered the new scope for FUNCTION_DEF_PARAMETERS */
-    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
+    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_DEF_DECL) {
+        set_state(FUNC_BODY);
         new_scope();
+    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_BODY) {
         set_state(BLOCK);
+        new_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
-        new_scope();
         set_state(BLOCK);
+        new_scope();
     } else if (node_begins_statement_label(n)) {
         set_overloading_class(STATEMENT_LABELS);
     }
@@ -211,14 +215,17 @@ void scope_fsm_start(Node *n) {
 void scope_fsm_end(Node *n) {
     enum data_type nt = n->n_type;
 
-    if (nt == COMPOUND_STATEMENT && get_state() == FUNCTION_BODY) {
+    if (node_is_function_param(n) && get_state() == FUNC_DEF_PARAM) {
+        previous_scope();
+        set_state(FUNC_DEF_DECL);
+    } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_BODY) {
         /* end of function definition */
         previous_scope();
         set_state(TOP_LEVEL);
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
         previous_scope();
         if (scope <= FUNCTION_BODY_SCOPE) {
-            set_state(FUNCTION_BODY);
+            set_state(FUNC_BODY);
         } else {
             set_state(BLOCK);
         }
@@ -263,9 +270,10 @@ char *get_scope_state_name(enum scope_state ss) {
     switch (ss) {
     #define CASE_FOR(ss) case ss: return #ss
         CASE_FOR(TOP_LEVEL);
-        CASE_FOR(FUNCTION_DEF);
-        CASE_FOR(FUNCTION_DEF_PARAMETERS);
-        CASE_FOR(FUNCTION_BODY);
+        CASE_FOR(FUNC_DEF);
+        CASE_FOR(FUNC_DEF_DECL);
+        CASE_FOR(FUNC_DEF_PARAM);
+        CASE_FOR(FUNC_BODY);
         CASE_FOR(BLOCK);
     #undef CASE_FOR
         default: return "";
@@ -326,7 +334,16 @@ void initialize_st(SymbolTable *st) {
     st->enclosing = NULL;
 }
 
-char *get_st_scope(SymbolTable *st) {
+
+int st_scope(SymbolTable *st) {
+    return st->scope;
+}
+
+int st_overloading_class(SymbolTable *st) {
+    return st->oc;
+}
+
+char *st_scope_name(SymbolTable *st) {
     switch(st->scope) {
         case TOP_LEVEL_SCOPE:
             return "file";
@@ -337,7 +354,7 @@ char *get_st_scope(SymbolTable *st) {
     }
 }
 
-char *get_st_overloading_class(SymbolTable *st) {
+char *st_overloading_class_name(SymbolTable *st) {
     switch(st->oc) {
         case OTHER_NAMES:
             return "other names";
@@ -346,10 +363,6 @@ char *get_st_overloading_class(SymbolTable *st) {
         default:
             return "";
     }
-}
-
-Symbol *get_st_symbols(SymbolTable *st) {
-    return st->symbols;
 }
 
 /* append the symbol s to the symbol table st */
@@ -581,6 +594,11 @@ enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2
 /* TypeNode helpers */
 TypeNode *push_type(TypeNode *type_tree, int t) {
     TypeNode *tn = create_type_node(t);
+    if (t == FUNCTION) {
+        tn->n.param_count = 0;
+    } else if (t == ARRAY) {
+        tn->n.array_size = 0;
+    }
     tn->next = type_tree;
     return tn;
 }
@@ -767,6 +785,9 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             error(0, 0, "error: %s", data);
         case STE_PROTO_MISMATCH:
             error(0, 0, "error: %s", "redeclaration of function");
+            return;
+        case STE_FUNC_DECL_SCOPE:
+            error(0, 0, "error: %s", "function declared at non-file scope");
             return;
         default:
             return;

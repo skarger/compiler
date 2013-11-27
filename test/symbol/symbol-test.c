@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "../../src/include/symbol.h"
+#include "../../src/include/symbol-utils.h"
 #include "../../src/include/literal.h"
 #include "../../y.tab.h"
 
@@ -76,8 +78,8 @@ void test_symbol_data() {
     test_res = assert_equal_int(FUNCTION, tn->type);
     printf("%s push_type: function type\n", get_test_result_name(test_res));
 
-    char *expected_tt = "function (12345 parameters) -> array (5 elements) -> "
-                        "unsigned int -> signed char";
+    char *expected_tt = "function (0 parameters) returning -> "
+                        "array (5 elements) of -> unsigned int -> signed char";
     test_res = assert_equal_string(expected_tt, type_tree_to_string(tn));
     printf("%s type_tree_to_string\n", get_test_result_name(test_res));
     /* end push type */
@@ -205,19 +207,24 @@ void test_st_fsm() {
     initialize_fsm();
     enum scope_state cur = get_state();
     int oc = get_overloading_class();
-    printf("initial state:\n");
+    printf("     initial state:\n");
     verify_st_fsm(TOP_LEVEL, 0, OTHER_NAMES);
 
     Node *n = malloc(sizeof(Node));
 
-    printf("top level decl:\n");
+    printf("     top level decl:\n");
     test_transition(n, DECL, START, TOP_LEVEL, 0, OTHER_NAMES);
     test_transition(n, DECL, END, TOP_LEVEL, 0, OTHER_NAMES);
 
-    printf("function definition:\n");
-    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_LIST, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    printf("     function definition 1:\n");
+    test_transition(n, FUNCTION_DEFINITION, START, FUNC_DEF, 0, OTHER_NAMES);
+
+    test_transition(n, TYPE_SPECIFIER, START, FUNC_DEF, 0, OTHER_NAMES);
+    test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
+
+    test_transition(n, PARAMETER_LIST, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_LIST, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3, OTHER_NAMES);
 
@@ -225,28 +232,31 @@ void test_st_fsm() {
     test_transition(n, IDENTIFIER, END, BLOCK, 3, OTHER_NAMES);
 
     test_transition(n, COMPOUND_STATEMENT, END, BLOCK, 2, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, END, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, END, FUNC_BODY, 1, OTHER_NAMES);
 
-    test_transition(n, LABELED_STATEMENT, START, FUNCTION_BODY, 1, STATEMENT_LABELS);
-    test_transition(n, IDENTIFIER, END, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, LABELED_STATEMENT, START, FUNC_BODY, 1, STATEMENT_LABELS);
+    test_transition(n, IDENTIFIER, END, FUNC_BODY, 1, OTHER_NAMES);
 
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
 
-    printf("function definition 2:\n");
+    printf("     function definition 2:\n");
     initialize_fsm();
-    n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_DECL, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, FUNCTION_DEFINITION, START, FUNC_DEF, 0, OTHER_NAMES);
+    test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
-    printf("function definition 3:\n");
+    printf("     function definition 3:\n");
     initialize_fsm();
     n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DEFINITION, START, FUNCTION_DEF, 0, OTHER_NAMES);
-    test_transition(n, TYPE_SPECIFIER, START, FUNCTION_DEF_PARAMETERS, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNCTION_BODY, 1, OTHER_NAMES);
+    test_transition(n, FUNCTION_DEFINITION, START, FUNC_DEF, 0, OTHER_NAMES);
+    test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
+    test_transition(n, TYPE_SPECIFIER, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
+    test_transition(n, TYPE_SPECIFIER, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
+    test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 }
 
