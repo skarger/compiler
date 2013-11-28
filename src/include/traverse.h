@@ -14,15 +14,18 @@
 struct TraversalData {
     SymbolTableContainer *stc;
     enum data_type current_base_type;
+    FunctionParameter *current_param_list;
     Symbol *current_symbol;
     enum Boolean processing_parameters;
     enum Boolean function_definition;
+    enum Boolean function_prototype;
     FILE *outfile;
 };
 typedef struct TraversalData TraversalData;
 
 
 /* tree traversal */
+void start_traversal(Node *n);
 void traverse_node(Node *n, TraversalData *td);
 void traverse_direct_abstract_declarator(void *np, TraversalData *td);
 void traverse_conditional_statement(void *np, TraversalData *td);
@@ -37,8 +40,9 @@ void print_symbol_param_list(FILE *out, Symbol *s);
 /* symbol creation during traversal */
 void create_symbol_if_necessary(TraversalData *td);
 void reset_current_symbol();
-void validate_current_symbol(TraversalData *td, int oc);
-void record_symbol(Node *n, TraversalData *td, int oc);
+void record_current_symbol(TraversalData *td, Node *n);
+void validate_symbol(Symbol *s, TraversalData *td);
+void validate_function_symbol(Symbol *s, TraversalData *td);
 
 
 #endif

@@ -137,6 +137,7 @@ void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
         scope_fsm_end(n);
     }
     post_scope = get_scope();
+    stc->current_oc = get_overloading_class();
     /* if we must create a new symbol table it should become the current one */
     /* or, if we moved to an enclosing scope then we must update the         */
     /* current symbol table to be the one enclosing the old one              */
@@ -145,8 +146,7 @@ void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
         insert_symbol_table(st, stc);
         set_current_st(st, stc);
     } else if (post_scope < pre_scope) {
-        oc = get_overloading_class();
-        set_current_st(stc->current_st[oc]->enclosing, stc);
+        set_current_st(stc->current_st[stc->current_oc]->enclosing, stc);
     }
 }
 
@@ -289,6 +289,7 @@ void initialize_st_container(SymbolTableContainer *stc) {
     stc->current_st[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->current_st[STATEMENT_LABELS] = (SymbolTable *) NULL;
     stc->function_prototypes = create_function_prototypes();
+    stc->current_oc = OTHER_NAMES;
 }
 
 /* symbol table */
@@ -458,44 +459,21 @@ void push_symbol_type(Symbol *s, int t) {
     s->type_tree = push_type(s->type_tree, t);
 }
 
-void append_function_parameter_to_symbol(Symbol *s) {
+void set_symbol_func_params(Symbol *s, FunctionParameter *fp) {
+    FunctionParameter *cur;
     if (symbol_outer_type(s) != FUNCTION) {
         handle_symbol_error(STE_NOT_FUNCTION, "adding param to non-function");
     }
-    FunctionParameter *fp = last_parameter(s);
-    if (fp == NULL) {
-        s->param_list = create_function_parameter();
-        s->type_tree->n.param_count = 1;
-        return;
-    } else {
-        fp->next = create_function_parameter();
+    s->param_list = fp;
+    cur = fp;
+    while (cur != NULL) {
         s->type_tree->n.param_count++;
+        cur = cur->next;
     }
-}
-
-void push_symbol_parameter_type(Symbol *s, int t) {
-    /* push onto the front of the last parameter of this symbol's param list */
-    FunctionParameter *fp = last_parameter(s);
-    if (fp == NULL) {
-        handle_symbol_error(STE_NULL_PARAM, "push_symbol_parameter_type");
-        return;
-    }
-    push_parameter_type(fp, t);
 }
 
 FunctionParameter *first_parameter(Symbol *s) {
     return s->param_list;
-}
-
-FunctionParameter *last_parameter(Symbol *s) {
-     FunctionParameter *fp = s->param_list;
-    if (fp == NULL) {
-        return NULL;
-    }
-    while (fp->next != NULL) {
-        fp = fp->next;
-    }
-    return fp;
 }
 
 /* set the size of the first element of this symbol's type_tree */
@@ -578,7 +556,13 @@ FunctionParameter *create_function_parameter() {
     return fp;
 }
 
-void set_function_parameter_name(FunctionParameter *fp, char *pname) {
+FunctionParameter *push_function_parameter(FunctionParameter *param_list) {
+    FunctionParameter *fp = create_function_parameter();
+    fp->next = param_list;
+    return fp;
+}
+
+void set_parameter_name(FunctionParameter *fp, char *pname) {
     fp->name = pname;
 }
 
@@ -591,6 +575,10 @@ char *parameter_type_string(FunctionParameter *fp) {
 }
 
 void push_parameter_type(FunctionParameter *fp, int t) {
+    if (fp == NULL) {
+        handle_symbol_error(STE_NULL_PARAM, "push_symbol_parameter_type");
+        return;
+    }
     fp->type_tree = push_type(fp->type_tree, t);
 }
 

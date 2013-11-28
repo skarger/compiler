@@ -104,7 +104,7 @@ SymbolTable *get_symbol_table(Symbol *s);
 char *symbol_type_string(Symbol *s);
 enum Boolean all_array_bounds_specified(Symbol *s);
 int symbol_outer_type(Symbol *s);
-void append_function_parameter_to_symbol(Symbol *s);
+void set_symbol_func_params(Symbol *s, FunctionParameter *fp);
 Symbol *find_prototype(SymbolTable *prototypes, char *name);
 Symbol *find_symbol(SymbolTable *st, char *name);
 
@@ -123,8 +123,9 @@ int get_parameter_count(TypeNode *tn);
 FunctionParameter *create_function_parameter();
 FunctionParameter *first_parameter(Symbol *);
 FunctionParameter *last_parameter(Symbol *s);
-void set_function_parameter_name(FunctionParameter *fp, char *pname);
+void set_parameter_name(FunctionParameter *fp, char *pname);
 char *get_parameter_name(FunctionParameter *fp);
+FunctionParameter *push_function_parameter(FunctionParameter *param_list);
 void push_parameter_type(FunctionParameter *fp, int t);
 enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);
 

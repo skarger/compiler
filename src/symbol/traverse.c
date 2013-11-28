@@ -13,6 +13,7 @@
 /* external variable for traversal data. this is the defining declaration. */
 TraversalData *td = NULL;
 
+
 /* file helper procs */
 long resolve_array_size(TraversalData *td, Node *n);
 enum Boolean array_bound_optional(TraversalData *td);
@@ -27,7 +28,7 @@ enum Boolean invalid_operand(long operand);
  * Returns: None
  * Side-effects: Allocates heap memory
  */
-void start_traversal(void *np) {
+void start_traversal(Node *n) {
     FILE *output = stdout;
     if (td == NULL) {
         util_emalloc((void **) &td, sizeof(TraversalData));
@@ -36,10 +37,14 @@ void start_traversal(void *np) {
         SymbolTableContainer *symbol_table_container = create_st_container();
         td->stc = symbol_table_container;
         td->current_base_type = NO_DATA_TYPE;
+        td->current_symbol = NULL;
+        td->current_param_list = NULL;
         td->processing_parameters = FALSE;
+        td->function_definition = FALSE;
+        td->function_prototype = FALSE;
         td->outfile = output;
     }
-    traverse_node(np, td);
+    traverse_node(n, td);
 }
 
 /*
@@ -63,8 +68,12 @@ void traverse_node(Node *n, TraversalData *td) {
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
-            int oc = get_overloading_class();
     switch (n->n_type) {
+        case FUNCTION_DEFINITION:
+            td->function_definition = TRUE;
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            break;
         case FUNCTION_DEF_SPEC:
             /* first child: type_specifier */
             traverse_node(n->children.child1, td);
@@ -85,24 +94,18 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             break;
         case SIMPLE_DECLARATOR:
-            /* here we have either: */
-            /* the name of a function parameter, or */
-            /* an identifier that should become a symbol table entry */
+            /* have an identifier */
+            create_symbol_if_necessary(td);
+            set_symbol_name(td->current_symbol, n->data.str);
             if (td->processing_parameters) {
-                FunctionParameter *fp = last_parameter(td->current_symbol);
-                set_function_parameter_name(fp, n->data.str);
+                set_parameter_name(td->current_param_list, n->data.str);
+                record_current_symbol(td, n);
             } else {
-                /* any enclosing declarators have been traversed already */
-                /* all relevant data has been assembled in the current symbol */
-                create_symbol_if_necessary(td);
-                set_symbol_name(td->current_symbol, n->data.str);
-                record_symbol(n, td, OTHER_NAMES);
+                record_current_symbol(td, n);
             }
             break;
         case POINTER_DECLARATOR:
-            if (!(td->processing_parameters)) {
-                create_symbol_if_necessary(td);
-            }
+            create_symbol_if_necessary(td);
             /* pointer(s) */
             traverse_node(n->children.child1, td);
             /* direct declarator */
@@ -112,9 +115,18 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_pointers(n, td);
             break;
         case FUNCTION_DECLARATOR:
+            if (!(td->function_definition)) {
+                td->function_prototype = TRUE;
+            }
             if (td->processing_parameters) {
                 handle_symbol_error(STE_FUNCTION_POINTER, "function parameter");
             } else {
+                /* second child: parameters */
+                td->processing_parameters = TRUE;
+                traverse_node(n->children.child2, td);
+                td->processing_parameters = FALSE;
+
+                /* first child: direct declarator */
                 create_symbol_if_necessary(td);
                 if (symbol_outer_type(td->current_symbol) == ARRAY) {
                     handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
@@ -122,21 +134,20 @@ void traverse_node(Node *n, TraversalData *td) {
                     handle_symbol_error(STE_FUNC_RET_FUNC, "function decl");
                 }
                 push_symbol_type(td->current_symbol, FUNCTION);
-                /* second child: parameters. process them first */
-                td->processing_parameters = TRUE;
-                traverse_node(n->children.child2, td);
-                td->processing_parameters = FALSE;
+                set_symbol_func_params(td->current_symbol,
+                                        td->current_param_list);
+                traverse_node(n->children.child1, td);
             }
-            /* first child: direct declarator */
-            traverse_node(n->children.child1, td);
             break;
         case PARAMETER_LIST:
-            /* first child: parameter list, parameter_decl, or type spec */
             /* we are grammatically guaranteed to find a type spec eventually */
-            /* so it is there that the parameter will be created */
-            traverse_node(n->children.child1, td);
+            /* for each param so create the parameter there */
             /* second child: parameter decl or type spec */
+            /* process the second child first because we can push each */
+            /* one onto the front and have them in order at the end */
             traverse_node(n->children.child2, td);
+            /* first child: parameter list, parameter_decl, or type spec */
+            traverse_node(n->children.child1, td);
             break;
         case PARAMETER_DECL:
             /* type specifier */
@@ -145,25 +156,25 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             break;
         case TYPE_SPECIFIER:
+            /* save in case multiple declarators follow this type */
+            td->current_base_type = n->data.attributes[TYPE_SPEC];
             if (td->processing_parameters) {
-                append_function_parameter_to_symbol(td->current_symbol);
-                push_symbol_parameter_type(td->current_symbol,
-                                            n->data.attributes[TYPE_SPEC]);
-            } else {
-                /* save in case multiple declarators follow this type */
-                td->current_base_type =
-                    n->data.attributes[TYPE_SPEC];
+                td->current_param_list =
+                    push_function_parameter(td->current_param_list);
+                push_parameter_type(td->current_param_list,
+                                    n->data.attributes[TYPE_SPEC]);
             }
             break;
         case ARRAY_DECLARATOR:
+            create_symbol_if_necessary(td);
+            if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+                handle_symbol_error(STE_ARRAY_OF_FUNC, "array declarator");
+            }
             if (td->processing_parameters) {
                 /* intentionally converting type from ARRAY to POINTER */
-                push_symbol_parameter_type(td->current_symbol, POINTER);
+                push_parameter_type(td->current_param_list, POINTER);
+                push_symbol_type(td->current_symbol, POINTER);
             } else {
-                create_symbol_if_necessary(td);
-                if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-                    handle_symbol_error(STE_ARRAY_OF_FUNC, "array declarator");
-                }
                 push_symbol_type(td->current_symbol, ARRAY);
                 /* second child: constant expr */
                 /* need to resolve this to determine array size */
@@ -181,7 +192,8 @@ void traverse_node(Node *n, TraversalData *td) {
             /* second child: constant_expr */
             if (td->processing_parameters) {
                 /* intentionally converting type from ARRAY to POINTER */
-                push_symbol_parameter_type(td->current_symbol, POINTER);
+                push_parameter_type(td->current_param_list, POINTER);
+                push_symbol_type(td->current_symbol, POINTER);
             } else {
                 array_size = resolve_array_size(td, n->children.child2);
                 push_symbol_type(td->current_symbol, ARRAY);
@@ -191,7 +203,7 @@ void traverse_node(Node *n, TraversalData *td) {
             td->current_base_type = NAMED_LABEL;
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
-            record_symbol(n, td, STATEMENT_LABELS);
+            record_current_symbol(td, n);
             break;
         case CAST_EXPR:
         case ABSTRACT_DECLARATOR:
@@ -200,7 +212,6 @@ void traverse_node(Node *n, TraversalData *td) {
         case LABELED_STATEMENT:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
-        case FUNCTION_DEFINITION:
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
@@ -332,10 +343,9 @@ void traverse_conditional_statement(void *np, TraversalData *td) {
 void traverse_pointers(Node *n, TraversalData *td) {
     /* push pointers onto type tree */
     while (n != NULL && n->n_type == POINTER) {
+        push_symbol_type(td->current_symbol, POINTER);
         if (td->processing_parameters) {
-            push_symbol_parameter_type(td->current_symbol, POINTER);
-        } else {
-            push_symbol_type(td->current_symbol, POINTER);
+            push_parameter_type(td->current_param_list, POINTER);
         }
         n = n->children.child1;
     }
@@ -567,36 +577,52 @@ void create_symbol_if_necessary(TraversalData *td) {
 }
 
 void reset_current_symbol(TraversalData *td) {
+    if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+        td->function_definition = FALSE;
+        td->function_prototype = FALSE;
+        td->current_param_list = NULL;
+    }
     td->current_symbol = NULL;
 }
 
-/* only checks functions, are there any other cases? */
-void validate_current_symbol(TraversalData *td, int oc) {
-    if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-        /* check that it matches its prototype if present */
-        Symbol *prototype;
-        prototype = find_prototype(td->stc->function_prototypes,
-                                    get_symbol_name(td->current_symbol));
-        if (prototype != NULL) {
-            if (!symbols_same_type(td->current_symbol, prototype)) {
-                handle_symbol_error(STE_PROTO_MISMATCH, "func decl");
-            }
-        }
-        /* functions may be declared only at file scope */
-        if (st_scope(td->stc->current_st[oc]) != TOP_LEVEL_SCOPE) {
-            handle_symbol_error(STE_FUNC_DECL_SCOPE, "function decl");
-        }
+void record_current_symbol(TraversalData *td, Node *n) {
+    /* have an identifier that should become a symbol table entry */
+    Symbol *s = td->current_symbol;
+    validate_symbol(s, td);
+    /* add to appropriate symbol table */
+    if (symbol_outer_type(s) == FUNCTION && td->function_prototype) {
+        printf("record func proto\n");
+        append_function_prototype(td->stc->function_prototypes, s);
+    } else {
+        append_symbol(td->stc->current_st[td->stc->current_oc], s);
+    }
+    /* add to parse tree  */
+    set_symbol_table_entry(n, s);
+    reset_current_symbol(td);
+}
+
+void validate_symbol(Symbol *s, TraversalData *td) {
+    /* only checks functions, are there any other cases? */
+    if (symbol_outer_type(s) == FUNCTION) {
+        validate_function_symbol(s, td);
     }
 }
 
-void record_symbol(Node *n, TraversalData *td, int oc) {
-    /* have an identifier that should become a symbol table entry */
-    validate_current_symbol(td, oc);
-    /* add to appropriate symbol table */
-    append_symbol(td->stc->current_st[oc], td->current_symbol);
-    /* add to parse tree */
-    set_symbol_table_entry(n, td->current_symbol);
-    reset_current_symbol(td);
+void validate_function_symbol(Symbol *s, TraversalData *td) {
+    /* functions may be declared only at file scope */
+    int scope = st_scope(td->stc->current_st[td->stc->current_oc]);
+    if (scope != TOP_LEVEL_SCOPE) {
+        handle_symbol_error(STE_FUNC_DECL_SCOPE, get_symbol_name(s));
+    }
+    /* check that definition matches its prototype if present */
+    if (td->function_definition) {
+        Symbol *prototype;
+        prototype = find_prototype(td->stc->function_prototypes,
+                                    get_symbol_name(s));
+        if (prototype != NULL && !symbols_same_type(s, prototype)) {
+            handle_symbol_error(STE_PROTO_MISMATCH, get_symbol_name(s));
+        }
+    }
 }
 
 void print_symbol_param_list(FILE *out, Symbol *s) {
