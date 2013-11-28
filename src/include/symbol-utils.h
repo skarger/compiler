@@ -44,14 +44,14 @@ enum scope_state {
     TOP_LEVEL,
     FUNC_DEF,
     FUNC_DEF_DECL,
-    FUNC_DEF_PARAM,
+    FUNC_DEF_PARAMS,
     FUNC_BODY,
     BLOCK
 };
 
 /*
- *  * Errors that are caught in the symbol table step.
- *   */
+ * Errors that are caught in the symbol table step.
+ */
 enum symbol_error {
     STE_SUCCESS = 0,
     STE_NOT_ARRAY = -1,

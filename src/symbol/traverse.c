@@ -140,16 +140,18 @@ void traverse_node(Node *n, TraversalData *td) {
             }
             break;
         case PARAMETER_LIST:
-            /* we are grammatically guaranteed to find a type spec eventually */
-            /* for each param so create the parameter there */
-            /* second child: parameter decl or type spec */
+            /* second child: parameter decl */
             /* process the second child first because we can push each */
             /* one onto the front and have them in order at the end */
             traverse_node(n->children.child2, td);
-            /* first child: parameter list, parameter_decl, or type spec */
+            /* first child: parameter list or parameter_decl */
             traverse_node(n->children.child1, td);
             break;
         case PARAMETER_DECL:
+            if (td->processing_parameters) {
+                td->current_param_list =
+                    push_function_parameter(td->current_param_list);
+            }
             /* type specifier */
             traverse_node(n->children.child1, td);
             /* declarator */
@@ -159,8 +161,6 @@ void traverse_node(Node *n, TraversalData *td) {
             /* save in case multiple declarators follow this type */
             td->current_base_type = n->data.attributes[TYPE_SPEC];
             if (td->processing_parameters) {
-                td->current_param_list =
-                    push_function_parameter(td->current_param_list);
                 push_parameter_type(td->current_param_list,
                                     n->data.attributes[TYPE_SPEC]);
             }

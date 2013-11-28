@@ -1,0 +1,217 @@
+signed int ((main)(void ))
+{
+((a) ? (b) : (c));
+((i) || (j));
+((i) && (j));
+((h) | (k));
+((y) | (z));
+((q) ^ (r));
+((w) == (e));
+((w) != (r));
+((h) < (i));
+((h) <= (i));
+((h) > (i));
+((j) >= (o));
+((b) << (s));
+((b) >> (s));
+((x) * (y));
+((c) / (d));
+((10) % (3));
+((signed int ) (x));
+((signed char (*)) (x));
+((signed short (***)) (x));
+((signed long ([])) (x));
+((signed int (*)) ((a)[((i) = (2))]));
+((signed long ((*)[(x)])) (x));
+((signed long ((*)[(10)])) (x));
+signed int (i);
+
+signed char (p);
+
+signed char (*(p));
+
+}
+signed int ((f)(signed char (c)))
+{
+signed int (i);
+
+signed int (j);
+
+}
+signed int ((f)(signed int (x)))
+{
+signed char (c), (d);
+
+}
+signed int ((f)(signed char (*(p))))
+{
+(i);
+}
+signed int ((f)(signed int (a), signed int (b)))
+{
+signed int (i);
+
+}
+signed int ((a)(signed char (c)))
+{
+;
+}
+signed char (*((f)(signed char (*(p)))))
+{
+(i);
+}
+signed int ((f)(signed int (a), signed char (c)))
+{
+signed char ((g)(void ));
+
+}
+signed char ((g)(signed int ((a)[(10)])));
+signed char ((g)(signed int (*((a)[(10)]))));
+signed char ((g)(signed int (*)));
+signed char ((g)(signed int ([])));
+signed char ((g)(signed int ([(10)])));
+signed char ((g)(signed int (a), signed int (b)));
+signed int ((main)(void ))
+{
+unsigned char (i);
+
+unsigned short (i);
+
+unsigned short (i);
+
+unsigned int (i);
+
+unsigned int (i);
+
+unsigned long (i);
+
+unsigned long (i);
+
+signed char (i);
+
+signed char (i);
+
+signed int (i);
+
+signed int (i);
+
+signed int (i);
+
+signed short (i);
+
+signed short (i);
+
+signed long (i);
+
+signed long (i);
+
+}
+signed int ((main)(void ))
+{
+signed char ((a)[((signed int (*)) (++(x)))]), ((b)[((y) || (z))]);
+
+}
+signed int ((main)(void ))
+{
+((a) ? (b) : (c));
+}
+signed int ((main)(void ))
+{
+signed int (i);
+
+goto LAB;
+LAB : ((i) = (5));
+}
+signed int ((main)(void ))
+{
+while ( ((i) > (0)) ) ((i)--);
+}
+signed int ((main)(void ))
+{
+for ( ((i) = (1)); ((i) < (len)); ((i)++) ) ((j)++);
+}
+signed int ((main)(void ))
+{
+do ((i)++); while ( ((i) < (5)) );
+}
+signed int ((main)(void ))
+{
+break;
+}
+signed int ((main)(void ))
+{
+return ;
+}
+signed int ((main)(void ))
+{
+return (0);
+}
+signed int ((main)(void ))
+{
+goto x;
+}
+signed int ((main)(void ))
+{
+break;
+}
+signed int ((main)(void ))
+{
+continue;
+}
+signed int ((main)(void ))
+{
+;
+}
+void ((pts)(void ))
+{
+signed char (******(p));
+
+}
+signed int ((main)(void ))
+{
+signed char (*(p));
+
+((p) = ((signed int ([])) (arr)));
+((i) = ((signed int (*([]))) (j)));
+}
+signed int ((main)(signed int (argc), signed char (*((argv)[]))))
+{
+return (0);
+}
+signed int ((main)(signed int (argc), signed char (*([]))))
+{
+return (0);
+}
+signed int ((main)(signed int (argc), signed char (*((argv)[(MAX_ARGS)]))))
+{
+return (0);
+}
+void ((f)(void ))
+{
+if ( (x) ) if ( (y) ) (s1); else (s2);
+}
+void ((ws)(void ))
+{
+while ( (true) ) 
+{
+((play)());
+}
+
+}
+void ((ws)(void ))
+{
+while ( (true) ) ((play)());
+}
+void ((ds)(void ))
+{
+do (x); while ( ((i) > (0)) );
+}
+void ((fs)(void ))
+{
+for ( ((i) = (0)); ((i) < (MAX)); ((i)++) ) 
+{
+((j) = ((2) * (i)));
+((k) = ((3) * (i)));
+}
+
+}

@@ -169,7 +169,7 @@ void scope_fsm_start(Node *n) {
     } else if (nt == FUNCTION_DECLARATOR && get_state() == FUNC_DEF) {
         set_state(FUNC_DEF_DECL);
     } else if (node_is_function_param(n) && get_state() == FUNC_DEF_DECL) {
-        set_state(FUNC_DEF_PARAM);
+        set_state(FUNC_DEF_PARAMS);
         new_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_DEF_DECL) {
         set_state(FUNC_BODY);
@@ -200,7 +200,7 @@ void scope_fsm_start(Node *n) {
 void scope_fsm_end(Node *n) {
     enum data_type nt = n->n_type;
 
-    if (node_is_function_param(n) && get_state() == FUNC_DEF_PARAM) {
+    if (node_is_function_param(n) && get_state() == FUNC_DEF_PARAMS) {
         previous_scope();
         set_state(FUNC_DEF_DECL);
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_BODY) {
@@ -231,8 +231,7 @@ void scope_fsm_end(Node *n) {
  *
  */
 int node_is_function_param(Node *n) {
-    return (n->n_type == PARAMETER_LIST || n->n_type == PARAMETER_DECL ||
-            n->n_type == TYPE_SPECIFIER);
+    return (n->n_type == PARAMETER_LIST || n->n_type == PARAMETER_DECL);
 }
 
 int node_begins_statement_label(Node *n) {
@@ -257,7 +256,7 @@ char *get_scope_state_name(enum scope_state ss) {
         CASE_FOR(TOP_LEVEL);
         CASE_FOR(FUNC_DEF);
         CASE_FOR(FUNC_DEF_DECL);
-        CASE_FOR(FUNC_DEF_PARAM);
+        CASE_FOR(FUNC_DEF_PARAMS);
         CASE_FOR(FUNC_BODY);
         CASE_FOR(BLOCK);
     #undef CASE_FOR

@@ -93,7 +93,7 @@ void test_symbol_data() {
     test_res = assert_equal_string("", fp->name);
     printf("%s FunctionParameter: initial name\n", get_test_result_name(test_res));
 
-    set_function_parameter_name(fp, "x");
+    set_parameter_name(fp, "x");
     test_res = assert_equal_string("x", fp->name);
     printf("%s FunctionParameter: name\n", get_test_result_name(test_res));
 
@@ -196,6 +196,7 @@ void test_st_data() {
 
     /* check insertion */
     insert_symbol_table(st, stc);
+    set_current_st(st, stc);
 
     test_res = (stc->symbol_tables[OTHER_NAMES] == st ? PASS : FAIL);
     printf("%s insert_symbol_table: insert into container\n", get_test_result_name(test_res));
@@ -228,7 +229,7 @@ void test_st_fsm() {
     test_transition(n, TYPE_SPECIFIER, START, FUNC_DEF, 0, OTHER_NAMES);
     test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
 
-    test_transition(n, PARAMETER_LIST, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_LIST, START, FUNC_DEF_PARAMS, 1, OTHER_NAMES);
     test_transition(n, PARAMETER_LIST, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 2, OTHER_NAMES);
@@ -250,20 +251,11 @@ void test_st_fsm() {
     initialize_fsm();
     test_transition(n, FUNCTION_DEFINITION, START, FUNC_DEF, 0, OTHER_NAMES);
     test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
-    test_transition(n, PARAMETER_DECL, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
+    test_transition(n, PARAMETER_DECL, START, FUNC_DEF_PARAMS, 1, OTHER_NAMES);
     test_transition(n, PARAMETER_DECL, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 
-    printf("     function definition 3:\n");
-    initialize_fsm();
-    n->n_type = TOP_LEVEL;
-    test_transition(n, FUNCTION_DEFINITION, START, FUNC_DEF, 0, OTHER_NAMES);
-    test_transition(n, FUNCTION_DECLARATOR, START, FUNC_DEF_DECL, 0, OTHER_NAMES);
-    test_transition(n, TYPE_SPECIFIER, START, FUNC_DEF_PARAM, 1, OTHER_NAMES);
-    test_transition(n, TYPE_SPECIFIER, END, FUNC_DEF_DECL, 0, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, START, FUNC_BODY, 1, OTHER_NAMES);
-    test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 }
 
 void test_transition(Node *n, enum data_type nt, int action,
