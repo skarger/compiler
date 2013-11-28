@@ -162,6 +162,7 @@ parameter_decl : integer_type_specifier declarator
     | integer_type_specifier abstract_declarator
         { $$ = create_node(PARAMETER_DECL, $1, $2); }
     | integer_type_specifier
+        { $$ = create_node(PARAMETER_DECL, $1, NULL); }
     | void_type_specifier declarator
         {
             yyerror("void may not appear with any other function parameters");
@@ -175,6 +176,7 @@ parameter_decl : integer_type_specifier declarator
             $$ = create_node(PARAMETER_DECL, $1, $2);
         }
     | void_type_specifier
+        { $$ = create_node(PARAMETER_DECL, $1, NULL); }
     ;
 
 array_declarator : direct_declarator LEFT_BRACKET RIGHT_BRACKET
@@ -1131,7 +1133,9 @@ void print_data_node(void *np) {
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
+            #ifdef TRAVERSE
             print_symbol(output, n->st_entry);
+            #endif
             fprintf(output, "%s", n->data.str);
             break;
         case STRING_CONSTANT:
