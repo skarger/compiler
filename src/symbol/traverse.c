@@ -13,8 +13,8 @@
 /* external variable for traversal data. this is the defining declaration. */
 TraversalData *td = NULL;
 
-
 /* file helper procs */
+void initialize_traversal_data(TraversalData *td);
 long resolve_array_size(TraversalData *td, Node *n);
 enum Boolean array_bound_optional(TraversalData *td);
 enum Boolean invalid_operand(long operand);
@@ -32,19 +32,24 @@ void start_traversal(Node *n) {
     FILE *output = stdout;
     if (td == NULL) {
         util_emalloc((void **) &td, sizeof(TraversalData));
-        /* create container for each symbol table that will be created */
-        /* pass the container across traversal so that STs may be inserted */
-        SymbolTableContainer *symbol_table_container = create_st_container();
-        td->stc = symbol_table_container;
-        td->current_base_type = NO_DATA_TYPE;
-        td->current_symbol = NULL;
-        td->current_param_list = NULL;
-        td->processing_parameters = FALSE;
-        td->function_definition = FALSE;
-        td->function_prototype = FALSE;
+        initialize_traversal_data(td);
         td->outfile = output;
     }
     traverse_node(n, td);
+}
+
+void initialize_traversal_data(TraversalData *td) {
+    td->current_base_type = NO_DATA_TYPE;
+    td->current_symbol = NULL;
+    td->current_param_list = NULL;
+    td->dummy_prototype_parameter = create_symbol();
+    td->processing_parameters = FALSE;
+    td->function_definition = FALSE;
+    td->function_prototype = FALSE;
+    /* create container for each symbol table that will be created */
+    /* pass the container across traversal so that STs may be inserted */
+    SymbolTableContainer *symbol_table_container = create_st_container();
+    td->stc = symbol_table_container;
 }
 
 /*
@@ -589,15 +594,21 @@ void record_current_symbol(TraversalData *td, Node *n) {
     /* have an identifier that should become a symbol table entry */
     Symbol *s = td->current_symbol;
     validate_symbol(s, td);
-    /* add to appropriate symbol table */
-    if (symbol_outer_type(s) == FUNCTION && td->function_prototype) {
-        printf("record func proto\n");
-        append_function_prototype(td->stc->function_prototypes, s);
-    } else {
+    /* add to appropriate symbol table and parse tree */
+    /* cases:
+     * any non-prototype declarators including function definitions
+     * prototype function declarator: put in prototype symbol table
+     * prototype function parameters: do NOT put in any symbol table
+     */
+    if (!td->function_prototype) {
         append_symbol(td->stc->current_st[td->stc->current_oc], s);
+        set_symbol_table_entry(n, s);
+    } else if (symbol_outer_type(s) == FUNCTION) {
+        append_function_prototype(td->stc->function_prototypes, s);
+        set_symbol_table_entry(n, s);
+    } else {
+        set_symbol_table_entry(n, td->dummy_prototype_parameter);
     }
-    /* add to parse tree  */
-    set_symbol_table_entry(n, s);
     reset_current_symbol(td);
 }
 
@@ -632,13 +643,16 @@ void print_symbol_param_list(FILE *out, Symbol *s) {
     while (fp != NULL) {
         param_name = get_parameter_name(fp);
         param_name = strcmp(param_name, "") == 0 ? "(none)" : param_name;
-        fprintf(out, " * name: %s, type: %s\n",
-                param_name, parameter_type_string(fp));
+        fprintf(out, " * type: %s", parameter_type_string(fp));
+        fprintf(out, ", name: %s\n", param_name);
         fp = fp->next;
     }
 }
 
 void print_symbol(FILE *out, Symbol *s) {
+    if (s == td->dummy_prototype_parameter) {
+        return;
+    }
     fprintf(out, "\n/*\n");
     fprintf(out, " * symbol: %s\n", get_symbol_name(s));
     fprintf(out, " * type: %s\n", symbol_type_string(s));
