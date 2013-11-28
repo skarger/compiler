@@ -361,7 +361,7 @@ void append_symbol(SymbolTable *st, Symbol *s) {
     while (cur != NULL) {
         if (strcmp(cur->name, s->name) == 0) {
             /* we do not return here to allow printing of invalid symbols */
-            handle_symbol_error(STE_DUPLICATE_SYMBOL, "append_symbol");
+            handle_symbol_error(STE_DUPLICATE_SYMBOL, s->name);
         }
         prev = cur;
         cur = cur->next;
@@ -745,7 +745,7 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             error(0, 0, "%s", data);
             return;
         case STE_DUPLICATE_SYMBOL:
-            error(0, 0, "error: %s: duplicate symbol", data);
+            error(0, 0, "error: \"%s\": duplicate symbol", data);
             return;
         case STE_NON_POSITIVE_ARRAY_SIZE:
             error(0, 0, "error: %s: array size must be positive", data);
