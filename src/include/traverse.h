@@ -16,6 +16,7 @@ struct TraversalData {
     enum data_type current_base_type;
     Symbol *current_symbol;
     enum Boolean processing_parameters;
+    enum Boolean function_definition;
     FILE *outfile;
 };
 typedef struct TraversalData TraversalData;

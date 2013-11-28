@@ -13,11 +13,10 @@
  * define a finite state machine to help with scope determination
  * while traversing parse tree.
  */
-
-static int current_state = TOP_LEVEL;
+static enum scope_state current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
-enum Boolean fsm_initialized = FALSE;
+static enum Boolean fsm_initialized = FALSE;
 
 /* upon entering a new scope level we should create a new symbol table */
 /* this may occur more than once at that scope level (siblings) */
@@ -40,6 +39,7 @@ char *get_overloading_class_name(int oc);
 void initialize_st_container(SymbolTableContainer *stc);
 void initialize_st(SymbolTable *st);
 SymbolTable *new_st();
+void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev);
 
 
 static void set_state(int state) {
@@ -183,7 +183,6 @@ void scope_fsm_start(Node *n) {
     } else if (node_begins_statement_label(n)) {
         set_overloading_class(STATEMENT_LABELS);
     }
-
 }
 
 
@@ -368,6 +367,22 @@ void append_symbol(SymbolTable *st, Symbol *s) {
         cur = cur->next;
     }
     /* no problems found. append the symbol */
+    attach_symbol(st, s, prev);
+}
+
+void append_function_prototype(SymbolTable *prototypes, Symbol *s) {
+    Symbol *prev, *cur;
+    prev = cur = prototypes->symbols;
+    /* duplicate prototypes are acceptable */
+    /* TODO: check for duplicate prototypes that don't match exactly */
+    while (cur != NULL) {
+        prev = cur;
+        cur = cur->next;
+    }
+    attach_symbol(prototypes, s, prev);
+}
+
+void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev) {
     if (prev != NULL) {
         prev->next = s;
     } else {
@@ -518,6 +533,8 @@ enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
             if (!equal) {
                 return FALSE;
             }
+            fp1 = fp1->next;
+            fp2 = fp2->next;
         }
         if (fp1 != NULL || fp2 != NULL) {
             return FALSE;
