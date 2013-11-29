@@ -175,11 +175,11 @@ void test_st_data() {
     printf("%s SymbolTableContainer: initialize statement labels\n", get_test_result_name(test_res));
 
     oc = get_overloading_class();
-    test_res = (stc->current_st[oc] == NULL ? PASS : FAIL);
+    test_res = (stc->current_st[oc] != NULL ? PASS : FAIL);
     printf("%s SymbolTableContainer: initialize current_st\n", get_test_result_name(test_res));
 
-    test_res = (should_create_new_st() == TRUE ? PASS : FAIL);
-    printf("%s should_create_new_st: initially true\n", get_test_result_name(test_res));
+    test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
+    printf("%s should_create_new_st: initially false\n", get_test_result_name(test_res));
 
     SymbolTable *st = create_symbol_table();
     test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
@@ -198,7 +198,7 @@ void test_st_data() {
     insert_symbol_table(st, stc);
     set_current_st(st, stc);
 
-    test_res = (stc->symbol_tables[OTHER_NAMES] == st ? PASS : FAIL);
+    test_res = (stc->current_st[OTHER_NAMES] == st ? PASS : FAIL);
     printf("%s insert_symbol_table: insert into container\n", get_test_result_name(test_res));
 
     oc = get_overloading_class();
