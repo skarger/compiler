@@ -122,6 +122,12 @@ pointer_declarator : pointer direct_declarator
         { $$ = create_node(POINTER_DECLARATOR, $1, $2);  }
     ;
 
+pointer : ASTERISK
+        {  $$ = create_node(POINTER, NULL); }
+    | ASTERISK pointer
+        { $$ = create_node(POINTER, $2); }
+    ;
+
 direct_declarator : simple_declarator
     | parenthesized_declarator
     | function_declarator
@@ -516,17 +522,16 @@ void_type_specifier : VOID
     {  $$ = create_node(TYPE_SPECIFIER, VOID); }
 
 /* abstract_declarator and close children */
-abstract_declarator : pointer
-        { $$ = create_node(ABSTRACT_DECLARATOR, $1, NULL); }
-    | pointer direct_abstract_declarator
-        { $$ = create_node(ABSTRACT_DECLARATOR, $1, $2); }
+abstract_declarator : pointer_abstract_declarator
+        { $$ = create_node(ABSTRACT_DECLARATOR, $1); }
     | direct_abstract_declarator
+        { $$ = create_node(ABSTRACT_DECLARATOR, $1); }
     ;
 
-pointer : ASTERISK
-        {  $$ = create_node(POINTER, NULL); }
-    | ASTERISK pointer
-        { $$ = create_node(POINTER, $2); }
+pointer_abstract_declarator : pointer
+        { $$ = create_node(PTR_ABS_DECL, $1, NULL); }
+    | pointer direct_abstract_declarator
+        { $$ = create_node(PTR_ABS_DECL, $1, $2); }
     ;
 
 direct_abstract_declarator : LEFT_PAREN abstract_declarator RIGHT_PAREN
@@ -702,6 +707,7 @@ int number_of_children(enum data_type nt) {
         case UNARY_EXPR:
         case PREFIX_EXPR:
         case POSTFIX_EXPR:
+        case ABSTRACT_DECLARATOR:
             return 1;
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
@@ -720,7 +726,7 @@ int number_of_children(enum data_type nt) {
         case FUNCTION_CALL:
         case CAST_EXPR:
         case TYPE_NAME:
-        case ABSTRACT_DECLARATOR:
+        case PTR_ABS_DECL:
         case DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
         case BINARY_EXPR:
@@ -841,13 +847,16 @@ void pretty_print(void *np) {
     }
 
     switch (n->n_type) {
+        case ABSTRACT_DECLARATOR:
+            pretty_print(n->children.child1);
+            break;
         case DIR_ABS_DECL:
             pretty_print(n->children.child1);
             fprintf(output, "[");
             pretty_print(n->children.child2);
             fprintf(output, "]");
             break;
-        case ABSTRACT_DECLARATOR:
+        case PTR_ABS_DECL:
         case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
             pretty_print(n->children.child1);
@@ -1020,7 +1029,7 @@ int parenthesize(enum data_type nt) {
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
 
-        case ABSTRACT_DECLARATOR:
+        case PTR_ABS_DECL:
         case DIR_ABS_DECL:
 
             return 1;
@@ -1308,6 +1317,7 @@ char *get_node_name(enum data_type nt) {
         CASE_FOR(TYPE_SPECIFIER);
         CASE_FOR(ABSTRACT_DECLARATOR);
         CASE_FOR(POINTER);
+        CASE_FOR(PTR_ABS_DECL);
         CASE_FOR(DIR_ABS_DECL);
     #undef CASE_FOR
         default: return "";
