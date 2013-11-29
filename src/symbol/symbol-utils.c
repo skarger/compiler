@@ -38,8 +38,8 @@ char *get_overloading_class_name(int oc);
 /* symbol table */
 void initialize_st_container(SymbolTableContainer *stc);
 void initialize_st(SymbolTable *st);
-SymbolTable *new_st();
 void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev);
+SymbolTable *create_file_scope_st(int oc);
 
 
 static void set_state(int state) {
@@ -106,8 +106,8 @@ void initialize_fsm() {
     set_state(TOP_LEVEL);
     set_scope(TOP_LEVEL_SCOPE);
     set_overloading_class(OTHER_NAMES);
-    create_new_st[OTHER_NAMES] = TRUE;
-    create_new_st[STATEMENT_LABELS] = TRUE;
+    create_new_st[OTHER_NAMES] = FALSE;
+    create_new_st[STATEMENT_LABELS] = FALSE;
     fsm_initialized = TRUE;
 }
 
@@ -143,6 +143,7 @@ void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
     /* current symbol table to be the one enclosing the old one              */
     if (should_create_new_st()) {
         SymbolTable *st = create_symbol_table();
+        complete_st_creation();
         insert_symbol_table(st, stc);
         set_current_st(st, stc);
     } else if (post_scope < pre_scope) {
@@ -285,8 +286,11 @@ SymbolTableContainer *create_st_container() {
 void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
-    stc->current_st[OTHER_NAMES] = (SymbolTable *) NULL;
-    stc->current_st[STATEMENT_LABELS] = (SymbolTable *) NULL;
+    /* create starting symbol tables at file scope */
+    /* the symbol table at file scope for STATEMENT_LABELS should stay empty */
+    /* it exists to have an ST enclosing the function level ones */
+    stc->current_st[OTHER_NAMES] = create_file_scope_st(OTHER_NAMES);
+    stc->current_st[STATEMENT_LABELS] =  create_file_scope_st(STATEMENT_LABELS);
     stc->function_prototypes = create_function_prototypes();
     stc->current_oc = OTHER_NAMES;
 }
@@ -296,20 +300,20 @@ void initialize_st_container(SymbolTableContainer *stc) {
  * create_symbol_table
  */
 SymbolTable *create_symbol_table() {
-    SymbolTable *st = new_st();
-    complete_st_creation();
+    SymbolTable *st;
+    util_emalloc( (void **) &st, sizeof(SymbolTable));
+    initialize_st(st);
     return st;
 }
 
 SymbolTable *create_function_prototypes() {
-    return new_st();
+    return create_symbol_table();
 }
 
-/* private helper */
-SymbolTable *new_st() {
-    SymbolTable *st;
-    util_emalloc( (void **) &st, sizeof(SymbolTable));
-    initialize_st(st);
+SymbolTable *create_file_scope_st(int oc) {
+    SymbolTable *st = create_symbol_table();
+    st->scope = TOP_LEVEL_SCOPE;
+    st->oc = oc;
     return st;
 }
 
