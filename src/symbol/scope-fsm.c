@@ -12,92 +12,50 @@ static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
 static enum Boolean fsm_initialized = FALSE;
 
-/* upon entering a new scope level we should create a new symbol table */
-/* this may occur more than once at that scope level (siblings) */
-/* also we must track the need to create a new symbol table separately */
-/* for statement labels and other names */
-static enum Boolean create_new_st[NUM_OC_CLASSES];
-/* upon exiting a scope level we should start referencing  */
-/* the symbol table at the enclosing scope but again that applies */
-/* differently to the separate overloading classes */
-static enum Boolean return_to_enclosing_st[NUM_OC_CLASSES];
+static void set_state(int state);
+static void set_scope(int s);
+static void set_overloading_class(int oc);
+static void new_scope();
+static void previous_scope();
 
+static enum Boolean fsm_is_ready();
+static void scope_fsm_start(Node *n);
+static void scope_fsm_end(Node *n);
+static int node_is_function_param(Node *);
+static int node_begins_statement_label(Node *n);
 
-/* scope finite state machine */
-void initialize_fsm();
-enum Boolean fsm_is_ready();
-void scope_fsm_start(Node *n);
-void scope_fsm_end(Node *n);
-int node_is_function_param(Node *);
-int node_begins_statement_label(Node *n);
-char *get_scope_state_name(enum scope_state);
-char *get_overloading_class_name(int oc);
+#ifndef SYMBOL_TEST
+static void initialize_fsm();
+static int get_state();
+static int get_scope();
+static int get_overloading_class();
+static char *get_scope_state_name(enum scope_state);
+static char *get_overloading_class_name(int oc);
+#endif
 
-static void set_state(int state) {
-    current_state = state;
-}
-
-static void new_scope(enum scope_state state) {
-    /* only create a new statement label scope when entering function body */
-    if (state == FUNC_BODY) {
-        create_new_st[STATEMENT_LABELS] = TRUE;
+/*
+ * transition_scope
+ *      update program scope in response to the given node
+ * parameters:
+ *  n - pointer to the Node prompting the call to this function
+ *  action - START or END, depending on what point of the parse tree traversal
+ *                         the caller is one with the given node
+ *  stc - pointer to SymbolTableContainer that will be updated with the
+ *        new scope and overloading class
+ * returns: none
+ * side effects: none
+ */
+void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
+    if (!fsm_is_ready()) {
+        initialize_fsm();
     }
-    /* always create a new other names symbol table except for function */
-    /* body because the needed ST was already created for its params */
-
-/* fix to keep one ST for a param list */
-
-    if (state != FUNC_BODY) {
-        create_new_st[OTHER_NAMES] = TRUE;
+    if (action == START) {
+        scope_fsm_start(n);
+    } else {
+        scope_fsm_end(n);
     }
-    scope++;
-}
-
-static void set_scope(int s) {
-    scope = s;
-}
-
-static void set_overloading_class(int oc) {
-    overloading_class = oc;
-}
-
-static void previous_scope(enum scope_state state) {
-    /* don't back up while still in param list */
-
-        return_to_enclosing_st[OTHER_NAMES] = TRUE;
-
-    if (state == TOP_LEVEL) {
-        return_to_enclosing_st[STATEMENT_LABELS] = TRUE;
-    }
-    scope--;
-}
-
-int get_state() {
-    return current_state;
-}
-
-int get_scope() {
-    return scope;
-}
-
-int get_overloading_class() {
-    return overloading_class;
-}
-
-static enum Boolean should_create_new_st() {
-    return create_new_st[get_overloading_class()];
-}
-
-static void complete_st_creation() {
-    create_new_st[get_overloading_class()] = FALSE;
-}
-
-static enum Boolean should_return_to_enclosing_st() {
-    return return_to_enclosing_st[get_overloading_class()];
-}
-
-static void complete_return_to_enclosing_st() {
-    return_to_enclosing_st[get_overloading_class()] = FALSE;
+    stc->current_scope = get_scope();
+    stc->current_oc = get_overloading_class();
 }
 
 /*
@@ -115,47 +73,7 @@ void initialize_fsm() {
     set_state(TOP_LEVEL);
     set_scope(TOP_LEVEL_SCOPE);
     set_overloading_class(OTHER_NAMES);
-    create_new_st[OTHER_NAMES] = FALSE;
-    create_new_st[STATEMENT_LABELS] = FALSE;
     fsm_initialized = TRUE;
-}
-
-enum Boolean fsm_is_ready() {
-    return fsm_initialized;
-}
-
-/*
- * transition_scope
- *      update program scope in response to the given node
- * parameters:
- *  n - pointer to the Node prompting the call to this function
- *  action - START or END, depending on what point of the parse tree traversal
- *                         the caller is one with the given node
- * returns: none
- * side effects: none
- */
-void transition_scope(Node *n, int action, SymbolTableContainer *stc) {
-    if (!fsm_is_ready()) {
-        initialize_fsm();
-    }
-    if (action == START) {
-        scope_fsm_start(n);
-    } else {
-        scope_fsm_end(n);
-    }
-    stc->current_oc = get_overloading_class();
-    /* if we must create a new symbol table it should become the current one */
-    /* or, if we moved to an enclosing scope then we must update the         */
-    /* current symbol table pointer to the one enclosing the old one         */
-    if (should_create_new_st()) {
-        SymbolTable *st = create_symbol_table(get_scope(), stc->current_oc);
-        complete_st_creation();
-        insert_symbol_table(st, stc);
-        set_current_st(st, stc);
-    } else if (should_return_to_enclosing_st()) {
-            set_current_st(stc->current_st[stc->current_oc]->enclosing, stc);
-            complete_return_to_enclosing_st();
-    }
 }
 
 /*
@@ -178,21 +96,22 @@ void scope_fsm_start(Node *n) {
         set_state(FUNC_DEF_DECL);
     } else if (node_is_function_param(n) && get_state() == FUNC_DEF_DECL) {
         set_state(FUNC_DEF_PARAMS);
-        new_scope(FUNC_DEF_PARAMS);
+        new_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_DEF_DECL) {
         set_state(FUNC_BODY);
-        new_scope(FUNC_BODY);
+        new_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_BODY) {
         set_state(BLOCK);
-        new_scope(BLOCK);
+        new_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
         set_state(BLOCK);
-        new_scope(BLOCK);
-    } else if (node_begins_statement_label(n)) {
+        new_scope();
+    }
+
+    if (node_begins_statement_label(n)) {
         set_overloading_class(STATEMENT_LABELS);
     }
 }
-
 
 /*
  * scope_fsm_end
@@ -210,22 +129,62 @@ void scope_fsm_end(Node *n) {
 
     if (node_is_function_param(n) && get_state() == FUNC_DEF_PARAMS) {
         set_state(FUNC_DEF_DECL);
-        previous_scope(FUNC_DEF_DECL);
+        previous_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == FUNC_BODY) {
         /* end of function definition */
         set_state(TOP_LEVEL);
-        previous_scope(TOP_LEVEL);
+        previous_scope();
     } else if (nt == COMPOUND_STATEMENT && get_state() == BLOCK) {
-        if (scope <= FUNCTION_BODY_SCOPE) {
+        previous_scope();
+        if (scope == TOP_LEVEL_SCOPE) {
+            set_state(TOP_LEVEL);
+        } else if (scope == FUNCTION_SCOPE) {
             set_state(FUNC_BODY);
-            previous_scope(FUNC_BODY);
         } else {
             set_state(BLOCK);
-            previous_scope(BLOCK);
         }
-    } else if (nt == IDENTIFIER && get_overloading_class() == STATEMENT_LABELS) {
+    }
+
+    if (nt == NAMED_LABEL && get_overloading_class() == STATEMENT_LABELS) {
         set_overloading_class(OTHER_NAMES);
     }
+}
+
+enum Boolean fsm_is_ready() {
+    return fsm_initialized;
+}
+
+static void new_scope() {
+    scope++;
+}
+
+static void previous_scope() {
+    scope--;
+}
+
+static void set_scope(int s) {
+    scope = s;
+}
+
+
+static void set_state(int state) {
+    current_state = state;
+}
+
+static void set_overloading_class(int oc) {
+    overloading_class = oc;
+}
+
+int get_scope() {
+    return scope;
+}
+
+int get_state() {
+    return current_state;
+}
+
+int get_overloading_class() {
+    return overloading_class;
 }
 
 /*
@@ -281,4 +240,8 @@ char *get_overloading_class_name(int oc) {
     #undef CASE_FOR
         default: return "";
   }
+}
+
+enum Boolean is_inner_block(int scope) {
+    return scope > FUNCTION_SCOPE;
 }

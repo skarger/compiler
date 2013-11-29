@@ -47,10 +47,12 @@ enum symbol_error {
 /* symbol table management functions */
 SymbolTableContainer *create_st_container();
 SymbolTable *create_symbol_table(int scope, int overloading_class);
+SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc);
 SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
+SymbolTable *get_current_st(SymbolTableContainer *stc);
 int st_scope(SymbolTable *st);
 char *st_scope_name(SymbolTable *st);
 int st_overloading_class(SymbolTable *st);

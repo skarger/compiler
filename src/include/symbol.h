@@ -109,6 +109,8 @@ struct SymbolTableContainer {
     SymbolTable *current_st[NUM_OC_CLASSES];
     /* separate symbol table for tracking function declarations */
     SymbolTable *function_prototypes;
+    /* track the current scope */
+    int current_scope;
     /* track the current overloading class */
     int current_oc;
 };

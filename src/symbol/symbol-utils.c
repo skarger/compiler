@@ -28,15 +28,26 @@ SymbolTableContainer *create_st_container() {
 void initialize_st_container(SymbolTableContainer *stc) {
     stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
     stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
-    /* create starting symbol tables at file scope */
-    /* the symbol table at file scope for STATEMENT_LABELS should stay empty */
-    /* it exists to have an ST enclosing the function level ones */
+    /* create starting symbol tables */
+    /* OTHER_NAMES file scope */
     stc->current_st[OTHER_NAMES] =
         create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
+    /* STATEMENT_LABELS file scope. should stay empty */
+    /* it exists to have an ST enclosing the function level ones */
     stc->current_st[STATEMENT_LABELS] =
         create_symbol_table(TOP_LEVEL_SCOPE, STATEMENT_LABELS);
     stc->function_prototypes = create_function_prototypes();
+    stc->current_scope = TOP_LEVEL_SCOPE;
     stc->current_oc = OTHER_NAMES;
+}
+
+void set_current_st(SymbolTable *st, SymbolTableContainer *stc) {
+    int oc = st_overloading_class(st);
+    stc->current_st[oc] = st;
+}
+
+SymbolTable *get_current_st(SymbolTableContainer *stc) {
+    return stc->current_st[stc->current_oc];
 }
 
 /* symbol table */
@@ -74,7 +85,7 @@ char *st_scope_name(SymbolTable *st) {
     switch(st->scope) {
         case TOP_LEVEL_SCOPE:
             return "file";
-        case FUNCTION_BODY_SCOPE:
+        case FUNCTION_SCOPE:
             return "function";
         default:
             return "block";
@@ -160,9 +171,11 @@ void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
     new->enclosing = enc;
 }
 
-void set_current_st(SymbolTable *st, SymbolTableContainer *stc) {
-    int oc = st_overloading_class(st);
-    stc->current_st[oc] = st;
+SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc) {
+    SymbolTable *st = create_symbol_table(scope, oc);
+    insert_symbol_table(st, stc);
+    set_current_st(st, stc);
+    return st;
 }
 
 Symbol *find_prototype(SymbolTable *prototypes, char *name) {

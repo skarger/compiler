@@ -65,12 +65,14 @@ void initialize_traversal_data(TraversalData *td) {
  * Returns: None
  * Side-effects: None
  */
+
 void traverse_node(Node *n, TraversalData *td) {
     if (n == NULL) {
         return;
     }
 
     unsigned long array_size;
+    SymbolTable *enclosing;
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
@@ -78,8 +80,19 @@ void traverse_node(Node *n, TraversalData *td) {
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
             td->function_definition = TRUE;
+            /* create the function level symbol tables */
+            SymbolTable *other_names_st =
+                new_current_st(FUNCTION_SCOPE, OTHER_NAMES, td->stc);
+            SymbolTable *statement_labels_st =
+                new_current_st(FUNCTION_SCOPE, STATEMENT_LABELS, td->stc);
+            /* first child: function def spec */
             traverse_node(n->children.child1, td);
+            /* second child: compound statement */
+            /* traversing function def spec returned us to the file level ST */
+            /* now switch back to function body ST */
+            set_current_st(other_names_st, td->stc);
             traverse_node(n->children.child2, td);
+            td->function_definition = FALSE;
             break;
         case FUNCTION_DEF_SPEC:
             /* first child: type_specifier */
@@ -132,8 +145,13 @@ void traverse_node(Node *n, TraversalData *td) {
                 td->processing_parameters = TRUE;
                 traverse_node(n->children.child2, td);
                 td->processing_parameters = FALSE;
-
                 /* first child: direct declarator */
+                if (td->function_definition) {
+                    /* return back to the file level ST to process it */
+                    /* only for func defintion since prototype has no body ST */ 
+                    enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
+                    set_current_st(enclosing, td->stc);
+                }
                 create_symbol_if_necessary(td);
                 if (symbol_outer_type(td->current_symbol) == ARRAY) {
                     handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
@@ -143,8 +161,10 @@ void traverse_node(Node *n, TraversalData *td) {
                 push_symbol_type(td->current_symbol, FUNCTION);
                 set_symbol_func_params(td->current_symbol,
                                         td->current_param_list);
+                td->current_param_list = NULL;
                 traverse_node(n->children.child1, td);
             }
+            td->function_prototype = FALSE;
             break;
         case PARAMETER_LIST:
             /* second child: parameter decl */
@@ -171,6 +191,17 @@ void traverse_node(Node *n, TraversalData *td) {
                 push_parameter_type(td->current_param_list,
                                     n->data.attributes[TYPE_SPEC]);
             }
+            break;
+        case COMPOUND_STATEMENT:
+            if (is_inner_block(td->stc->current_scope)) {
+                SymbolTable *inner_block_st =
+                new_current_st(td->stc->current_scope, OTHER_NAMES, td->stc);
+            }
+            traverse_node(n->children.child1, td);
+            enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
+            set_current_st(enclosing, td->stc);
+            enclosing = td->stc->current_st[STATEMENT_LABELS]->enclosing;
+            set_current_st(enclosing, td->stc);
             break;
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -223,7 +254,6 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             break;
         case EXPRESSION_STATEMENT:
-        case COMPOUND_STATEMENT:
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
             traverse_node(n->children.child1, td);
@@ -585,11 +615,6 @@ void create_symbol_if_necessary(TraversalData *td) {
 }
 
 void reset_current_symbol(TraversalData *td) {
-    if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-        td->function_definition = FALSE;
-        td->function_prototype = FALSE;
-        td->current_param_list = NULL;
-    }
     td->current_symbol = NULL;
 }
 
@@ -604,7 +629,7 @@ void record_current_symbol(TraversalData *td, Node *n) {
      * prototype function parameters: do NOT put in any symbol table
      */
     if (!td->function_prototype) {
-        append_symbol(td->stc->current_st[td->stc->current_oc], s);
+        append_symbol(get_current_st(td->stc), s);
         set_symbol_table_entry(n, s);
     } else if (symbol_outer_type(s) == FUNCTION) {
         append_function_prototype(td->stc->function_prototypes, s);
@@ -624,7 +649,7 @@ void validate_symbol(Symbol *s, TraversalData *td) {
 
 void validate_function_symbol(Symbol *s, TraversalData *td) {
     /* functions may be declared only at file scope */
-    int scope = st_scope(td->stc->current_st[td->stc->current_oc]);
+    int scope = st_scope(get_current_st(td->stc));
     if (scope != TOP_LEVEL_SCOPE) {
         handle_symbol_error(STE_FUNC_DECL_SCOPE, get_symbol_name(s));
     }

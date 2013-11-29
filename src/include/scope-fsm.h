@@ -5,8 +5,7 @@
 
 /* give names to fundamental scope levels. deeper levels need no name */
 #define TOP_LEVEL_SCOPE 0
-#define FUNCTION_BODY_SCOPE 1
-#define STATEMENT_LABEL_SCOPE 1
+#define FUNCTION_SCOPE 1
 
 /* indicator for whether we are starting or ending the traversal of a node */
 #define START 1
@@ -23,9 +22,7 @@ enum scope_state {
 };
 
 /* finite state machine functions */
-int get_state();
-int get_scope();
-int get_overloading_class();
 void transition_scope(Node *n, int action, SymbolTableContainer *stc);
+enum Boolean is_inner_block(int scope);
 
 #endif
