@@ -83,7 +83,6 @@ SymbolTableContainer *create_st_container();
 SymbolTable *create_symbol_table();
 SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
-enum Boolean should_create_new_st();
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
 int st_scope(SymbolTable *st);
