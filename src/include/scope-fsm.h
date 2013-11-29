@@ -25,4 +25,13 @@ enum scope_state {
 void transition_scope(Node *n, int action, SymbolTableContainer *stc);
 enum Boolean is_inner_block(int scope);
 
+/* TODO: these should be static methods. they are only visible for testing */
+void initialize_fsm();
+int get_state();
+int get_scope();
+int get_overloading_class();
+char *get_scope_state_name(enum scope_state);
+char *get_overloading_class_name(int oc);
+
+
 #endif

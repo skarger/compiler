@@ -1,10 +1,9 @@
-#define SYMBOL_TEST
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "../../src/include/symbol.h"
 #include "../../src/include/symbol-utils.h"
+#include "../../src/include/scope-fsm.h"
 #include "../../src/include/literal.h"
 #include "../../y.tab.h"
 
@@ -180,12 +179,8 @@ void test_st_data() {
     test_res = (stc->current_st[oc] != NULL ? PASS : FAIL);
     printf("%s SymbolTableContainer: initialize current_st\n", get_test_result_name(test_res));
 
-    test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
-    printf("%s should_create_new_st: initially false\n", get_test_result_name(test_res));
-
     SymbolTable *st = create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
-    test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
-    printf("%s should_create_new_st: false after creating symbol table\n", get_test_result_name(test_res));
+
 
     test_res = (sizeof(*st) == sizeof(SymbolTable) ? PASS : FAIL);
     printf("%s SymbolTable: initialize size\n", get_test_result_name(test_res));
@@ -238,13 +233,13 @@ void test_st_fsm() {
     test_transition(n, COMPOUND_STATEMENT, START, BLOCK, 3, OTHER_NAMES);
 
     test_transition(n, GOTO_STATEMENT, START, BLOCK, 3, STATEMENT_LABELS);
-    test_transition(n, IDENTIFIER, END, BLOCK, 3, OTHER_NAMES);
+    test_transition(n, NAMED_LABEL, END, BLOCK, 3, OTHER_NAMES);
 
     test_transition(n, COMPOUND_STATEMENT, END, BLOCK, 2, OTHER_NAMES);
     test_transition(n, COMPOUND_STATEMENT, END, FUNC_BODY, 1, OTHER_NAMES);
 
     test_transition(n, LABELED_STATEMENT, START, FUNC_BODY, 1, STATEMENT_LABELS);
-    test_transition(n, IDENTIFIER, END, FUNC_BODY, 1, OTHER_NAMES);
+    test_transition(n, NAMED_LABEL, END, FUNC_BODY, 1, OTHER_NAMES);
 
     test_transition(n, COMPOUND_STATEMENT, END, TOP_LEVEL, 0, OTHER_NAMES);
 

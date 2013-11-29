@@ -73,8 +73,8 @@ test-parser-output : parser-main
 symbol-test.o : test/symbol/symbol-test.c
 	$(CC) -c test/symbol/symbol-test.c
 
-symbol-test : symbol-utils.o symbol-test.o utilities.o
-	$(CC) symbol-utils.o symbol-test.o utilities.o -o $@
+symbol-test : symbol-utils.o symbol-test.o utilities.o scope-fsm.o
+	$(CC) symbol-utils.o symbol-test.o utilities.o scope-fsm.o -o $@
 	./symbol-test
 
 test-symbol-output : test/symbol/test-symbol-output parser

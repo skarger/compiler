@@ -28,6 +28,7 @@ symbol-test.o: test/symbol/symbol-test.c \
   test/symbol/../../src/include/parse-tree.h \
   test/symbol/../../src/include/symbol.h \
   test/symbol/../../src/include/literal.h \
+  test/symbol/../../src/include/scope-fsm.h \
   test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
 symbol-main.o: src/symbol/symbol-main.c \
   src/symbol/../../src/include/traverse.h \

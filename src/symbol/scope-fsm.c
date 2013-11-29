@@ -24,15 +24,6 @@ static void scope_fsm_end(Node *n);
 static int node_is_function_param(Node *);
 static int node_begins_statement_label(Node *n);
 
-#ifndef SYMBOL_TEST
-static void initialize_fsm();
-static int get_state();
-static int get_scope();
-static int get_overloading_class();
-static char *get_scope_state_name(enum scope_state);
-static char *get_overloading_class_name(int oc);
-#endif
-
 /*
  * transition_scope
  *      update program scope in response to the given node
