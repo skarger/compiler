@@ -71,6 +71,7 @@ enum data_type {
     TYPE_SPECIFIER,
     ABSTRACT_DECLARATOR,
     POINTER,
+    PTR_ABS_DECL,
     DIR_ABS_DECL
 };
 

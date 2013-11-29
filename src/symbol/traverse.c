@@ -123,6 +123,7 @@ void traverse_node(Node *n, TraversalData *td) {
             } else {
                 record_current_symbol(td, n);
             }
+            reset_current_symbol(td);
             break;
         case POINTER_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -183,6 +184,7 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             /* declarator */
             traverse_node(n->children.child2, td);
+            reset_current_symbol(td);
             break;
         case TYPE_SPECIFIER:
             /* save in case multiple declarators follow this type */
@@ -224,6 +226,11 @@ void traverse_node(Node *n, TraversalData *td) {
             /* first child: direct declarator */
             traverse_node(n->children.child1, td);
             break;
+        case ABSTRACT_DECLARATOR:
+            create_symbol_if_necessary(td);
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            break;
         case DIR_ABS_DECL:
             /* first child: direct_abstract_declarator */
             traverse_node(n->children.child1, td);
@@ -231,20 +238,18 @@ void traverse_node(Node *n, TraversalData *td) {
             if (td->processing_parameters) {
                 /* intentionally converting type from ARRAY to POINTER */
                 push_parameter_type(td->current_param_list, POINTER);
-                push_symbol_type(td->current_symbol, POINTER);
-            } else {
-                array_size = resolve_array_size(td, n->children.child2);
-                push_symbol_type(td->current_symbol, ARRAY);
             }
+            /* TODO: apply this array size somewhere */
+            array_size = resolve_array_size(td, n->children.child2);
             break;
         case NAMED_LABEL:
             td->current_base_type = NAMED_LABEL;
             create_symbol_if_necessary(td);
             set_symbol_name(td->current_symbol, n->data.str);
             record_current_symbol(td, n);
+            reset_current_symbol(td);
             break;
         case CAST_EXPR:
-        case ABSTRACT_DECLARATOR:
         case TYPE_NAME:
         case DECL_OR_STMT_LIST:
         case LABELED_STATEMENT:
@@ -637,7 +642,6 @@ void record_current_symbol(TraversalData *td, Node *n) {
     } else {
         set_symbol_table_entry(n, td->dummy_prototype_parameter);
     }
-    reset_current_symbol(td);
 }
 
 void validate_symbol(Symbol *s, TraversalData *td) {
