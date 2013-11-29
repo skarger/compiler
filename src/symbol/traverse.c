@@ -229,16 +229,20 @@ void traverse_node(Node *n, TraversalData *td) {
         case ABSTRACT_DECLARATOR:
             create_symbol_if_necessary(td);
             traverse_node(n->children.child1, td);
+            break;
+        case PTR_ABS_DECL:
+            create_symbol_if_necessary(td);
+            traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
         case DIR_ABS_DECL:
             /* first child: direct_abstract_declarator */
             traverse_node(n->children.child1, td);
-            /* second child: constant_expr */
             if (td->processing_parameters) {
                 /* intentionally converting type from ARRAY to POINTER */
                 push_parameter_type(td->current_param_list, POINTER);
             }
+            /* second child: constant_expr */
             /* TODO: apply this array size somewhere */
             array_size = resolve_array_size(td, n->children.child2);
             break;
