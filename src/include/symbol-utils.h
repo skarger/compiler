@@ -5,29 +5,10 @@
 #ifndef SYMBOL_UTILS_H
 #define SYMBOL_UTILS_H
 
-/* give names to fundamental scope levels. deeper levels need no name */
-#define TOP_LEVEL_SCOPE 0
-#define FUNCTION_BODY_SCOPE 1
-#define STATEMENT_LABEL_SCOPE 1
-
-/* indicator for whether we are starting or ending the traversal of a node */
-#define START 1
-#define END 2
-
 /* for testing */
 #define PASS 1
 #define FAIL 2
 
-/* array bound related */
-/* choosing these constants since they are invalid array bounds anyway */
-#define UNSPECIFIED_VALUE   -2147483647
-#define VARIABLE_VALUE      -2147483646
-#define NON_INTEGRAL_VALUE  -2147483645
-#define CAST_VALUE          -2147483644
-
-/* function related */
-#define PARAM_NAME 0
-#define PARAM_TYPE 1
 
 /* limit on the length of a type tree chain in string format */
 #define MAX_TYPE_TREE_STRLEN 1023
@@ -39,15 +20,6 @@
  * "function (12345 parameters) returning -> "
  * */
 #define MAX_TYPE_STRLEN 48
-
-enum scope_state {
-    TOP_LEVEL,
-    FUNC_DEF,
-    FUNC_DEF_DECL,
-    FUNC_DEF_PARAMS,
-    FUNC_BODY,
-    BLOCK
-};
 
 /*
  * Errors that are caught in the symbol table step.
@@ -72,15 +44,9 @@ enum symbol_error {
 };
 
 
-/* finite state machine functions */
-int get_state();
-int get_scope();
-int get_overloading_class();
-void transition_scope(Node *n, int action, SymbolTableContainer *stc);
-
 /* symbol table management functions */
 SymbolTableContainer *create_st_container();
-SymbolTable *create_symbol_table();
+SymbolTable *create_symbol_table(int scope, int overloading_class);
 SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);

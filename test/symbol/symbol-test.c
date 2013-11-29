@@ -181,7 +181,7 @@ void test_st_data() {
     test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
     printf("%s should_create_new_st: initially false\n", get_test_result_name(test_res));
 
-    SymbolTable *st = create_symbol_table();
+    SymbolTable *st = create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
     test_res = (should_create_new_st() == FALSE ? PASS : FAIL);
     printf("%s should_create_new_st: false after creating symbol table\n", get_test_result_name(test_res));
 

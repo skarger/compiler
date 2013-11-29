@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "symbol.h"
 
 /* contains data definitions for parse tree nodes. */

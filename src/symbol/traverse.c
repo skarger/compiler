@@ -6,6 +6,7 @@
 #include "../include/traverse.h"
 #include "../include/parse-tree.h"
 #include "../include/symbol-utils.h"
+#include "../include/scope-fsm.h"
 #include "../include/utilities.h"
 #include "../include/literal.h"
 #include "../../y.tab.h"
@@ -73,6 +74,7 @@ void traverse_node(Node *n, TraversalData *td) {
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
+
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
             td->function_definition = TRUE;
@@ -279,6 +281,7 @@ void traverse_node(Node *n, TraversalData *td) {
         default:
             break;
     }
+
     transition_scope(n, END, td->stc);
 }
 

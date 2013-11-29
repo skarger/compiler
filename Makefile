@@ -14,7 +14,8 @@ TESTS = symbol-test test/symbol/st-output
 EXECS = lexer parser-main symbol-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/symbol/traverse.c \
-src/symbol/symbol-utils.c test/symbol/symbol-test.c src/symbol/symbol-main.c
+src/symbol/symbol-utils.c test/symbol/symbol-test.c src/symbol/symbol-main.c \
+src/symbol/scope-fsm.c
 
 
 all : $(EXECS)
@@ -53,8 +54,8 @@ y.tab.o :
 parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
-parser-main : parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o
-	$(CC) parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@
+parser-main : parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o scope-fsm.o
+	$(CC) parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o scope-fsm.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
@@ -62,6 +63,8 @@ symbol-utils.o : src/symbol/symbol-utils.c
 traverse.o : src/symbol/traverse.c
 	$(CC) -c src/symbol/traverse.c
 
+scope-fsm.o : src/symbol/scope-fsm.c
+	$(CC) -c src/symbol/scope-fsm.c
 
 # tests
 test-parser-output : parser-main

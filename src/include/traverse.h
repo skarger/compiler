@@ -11,6 +11,15 @@
 
 #define TRAVERSE
 
+
+/* array bound related */
+/* choosing these constants since they are invalid array bounds anyway */
+#define UNSPECIFIED_VALUE   -2147483647
+#define VARIABLE_VALUE      -2147483646
+#define NON_INTEGRAL_VALUE  -2147483645
+#define CAST_VALUE          -2147483644
+
+
 struct TraversalData {
     SymbolTableContainer *stc;
     enum data_type current_base_type;
