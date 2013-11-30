@@ -31,3 +31,13 @@ then
 else
     echo " FAIL: FUNCTION DECLARATORS"
 fi
+
+./symbol-main test/symbol/st-in-function-definitions test/symbol/st-output
+diff test/symbol/st-exp-function-definitions test/symbol/st-output
+
+if [ $? -eq 0 ]
+then
+    echo "PASS: FUNCTION DEFINITIONS"
+else
+    echo " FAIL: FUNCTION DEFINITIONS"
+fi

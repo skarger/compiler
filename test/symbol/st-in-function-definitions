@@ -1,0 +1,45 @@
+int main(int argc, char *argv[]) {
+    return 0;
+}
+
+char *fn1(void) {
+    return 0;
+}
+
+unsigned long fn3(unsigned long ul) {
+    return 0;
+}
+
+char *fn4(int a, char b, short c) {
+    return 0;
+}
+
+short fn5(int a[]) {
+    return 0;
+}
+
+int fn6(char b) {
+    LAB:
+        return 0;
+}
+
+long fn7(int a) {
+    return 0;
+}
+
+char fn8(short c) {
+    LAB:
+        return 0;
+}
+
+int *errfn1(int []) {
+    return 0;
+}
+
+char errfn2(int *[]) {
+    return 0;
+}
+
+char errfn3(long [][][]) {
+    return 0;
+}

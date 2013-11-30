@@ -535,10 +535,13 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_NOT_FUNCTION:
             error(0, 0, "error: %s", data);
         case STE_PROTO_MISMATCH:
-            error(0, 0, "error: %s", "redeclaration of function");
+            error(0, 0, "error: %s: redeclaration of function", data);
             return;
         case STE_FUNC_DECL_SCOPE:
-            error(0, 0, "error: %s", "function declared at non-file scope");
+            error(0, 0, "error: %s: function declared at non-file scope", data);
+            return;
+        case STE_ABS_DECL_FUNC:
+            error(0, 0, "error: %s: function parameters must be named", data);
             return;
         default:
             return;

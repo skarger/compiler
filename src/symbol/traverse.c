@@ -232,6 +232,9 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             break;
         case ABSTRACT_DECLARATOR:
+            if (td->function_definition) {
+                handle_symbol_error(STE_ABS_DECL_FUNC, "abstract declarator");
+            }
             create_symbol_if_necessary(td);
             traverse_node(n->children.child1, td);
             break;
