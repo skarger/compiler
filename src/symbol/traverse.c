@@ -249,7 +249,7 @@ void traverse_node(Node *n, TraversalData *td) {
             break;
         case ABSTRACT_DECLARATOR:
             if (td->function_def_spec && td->processing_parameters) {
-                handle_symbol_error(STE_ABS_DECL_FUNC, "abstract declarator");
+                handle_symbol_error(STE_ABS_DECL_PARAM, "abstract declarator");
             }
             create_symbol_if_necessary(td);
             traverse_node(n->children.child1, td);
@@ -452,7 +452,12 @@ long resolve_array_size(TraversalData *td, Node *n) {
 unsigned long resolve_constant_expr(Node *n) {
     unsigned long resolve_conditional_expr(Node *n);
     unsigned long resolve_binary_expr(Node *n);
+    unsigned long resolve_cast_expr(Node *n);
     unsigned long resolve_unary_expr(Node *n);
+    unsigned long resolve_prefix_expr(Node *n);
+    unsigned long resolve_postfix_expr(Node *n);
+    unsigned long resolve_subscript_expr(Node *n);
+    unsigned long resolve_function_call(Node *n);
 
     /* error if it cannot be resolved */
     switch (n->n_type) {
@@ -470,11 +475,15 @@ unsigned long resolve_constant_expr(Node *n) {
             return resolve_unary_expr(n);
         /* error cases */
         case CAST_EXPR:
-            return CAST_VALUE;
+            return resolve_cast_expr(n);
         case PREFIX_EXPR:
+            return resolve_prefix_expr(n);
         case POSTFIX_EXPR:
+            return resolve_postfix_expr(n);
         case SUBSCRIPT_EXPR:
+            return resolve_subscript_expr(n);
         case FUNCTION_CALL:
+            return resolve_function_call(n);
         case IDENTIFIER_EXPR:
             set_symbol_table_entry(n, td->dummy_symbol);
             return VARIABLE_VALUE;
@@ -581,6 +590,15 @@ unsigned long resolve_binary_expr(Node *n) {
     }
 }
 
+unsigned long resolve_cast_expr(Node *n) {
+    unsigned long child2;
+    child2 = resolve_constant_expr(n->children.child2);
+    if (invalid_operand(child2)) {
+        return child2;
+    }
+    return CAST_VALUE;
+}
+
 unsigned long resolve_unary_expr(Node *n) {
     unsigned long child1;
     child1 = resolve_constant_expr(n->children.child1);
@@ -603,6 +621,64 @@ unsigned long resolve_unary_expr(Node *n) {
         default:
             return UNSPECIFIED_VALUE;
     }
+}
+
+unsigned long resolve_prefix_expr(Node *n) {
+    unsigned long child1;
+    child1 = resolve_constant_expr(n->children.child1);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    switch (n->data.attributes[OPERATOR]) {
+        case INCREMENT:
+            return ++child1;
+        case DECREMENT:
+            return --child1;
+        default:
+            return VARIABLE_VALUE;
+    }
+}
+
+unsigned long resolve_postfix_expr(Node *n) {
+    unsigned long child1;
+    child1 = resolve_constant_expr(n->children.child1);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    switch (n->data.attributes[OPERATOR]) {
+        case INCREMENT:
+            return child1++;
+        case DECREMENT:
+            return child1++;
+        default:
+            return VARIABLE_VALUE;
+    }
+}
+
+unsigned long resolve_subscript_expr(Node *n) {
+    unsigned long child1, child2;
+    child1 = resolve_constant_expr(n->children.child1);
+    child2 = resolve_constant_expr(n->children.child2);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    if (invalid_operand(child2)) {
+        return child2;
+    }
+    return VARIABLE_VALUE;
+}
+
+unsigned long resolve_function_call(Node *n) {
+    unsigned long child1, child2;
+    child1 = resolve_constant_expr(n->children.child1);
+    child2 = resolve_constant_expr(n->children.child2);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    if (invalid_operand(child2)) {
+        return child2;
+    }
+    return VARIABLE_VALUE;
 }
 
 enum Boolean array_bound_optional(TraversalData *td) {

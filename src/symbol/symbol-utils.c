@@ -552,7 +552,7 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_FUNC_DECL_SCOPE:
             error(0, 0, "error: %s: function declared at non-file scope", data);
             return;
-        case STE_ABS_DECL_FUNC:
+        case STE_ABS_DECL_PARAM:
             error(0, 0, "error: %s: function parameters must be named", data);
             return;
         case STE_ID_UNDECLARED:
