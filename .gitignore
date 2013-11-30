@@ -35,4 +35,4 @@ lex.yy.c
 lexer
 parser-main
 symbol-main
-symbol-test
+test-symbol-utils

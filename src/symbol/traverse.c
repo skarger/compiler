@@ -45,7 +45,7 @@ void initialize_traversal_data(TraversalData *td) {
     td->current_param_list = NULL;
     td->dummy_symbol = create_symbol();
     td->processing_parameters = FALSE;
-    td->function_definition = FALSE;
+    td->function_def_spec = FALSE;
     td->function_prototype = FALSE;
     /* create container for each symbol table that will be created */
     /* pass the container across traversal so that STs may be inserted */
@@ -73,6 +73,7 @@ void traverse_node(Node *n, TraversalData *td) {
 
     unsigned long array_size;
     SymbolTable *enclosing;
+    SymbolTable *function_other_names_st, *function_statement_labels_st;
     Symbol* function_symbol;
     Symbol *id_symbol;
     enum data_type decl_base_type;
@@ -92,20 +93,24 @@ void traverse_node(Node *n, TraversalData *td) {
             }
             break;
         case FUNCTION_DEFINITION:
-            td->function_definition = TRUE;
             /* create the function level symbol tables */
-            SymbolTable *other_names_st =
+            function_other_names_st =
                 new_current_st(FUNCTION_SCOPE, OTHER_NAMES, td->stc);
-            SymbolTable *statement_labels_st =
+            function_statement_labels_st =
                 new_current_st(FUNCTION_SCOPE, STATEMENT_LABELS, td->stc);
             /* first child: function def spec */
             traverse_node(n->children.child1, td);
             /* second child: compound statement */
             /* traversing function def spec returned us to the file level ST */
             /* now switch back to function body ST */
-            set_current_st(other_names_st, td->stc);
+            set_current_st(function_other_names_st, td->stc);
             traverse_node(n->children.child2, td);
-            td->function_definition = FALSE;
+            break;
+        case FUNCTION_DEF_SPEC:
+            td->function_def_spec = TRUE;
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            td->function_def_spec = FALSE;
             break;
         case INIT_DECL_LIST:
             /* first child: initialized declarator list */
@@ -149,7 +154,7 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_pointers(n, td);
             break;
         case FUNCTION_DECLARATOR:
-            if (!(td->function_definition)) {
+            if (!(td->function_def_spec)) {
                 td->function_prototype = TRUE;
             }
             if (td->processing_parameters) {
@@ -169,7 +174,7 @@ void traverse_node(Node *n, TraversalData *td) {
                 td->processing_parameters = TRUE;
                 traverse_node(n->children.child2, td);
                 td->processing_parameters = FALSE;
-                if (td->function_definition) {
+                if (td->function_def_spec) {
                     /* return back to the file level ST to process it */
                     /* only for func defn since prototype has no body ST */
                     enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
@@ -243,7 +248,7 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             break;
         case ABSTRACT_DECLARATOR:
-            if (td->function_definition) {
+            if (td->function_def_spec && td->processing_parameters) {
                 handle_symbol_error(STE_ABS_DECL_FUNC, "abstract declarator");
             }
             create_symbol_if_necessary(td);
@@ -285,7 +290,6 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child3, td);
             break;
         case DECL:
-        case FUNCTION_DEF_SPEC:
         case PTR_ABS_DECL:
         case DECL_OR_STMT_LIST:
         case CAST_EXPR:
@@ -472,6 +476,7 @@ unsigned long resolve_constant_expr(Node *n) {
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
         case IDENTIFIER_EXPR:
+            set_symbol_table_entry(n, td->dummy_symbol);
             return VARIABLE_VALUE;
         case STRING_CONSTANT:
             return NON_INTEGRAL_VALUE;
@@ -666,7 +671,7 @@ void validate_function_symbol(Symbol *s, TraversalData *td) {
         handle_symbol_error(STE_FUNC_DECL_SCOPE, get_symbol_name(s));
     }
     /* check that definition matches its prototype if present */
-    if (td->function_definition) {
+    if (td->function_def_spec) {
         Symbol *prototype;
         prototype = find_prototype(td->stc->function_prototypes,
                                     get_symbol_name(s));

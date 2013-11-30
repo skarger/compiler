@@ -64,3 +64,8 @@ int errfn5(char c);
 long errfn5(char c) {
     return 0;
 }
+
+int errfn6(int a, char c) {
+    /* this function decl is a scope error but is syntactically correct */
+    char errfn7 ( int d );
+}

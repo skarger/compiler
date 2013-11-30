@@ -27,7 +27,7 @@ struct TraversalData {
     Symbol *current_symbol;
     Symbol *dummy_symbol;
     enum Boolean processing_parameters;
-    enum Boolean function_definition;
+    enum Boolean function_def_spec;
     enum Boolean function_prototype;
     FILE *outfile;
 };

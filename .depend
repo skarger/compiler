@@ -22,7 +22,7 @@ symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/literal.h src/symbol/../include/scope-fsm.h \
   src/symbol/../include/traverse.h src/symbol/../include/literal.h \
   src/symbol/../include/utilities.h
-symbol-test.o: test/symbol/symbol-test.c \
+test-symbol-utils.o: test/symbol/test-symbol-utils.c \
   test/symbol/../../src/include/symbol.h \
   test/symbol/../../src/include/utilities.h \
   test/symbol/../../src/include/symbol-utils.h \

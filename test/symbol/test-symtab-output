@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo -e "\n*** Testing Symbol Table Output ***"
+
 ./symbol-main test/symbol/st-in-simple-declarators test/symbol/st-output
 diff test/symbol/st-exp-simple-declarators test/symbol/st-output
 
@@ -51,3 +53,5 @@ then
 else
     echo " FAIL: IDENTIFIERS"
 fi
+
+echo -e "\n"

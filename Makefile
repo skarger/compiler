@@ -10,12 +10,12 @@ YFLAGS += -d
 VPATH = src
 
 
-TESTS = symbol-test test/symbol/st-output
+TESTS = test-symbol-utils test/symbol/st-output
 EXECS = lexer parser-main symbol-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/symbol/traverse.c \
-src/symbol/symbol-utils.c test/symbol/symbol-test.c src/symbol/symbol-main.c \
-src/symbol/scope-fsm.c
+src/symbol/symbol-utils.c test/symbol/test-symbol-utils.c \
+src/symbol/symbol-main.c src/symbol/scope-fsm.c
 
 
 all : $(EXECS)
@@ -59,6 +59,9 @@ symbol-utils.o scope-fsm.o
 	$(CC) parser-main.o y.tab.o utilities.o traverse.o \
 symbol-utils.o scope-fsm.o -o $@
 
+symbol-main.o : src/symbol/symbol-main.c
+	$(CC) -c src/symbol/symbol-main.c -o $@
+
 symbol-main : symbol-main.o y.tab.o utilities.o traverse.o \
 symbol-utils.o scope-fsm.o
 	$(CC) symbol-main.o y.tab.o utilities.o traverse.o \
@@ -77,19 +80,19 @@ scope-fsm.o : src/symbol/scope-fsm.c
 test-parser-output : parser-main
 	./test/parser/test-parser-output
 
-symbol-test.o : test/symbol/symbol-test.c
-	$(CC) -c test/symbol/symbol-test.c
+test-symbol : test-symbol-utils test-symtab-output
+	./test/symbol/test-symtab-output 2>/dev/null
+	./test-symbol-utils
 
-symbol-test : symbol-utils.o symbol-test.o utilities.o scope-fsm.o
-	$(CC) symbol-utils.o symbol-test.o utilities.o scope-fsm.o -o $@
-	./symbol-test
+test-symtab-errors : symbol-main
+	./test/symbol/test-symtab-output 
 
-test-symbol-output : test/symbol/test-symbol-output parser
-	test/symbol/test-symbol-output
+test-symbol-utils.o : test/symbol/test-symbol-utils.c
+	$(CC) -c test/symbol/test-symbol-utils.c
 
-symbol-main.o : src/symbol/symbol-main.c
-	$(CC) -c src/symbol/symbol-main.c
+test-symbol-utils : symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o
+	$(CC) symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o -o $@	
 
 test-symtab-output : symbol-main
-	./test/symbol/test-symtab-output
+
 
