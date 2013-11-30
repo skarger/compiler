@@ -17,17 +17,17 @@ traverse.o: src/symbol/traverse.c src/symbol/../include/traverse.h \
   src/symbol/../include/scope-fsm.h src/symbol/../include/utilities.h \
   src/symbol/../include/literal.h src/symbol/../../y.tab.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
-  src/symbol/../include/symbol-utils.h src/symbol/../include/parse-tree.h \
-  src/symbol/../include/symbol.h src/symbol/../include/utilities.h \
+  src/symbol/../include/utilities.h src/symbol/../include/symbol-utils.h \
+  src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
   src/symbol/../include/literal.h src/symbol/../include/scope-fsm.h \
   src/symbol/../include/traverse.h src/symbol/../include/literal.h \
   src/symbol/../include/utilities.h
 symbol-test.o: test/symbol/symbol-test.c \
   test/symbol/../../src/include/symbol.h \
+  test/symbol/../../src/include/utilities.h \
   test/symbol/../../src/include/symbol-utils.h \
   test/symbol/../../src/include/parse-tree.h \
   test/symbol/../../src/include/symbol.h \
-  test/symbol/../../src/include/utilities.h \
   test/symbol/../../src/include/literal.h \
   test/symbol/../../src/include/scope-fsm.h \
   test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h

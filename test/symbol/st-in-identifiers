@@ -6,7 +6,11 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-int x; /* file scope identifier */
+/* file scope identifiers */
+int x;
+int dup1;
+int dup1;
+char dup1;
 
 long fn1(int y) {
     return x + y;
@@ -48,10 +52,26 @@ char fn5(int x) {
     return x;
 }
 
+int fn6(void) {
+    goto END;
+    END:
+    return 0;
+}
+
 int errfn1(void) {
 	return i;
 }
 
 int errfn2(void) {
     goto LAB;
+}
+
+int errfn3(void) {
+    int dup;
+    int dup;
+}
+
+int errfn4(void) {
+    goto END;
+    return 0;
 }

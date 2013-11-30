@@ -42,7 +42,8 @@ enum symbol_error {
     STE_PROTO_MISMATCH = -14,
     STE_FUNC_DECL_SCOPE = -15,
     STE_ABS_DECL_FUNC = -16,
-    STE_ID_UNDECLARED = -17
+    STE_ID_UNDECLARED = -17,
+    STE_LAB_UNDEFINED = -18
 };
 
 
@@ -52,6 +53,7 @@ SymbolTable *create_symbol_table(int scope, int overloading_class);
 SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc);
 SymbolTable *create_function_prototypes();
 void set_st_symbols(SymbolTable *st, Symbol *s);
+Symbol *st_symbols(SymbolTable *st);
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
 SymbolTable *get_current_st(SymbolTableContainer *stc);
@@ -76,6 +78,8 @@ int symbol_outer_type(Symbol *s);
 void set_symbol_func_params(Symbol *s, FunctionParameter *fp);
 Symbol *find_prototype(SymbolTable *prototypes, char *name);
 Symbol *find_symbol(SymbolTable *st, char *name);
+void set_label_defined(Symbol *s, boolean b);
+boolean label_is_defined(Symbol *s);
 
 /* helpers */
 TypeNode *create_type_node(int type);

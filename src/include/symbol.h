@@ -2,6 +2,8 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include "utilities.h"
+
 /* overloading classes */
 #define NUM_OC_CLASSES 2
 #define OTHER_NAMES 0
@@ -56,6 +58,7 @@ struct Symbol {
     char *name;          /* the name of the symbol */
     TypeNode *type_tree;
     FunctionParameter *param_list;      /* function parameter list */
+    boolean label_defined;              /* statement label flag */
     struct Symbol *next;                /* adjacent item in symbol table */
     struct SymbolTable *symbol_table;   /* the symbol's symbol table */
 };

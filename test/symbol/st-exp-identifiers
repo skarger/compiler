@@ -85,6 +85,36 @@ signed int (
  * overloading class: other names
  */
 x);
+signed int (
+/*
+ * symbol: dup1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
+signed int (
+/*
+ * symbol: dup1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
+signed char (
+/*
+ * symbol: dup1
+ * type: signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
 signed long ((
 /*
  * symbol: fn1
@@ -455,6 +485,40 @@ x);
 }
 signed int ((
 /*
+ * symbol: fn6
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn6)(void ))
+{
+goto 
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END;
+
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END : return (0);
+}
+signed int ((
+/*
  * symbol: errfn1
  * type: function (1 parameter) returning -> signed int
  * parameters:
@@ -481,5 +545,75 @@ signed int ((
  */
 errfn2)(void ))
 {
-goto LAB;
+goto 
+/*
+ * symbol: LAB
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+LAB;
+}
+signed int ((
+/*
+ * symbol: errfn3
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn3)(void ))
+{
+signed int (
+/*
+ * symbol: dup
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+dup);
+
+signed int (
+/*
+ * symbol: dup
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+dup);
+
+}
+signed int ((
+/*
+ * symbol: errfn4
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn4)(void ))
+{
+goto 
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END;
+return (0);
 }

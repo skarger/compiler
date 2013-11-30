@@ -53,6 +53,7 @@ void reset_current_symbol(TraversalData *td);
 void record_current_symbol(TraversalData *td, Node *n);
 void validate_symbol(Symbol *s, TraversalData *td);
 void validate_function_symbol(Symbol *s, TraversalData *td);
+void validate_statement_labels(TraversalData *td);
 
 
 #endif

@@ -237,7 +237,10 @@ other_matched_statement : expr SEMICOLON
         { $$ = create_node(CONTINUE_STATEMENT); }
     | return_statement
     | GOTO identifier SEMICOLON
-        { $$ = create_node(GOTO_STATEMENT, $2); }
+        {
+            set_node_type($2, NAMED_LABEL);
+            $$ = create_node(GOTO_STATEMENT, $2);
+        }
     | SEMICOLON
         { $$ = create_node(NULL_STATEMENT); }
     ;

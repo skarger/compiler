@@ -216,6 +216,7 @@ void traverse_node(Node *n, TraversalData *td) {
             set_current_st(enclosing, td->stc);
             /* if we are not at an inner block then we are exiting a function */
             if (!is_inner_block(td->stc->current_scope)) {
+                validate_statement_labels(td);
                 enclosing = td->stc->current_st[STATEMENT_LABELS]->enclosing;
                 set_current_st(enclosing, td->stc);
             }
@@ -259,11 +260,23 @@ void traverse_node(Node *n, TraversalData *td) {
             array_size = resolve_array_size(td, n->children.child2);
             break;
         case NAMED_LABEL:
-            td->current_base_type = NAMED_LABEL;
-            create_symbol_if_necessary(td);
-            set_symbol_name(td->current_symbol, n->data.str);
-            record_current_symbol(td, n);
-            reset_current_symbol(td);
+            id_symbol = find_symbol(get_current_st(td->stc), n->data.str);
+            if (id_symbol != NULL) {
+                set_symbol_table_entry(n, id_symbol);
+            } else {
+                td->current_base_type = NAMED_LABEL;
+                create_symbol_if_necessary(td);
+                set_symbol_name(td->current_symbol, n->data.str);
+                record_current_symbol(td, n);
+                reset_current_symbol(td);
+            }
+            break;
+        case LABELED_STATEMENT:
+            traverse_node(n->children.child1, td);
+            id_symbol = find_symbol(td->stc->current_st[STATEMENT_LABELS],
+                                    n->children.child1->data.str);
+            set_label_defined(id_symbol, TRUE);
+            traverse_node(n->children.child2, td);
             break;
         /* nodes we simply pass through with respect to symbol table */
         case CONDITIONAL_EXPR:
@@ -275,7 +288,6 @@ void traverse_node(Node *n, TraversalData *td) {
         case FUNCTION_DEF_SPEC:
         case PTR_ABS_DECL:
         case DECL_OR_STMT_LIST:
-        case LABELED_STATEMENT:
         case CAST_EXPR:
         case TYPE_NAME:
         case BINARY_EXPR:
@@ -661,6 +673,16 @@ void validate_function_symbol(Symbol *s, TraversalData *td) {
         if (prototype != NULL && !symbols_same_type(s, prototype)) {
             handle_symbol_error(STE_PROTO_MISMATCH, get_symbol_name(s));
         }
+    }
+}
+
+void validate_statement_labels(TraversalData *td) {
+    Symbol *cur = st_symbols(td->stc->current_st[STATEMENT_LABELS]);
+    while (cur != NULL) {
+        if (!label_is_defined(cur)) {
+            handle_symbol_error(STE_LAB_UNDEFINED, get_symbol_name(cur));
+        }
+        cur = cur->next;
     }
 }
 

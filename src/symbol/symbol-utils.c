@@ -72,6 +72,9 @@ void initialize_st(SymbolTable *st, int scope, int overloading_class) {
     st->enclosing = NULL;
 }
 
+Symbol *st_symbols(SymbolTable *st) {
+    return st->symbols;
+}
 
 int st_scope(SymbolTable *st) {
     return st->scope;
@@ -203,6 +206,7 @@ Symbol *create_symbol() {
     s->name = "";
     s->type_tree = NULL;
     s->param_list = NULL;
+    s->label_defined = FALSE;
     s->symbol_table = NULL;
     s->next = NULL;
     return s;
@@ -280,6 +284,14 @@ void set_symbol_name(Symbol *s, char *name) {
 
 char *get_symbol_name(Symbol *s) {
     return s->name;
+}
+
+void set_label_defined(Symbol *s, boolean b) {
+    s->label_defined = b;
+}
+
+boolean label_is_defined(Symbol *s) {
+    return s->label_defined;
 }
 
 SymbolTable *get_symbol_table(Symbol *s) {
@@ -545,6 +557,9 @@ void handle_symbol_error(enum symbol_error e, char *data) {
             return;
         case STE_ID_UNDECLARED:
             error(0, 0, "error: \"%s\" undeclared", data);
+            return;
+        case STE_LAB_UNDEFINED:
+            error(0, 0, "error: '%s' used but not defined", data);
             return;
         default:
             return;
