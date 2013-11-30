@@ -43,3 +43,15 @@ char errfn2(int *[]) {
 char errfn3(long [][][]) {
     return 0;
 }
+
+int errfn4(char c);
+
+int errfn4(long c) {
+    return 0;
+}
+
+int errfn5(char c);
+
+long errfn5(char c) {
+    return 0;
+}

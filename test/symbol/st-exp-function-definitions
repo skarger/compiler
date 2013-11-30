@@ -274,3 +274,75 @@ errfn3)(signed long ((([])[])[])))
 {
 return (0);
 }
+signed int ((
+/*
+ * symbol: errfn4
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn4)(signed char (c)));
+signed int ((
+/*
+ * symbol: errfn4
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed long, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn4)(signed long (
+/*
+ * symbol: c
+ * type: signed long
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c)))
+{
+return (0);
+}
+signed int ((
+/*
+ * symbol: errfn5
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn5)(signed char (c)));
+signed long ((
+/*
+ * symbol: errfn5
+ * type: function (1 parameter) returning -> signed long
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn5)(signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c)))
+{
+return (0);
+}
