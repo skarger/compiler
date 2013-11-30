@@ -11,4 +11,16 @@ long fn1(int y) {
     return x + y;
 }
 
+int i1;
+int fn2(int i2) {
+    int i3;
+    {
+        int i4, i5;
+        i1 = i1 + i2 + i3 + i4;
+    }
+    i1 += i3;
+    i1 -= i2;
+    return i1;
+}
+   
 

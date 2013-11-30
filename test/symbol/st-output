@@ -127,3 +127,165 @@ x) + (
  */
 y));
 }
+signed int (
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1);
+signed int ((
+/*
+ * symbol: fn2
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed int, name: i2
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn2)(signed int (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2)))
+{
+signed int (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3);
+
+
+{
+signed int (
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4), (
+/*
+ * symbol: i5
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i5);
+
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) = ((((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) + (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2)) + (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3)) + (
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4)));
+}
+
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) += (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3));
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) -= (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2));
+return (
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1);
+}
