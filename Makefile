@@ -78,6 +78,9 @@ scope-fsm.o : src/symbol/scope-fsm.c
 
 # tests
 test-parser-output : parser-main
+	./test/parser/test-parser-output 2>/dev/null
+
+test-parser-errors : parser-main
 	./test/parser/test-parser-output
 
 test-symbol : test-symbol-utils test-symtab-output

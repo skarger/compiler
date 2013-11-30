@@ -1,0 +1,1095 @@
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+((a) ? (b) : (c));
+((i) || (j));
+((i) && (j));
+((h) | (k));
+((y) | (z));
+((q) ^ (r));
+((w) == (e));
+((w) != (r));
+((h) < (i));
+((h) <= (i));
+((h) > (i));
+((j) >= (o));
+((b) << (s));
+((b) >> (s));
+((x) * (y));
+((c) / (d));
+((10) % (3));
+((signed int ) (x));
+((signed char (*)) (x));
+((signed short (***)) (x));
+((signed long ([])) (x));
+((signed int (*)) ((a)[((i) = (2))]));
+((signed long ((*)[(x)])) (x));
+((signed long ((*)[(10)])) (x));
+signed int (
+/*
+ * symbol: i
+ * type: pointer -> pointer -> pointer -> pointer -> pointer -> pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed char (
+/*
+ * symbol: p
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p);
+
+signed char (*(
+/*
+ * symbol: p
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p));
+
+}
+signed int ((
+/*
+ * symbol: f
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c)))
+{
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed int (
+/*
+ * symbol: j
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+j);
+
+}
+signed int ((
+/*
+ * symbol: f
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed int, name: x
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed int (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+x)))
+{
+signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c), (
+/*
+ * symbol: d
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+d);
+
+}
+signed int ((
+/*
+ * symbol: f
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: pointer -> signed char, name: p
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed char (*(
+/*
+ * symbol: p
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p))))
+{
+(i);
+}
+signed int ((
+/*
+ * symbol: f
+ * type: function (2 parameters) returning -> signed int
+ * parameters:
+ * type: signed int, name: a
+ * type: signed int, name: b
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed int (
+/*
+ * symbol: a
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+a), signed int (
+/*
+ * symbol: b
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+b)))
+{
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+}
+signed int ((
+/*
+ * symbol: a
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+a)(signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c)))
+{
+;
+}
+signed char (*((
+/*
+ * symbol: f
+ * type: function (1 parameter) returning -> pointer -> signed char
+ * parameters:
+ * type: pointer -> signed char, name: p
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed char (*(
+/*
+ * symbol: p
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p)))))
+{
+(i);
+}
+signed int ((
+/*
+ * symbol: f
+ * type: function (2 parameters) returning -> signed int
+ * parameters:
+ * type: signed int, name: a
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(signed int (
+/*
+ * symbol: a
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+a), signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+c)))
+{
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(void ));
+
+}
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: pointer -> signed int, name: a
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int ((a)[(10)])));
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: pointer -> pointer -> signed int, name: a
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int (*((a)[(10)]))));
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: pointer -> signed int, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int (*)));
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: pointer -> signed int, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int ([])));
+signed char ((
+/*
+ * symbol: g
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: pointer -> signed int, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int ([(10)])));
+signed char ((
+/*
+ * symbol: g
+ * type: function (2 parameters) returning -> signed char
+ * parameters:
+ * type: signed int, name: a
+ * type: signed int, name: b
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+g)(signed int (a), signed int (b)));
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+unsigned char (
+/*
+ * symbol: i
+ * type: unsigned char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned short (
+/*
+ * symbol: i
+ * type: unsigned short
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned short (
+/*
+ * symbol: i
+ * type: unsigned short
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned int (
+/*
+ * symbol: i
+ * type: unsigned int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned int (
+/*
+ * symbol: i
+ * type: unsigned int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned long (
+/*
+ * symbol: i
+ * type: unsigned long
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+unsigned long (
+/*
+ * symbol: i
+ * type: unsigned long
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed char (
+/*
+ * symbol: i
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed char (
+/*
+ * symbol: i
+ * type: signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed short (
+/*
+ * symbol: i
+ * type: signed short
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed short (
+/*
+ * symbol: i
+ * type: signed short
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed long (
+/*
+ * symbol: i
+ * type: signed long
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+signed long (
+/*
+ * symbol: i
+ * type: signed long
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+signed char ((
+/*
+ * symbol: a
+ * type: array (unspecified size) of -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+a)[((signed int (*)) (++(x)))]), ((
+/*
+ * symbol: b
+ * type: array (unspecified size) of -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+b)[((y) || (z))]);
+
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+((
+/*
+ * symbol: a
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+a) ? (b) : (c));
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i);
+
+goto 
+/*
+ * symbol: LAB
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+LAB;
+
+/*
+ * symbol: LAB
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+LAB : ((
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i) = (5));
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+while ( ((i) > (0)) ) ((i)--);
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+for ( ((i) = (1)); ((i) < (len)); ((i)++) ) ((j)++);
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+do ((i)++); while ( ((i) < (5)) );
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+break;
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+return ;
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+return (0);
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+goto 
+/*
+ * symbol: x
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+x;
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+break;
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+continue;
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+;
+}
+void ((
+/*
+ * symbol: pts
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+pts)(void ))
+{
+signed char (******(
+/*
+ * symbol: p
+ * type: pointer -> pointer -> pointer -> pointer -> pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p));
+
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(void ))
+{
+signed char (*(
+/*
+ * symbol: p
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p));
+
+((
+/*
+ * symbol: p
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+p) = ((signed int ([])) (arr)));
+((i) = ((signed int (*([]))) (j)));
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (2 parameters) returning -> pointer -> signed int
+ * parameters:
+ * type: signed int, name: argc
+ * type: pointer -> pointer -> signed char, name: argv
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(signed int (
+/*
+ * symbol: argc
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argc), signed char (*((
+/*
+ * symbol: argv
+ * type: pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argv)[]))))
+{
+return (0);
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (2 parameters) returning -> signed int
+ * parameters:
+ * type: signed int, name: argc
+ * type: pointer -> pointer -> signed char, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(signed int (
+/*
+ * symbol: argc
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argc), signed char (*([]))))
+{
+return (0);
+}
+signed int ((
+/*
+ * symbol: main
+ * type: function (2 parameters) returning -> signed int
+ * parameters:
+ * type: signed int, name: argc
+ * type: pointer -> pointer -> signed char, name: argv
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(signed int (
+/*
+ * symbol: argc
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argc), signed char (*((
+/*
+ * symbol: argv
+ * type: pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argv)[(MAX_ARGS)]))))
+{
+return (0);
+}
+void ((
+/*
+ * symbol: f
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+f)(void ))
+{
+if ( (x) ) if ( (y) ) (s1); else (s2);
+}
+void ((
+/*
+ * symbol: ws
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ws)(void ))
+{
+while ( (true) ) 
+{
+((play)());
+}
+
+}
+void ((
+/*
+ * symbol: ws
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ws)(void ))
+{
+while ( (true) ) ((play)());
+}
+void ((
+/*
+ * symbol: ds
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ds)(void ))
+{
+do (x); while ( ((i) > (0)) );
+}
+void ((
+/*
+ * symbol: fs
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fs)(void ))
+{
+for ( ((i) = (0)); ((i) < (MAX)); ((i)++) ) 
+{
+((j) = ((2) * (i)));
+((k) = ((3) * (i)));
+}
+
+}
