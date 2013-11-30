@@ -146,3 +146,23 @@ idls3)), (
  * overloading class: other names
  */
 idls4);
+void (
+/*
+ * symbol: err1
+ * type: void
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+err1);
+void (*(
+/*
+ * symbol: err2
+ * type: pointer -> void
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+err2));

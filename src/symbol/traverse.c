@@ -75,6 +75,7 @@ void traverse_node(Node *n, TraversalData *td) {
     SymbolTable *enclosing;
     Symbol* function_symbol;
     Symbol *id_symbol;
+    enum data_type decl_base_type;
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
@@ -106,8 +107,19 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             td->function_definition = FALSE;
             break;
+        case INIT_DECL_LIST:
+            /* first child: initialized declarator list */
+            /* save the base type of the decl */
+            /* we may encounter a function declarator whose parameters */
+            /* will overwrite the current base type, but we'll need it again */
+            decl_base_type = td->current_base_type;
+            traverse_node(n->children.child1, td);
+            /* second child: initialized declarator */
+            /* restore the base type of the decl */
+            td->current_base_type = decl_base_type;
+            traverse_node(n->children.child2, td);
+            break;
         case TYPE_SPECIFIER:
-            /* save in case multiple declarators follow this type */
             td->current_base_type = n->data.attributes[TYPE_SPEC];
             if (td->processing_parameters) {
                 push_parameter_type(td->current_param_list,
@@ -259,10 +271,9 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             traverse_node(n->children.child3, td);
             break;
-        case FUNCTION_DEF_SPEC:
         case DECL:
+        case FUNCTION_DEF_SPEC:
         case PTR_ABS_DECL:
-        case INIT_DECL_LIST:
         case DECL_OR_STMT_LIST:
         case LABELED_STATEMENT:
         case CAST_EXPR:

@@ -156,6 +156,41 @@ signed char ((
  * overloading class: other names
  */
 fn13)(signed int ((*([]))[])));
+void ((
+/*
+ * symbol: fn14
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: signed int, name: i
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn14)(signed int (i)));
+unsigned long ((
+/*
+ * symbol: fn15
+ * type: function (1 parameter) returning -> unsigned long
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn15)(void )), ((
+/*
+ * symbol: fn16
+ * type: function (1 parameter) returning -> unsigned long
+ * parameters:
+ * type: signed char, name: c
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn16)(signed char (c)));
 signed char (((
 /*
  * symbol: errfn1

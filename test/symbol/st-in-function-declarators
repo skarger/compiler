@@ -11,6 +11,8 @@ char fn10(int [][][]);
 char fn11(int [5]);
 char fn12(int (*[]));
 char fn13(int (*[])[]);
+void fn14(int i);
+unsigned long fn15(void), fn16(char c);
 char errfn1(int i)[10];
 char errfn2(int i)(int j);
 int errfn3(void)[10];

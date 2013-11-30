@@ -11,3 +11,5 @@ int *ip;
 unsigned short int *usp;
 int idls1, idls2;
 char *idls3, idls4;
+void err1;
+void *err2;

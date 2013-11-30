@@ -22,5 +22,18 @@ int fn2(int i2) {
     i1 -= i2;
     return i1;
 }
-   
+
+void fn3(void) {
+    int i1;
+    {
+        int i2;
+        {
+            int i3;
+            {
+                int i4;
+                i4 = i3 * i2 - i1++;
+            }
+        }
+    }
+}
 
