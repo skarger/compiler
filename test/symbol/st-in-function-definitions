@@ -32,6 +32,15 @@ char fn8(short c) {
         return 0;
 }
 
+long fn9(short c) {
+    LAB:
+        return 0;
+    {
+        BAL:
+            return 1;
+    }
+}
+
 int *errfn1(int []) {
     return 0;
 }

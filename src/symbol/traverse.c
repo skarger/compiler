@@ -79,6 +79,23 @@ void traverse_node(Node *n, TraversalData *td) {
     transition_scope(n, START, td->stc);
 
     switch (n->n_type) {
+        case IDENTIFIER_EXPR:
+            break;
+        case IDENTIFIER:
+            /*
+                if processing decl
+                    add to type tree
+                    check current symbol table for duplicate id
+                    if duplicated
+                        if it is a function def duplicating a func prototype or vice versa
+                            check that num params and param types match
+                        else
+                            error
+                else
+                    look for id in symbol table and enclosing
+                    if not found error
+            */
+            break;
         case FUNCTION_DEFINITION:
             td->function_definition = TRUE;
             /* create the function level symbol tables */
@@ -95,24 +112,13 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child2, td);
             td->function_definition = FALSE;
             break;
-        case FUNCTION_DEF_SPEC:
-            /* first child: type_specifier */
-            traverse_node(n->children.child1, td);
-            /* second child: declarator */
-            traverse_node(n->children.child2, td);
-            break;
-        case DECL:
-            /* first child: type_specifier */
-            traverse_node(n->children.child1, td);
-            /* second child: initialized declarator list */
-            traverse_node(n->children.child2, td);
-            break;
-        case INIT_DECL_LIST:
-            /* we will create a symbol for each declarator we recurse into */
-            /* child1 may itself be a list of declarators or just one */
-            /* child2 is a single declarator */
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
+        case TYPE_SPECIFIER:
+            /* save in case multiple declarators follow this type */
+            td->current_base_type = n->data.attributes[TYPE_SPEC];
+            if (td->processing_parameters) {
+                push_parameter_type(td->current_param_list,
+                                    n->data.attributes[TYPE_SPEC]);
+            }
             break;
         case SIMPLE_DECLARATOR:
             /* have an identifier */
@@ -143,8 +149,13 @@ void traverse_node(Node *n, TraversalData *td) {
             if (td->processing_parameters) {
                 handle_symbol_error(STE_FUNCTION_POINTER, "function parameter");
             } else {
-                /* save the nascent function symbol then dive into parameters */
                 create_symbol_if_necessary(td);
+                if (symbol_outer_type(td->current_symbol) == ARRAY) {
+                    handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
+                } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+                    handle_symbol_error(STE_FUNC_RET_FUNC, "function decl");
+                }
+                /* save the nascent function symbol then dive into parameters */
                 function_symbol = td->current_symbol;
                 reset_current_symbol(td);
 
@@ -152,20 +163,15 @@ void traverse_node(Node *n, TraversalData *td) {
                 td->processing_parameters = TRUE;
                 traverse_node(n->children.child2, td);
                 td->processing_parameters = FALSE;
-                td->current_symbol = function_symbol;
-
-                /* first child: direct declarator */
                 if (td->function_definition) {
                     /* return back to the file level ST to process it */
                     /* only for func defn since prototype has no body ST */
                     enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
                     set_current_st(enclosing, td->stc);
                 }
-                if (symbol_outer_type(td->current_symbol) == ARRAY) {
-                    handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
-                } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-                    handle_symbol_error(STE_FUNC_RET_FUNC, "function decl");
-                }
+                /* first child: direct declarator */
+                /* resurrect the function symbol */
+                td->current_symbol = function_symbol;
                 push_symbol_type(td->current_symbol, FUNCTION);
                 set_symbol_func_params(td->current_symbol,
                                         td->current_param_list);
@@ -176,7 +182,7 @@ void traverse_node(Node *n, TraversalData *td) {
             break;
         case PARAMETER_LIST:
             /* second child: parameter decl */
-            /* process the second child first because we can push each */
+            /* process the second child first so that we can push each */
             /* one onto the front and have them in order at the end */
             traverse_node(n->children.child2, td);
             /* first child: parameter list or parameter_decl */
@@ -189,26 +195,24 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             /* declarator */
             traverse_node(n->children.child2, td);
+            /* this reset is redundant unless we had an abstract declarator */
             reset_current_symbol(td);
             break;
-        case TYPE_SPECIFIER:
-            /* save in case multiple declarators follow this type */
-            td->current_base_type = n->data.attributes[TYPE_SPEC];
-            if (td->processing_parameters) {
-                push_parameter_type(td->current_param_list,
-                                    n->data.attributes[TYPE_SPEC]);
-            }
-            break;
         case COMPOUND_STATEMENT:
+            /* verify that we have an inner block to avoid creating an extra */
+            /* ST for function blocks after we created it for the parameters */
             if (is_inner_block(td->stc->current_scope)) {
-                SymbolTable *inner_block_st =
                 new_current_st(td->stc->current_scope, OTHER_NAMES, td->stc);
             }
             traverse_node(n->children.child1, td);
+            /* return to the STs at the enclosing scope */
             enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
             set_current_st(enclosing, td->stc);
-            enclosing = td->stc->current_st[STATEMENT_LABELS]->enclosing;
-            set_current_st(enclosing, td->stc);
+            /* if we are not at an inner block then we are exiting a function */
+            if (!is_inner_block(td->stc->current_scope)) {
+                enclosing = td->stc->current_st[STATEMENT_LABELS]->enclosing;
+                set_current_st(enclosing, td->stc);
+            }
             break;
         case ARRAY_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -238,10 +242,6 @@ void traverse_node(Node *n, TraversalData *td) {
             create_symbol_if_necessary(td);
             traverse_node(n->children.child1, td);
             break;
-        case PTR_ABS_DECL:
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
-            break;
         case DIR_ABS_DECL:
             /* first child: direct_abstract_declarator */
             traverse_node(n->children.child1, td);
@@ -250,7 +250,6 @@ void traverse_node(Node *n, TraversalData *td) {
                 push_parameter_type(td->current_param_list, POINTER);
             }
             /* second child: constant_expr */
-            /* TODO: apply this array size somewhere */
             array_size = resolve_array_size(td, n->children.child2);
             break;
         case NAMED_LABEL:
@@ -260,18 +259,32 @@ void traverse_node(Node *n, TraversalData *td) {
             record_current_symbol(td, n);
             reset_current_symbol(td);
             break;
-        case CAST_EXPR:
-        case TYPE_NAME:
+        /* nodes we simply pass through with respect to symbol table */
+        case CONDITIONAL_EXPR:
+            traverse_node(n->children.child1, td);
+            traverse_node(n->children.child2, td);
+            traverse_node(n->children.child3, td);
+            break;
+        case FUNCTION_DEF_SPEC:
+        case DECL:
+        case PTR_ABS_DECL:
+        case INIT_DECL_LIST:
         case DECL_OR_STMT_LIST:
         case LABELED_STATEMENT:
+        case CAST_EXPR:
+        case TYPE_NAME:
+        case BINARY_EXPR:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
+        case POSTFIX_EXPR:
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;
         case EXPRESSION_STATEMENT:
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
             traverse_node(n->children.child1, td);
             break;
         case IF_THEN:
@@ -286,39 +299,6 @@ void traverse_node(Node *n, TraversalData *td) {
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
-            break;
-        case CONDITIONAL_EXPR:
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
-            traverse_node(n->children.child3, td);
-            break;
-        case BINARY_EXPR:
-            traverse_node(n->children.child1, td);
-            traverse_node(n->children.child2, td);
-            break;
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-            traverse_node(n->children.child1, td);
-            break;
-        case POSTFIX_EXPR:
-            traverse_node(n->children.child1, td);
-            break;
-        case IDENTIFIER_EXPR:
-            break;
-        case IDENTIFIER:
-            /*
-                if processing decl
-                    add to type tree
-                    check current symbol table for duplicate id
-                    if duplicated
-                        if it is a function def duplicating a func prototype or vice versa
-                            check that num params and param types match
-                        else
-                            error
-                else
-                    look for id in symbol table and enclosing
-                    if not found error
-            */
             break;
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
