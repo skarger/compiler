@@ -27,9 +27,7 @@ int main(int argc, char *argv[]) {
     yyin = input;
 
     /* do the work */
-
     rv = yyparse();
-
 
     /* cleanup */
     if (output != stdout) {

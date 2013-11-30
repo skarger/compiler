@@ -1,10 +1,11 @@
-./symbol-main test/symbol/st-input test/symbol/st-output
-diff test/symbol/st-expected test/symbol/st-output
+#!/bin/bash
+
+./symbol-main test/symbol/st-in-array-declarators test/symbol/st-output
+diff test/symbol/st-exp-array-declarators test/symbol/st-output
 
 if [ $? -eq 0 ]
 then
-    echo "TESTS PASS"
+    echo "PASS: ARRAY DECLARATORS"
 else
-    echo "TESTS FAIL"
+    echo " FAIL: ARRAY DECLARATORS"
 fi
-

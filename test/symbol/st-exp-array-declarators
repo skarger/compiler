@@ -1,0 +1,502 @@
+signed int ((
+/*
+ * symbol: a
+ * type: array (5 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+a)[(5)]);
+signed int (((
+/*
+ * symbol: _2dim
+ * type: array (5 elements) of -> array (10 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+_2dim)[(5)])[(10)]);
+signed char (*((
+/*
+ * symbol: cpa
+ * type: array (3 elements) of -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+cpa)[(3)]));
+signed int ((
+/*
+ * symbol: tert
+ * type: array (20 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+tert)[((1) ? (20) : (10))]);
+signed int ((
+/*
+ * symbol: terf
+ * type: array (10 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+terf)[((0) ? (20) : (10))]);
+signed int ((
+/*
+ * symbol: ort
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ort)[((0) || (1))]);
+signed int ((
+/*
+ * symbol: andt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+andt)[((1) && (1))]);
+signed int ((
+/*
+ * symbol: orandt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+orandt)[((0) || ((1) && (1)))]);
+signed int ((
+/*
+ * symbol: bwot
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwot)[((1) | (0))]);
+signed int ((
+/*
+ * symbol: bwof
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwof)[((0) | (0))]);
+signed int ((
+/*
+ * symbol: bwxort
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwxort)[((1) ^ (0))]);
+signed int ((
+/*
+ * symbol: bwxorf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwxorf)[((1) ^ (1))]);
+signed int ((
+/*
+ * symbol: bwat
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwat)[((1) | (1))]);
+signed int ((
+/*
+ * symbol: bwaf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwaf)[((1) & (0))]);
+signed int ((
+/*
+ * symbol: eqt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+eqt)[((1) == (1))]);
+signed int ((
+/*
+ * symbol: eqf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+eqf)[((1) == (0))]);
+signed int ((
+/*
+ * symbol: neqt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+neqt)[((1) != (0))]);
+signed int ((
+/*
+ * symbol: neqf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+neqf)[((1) != (1))]);
+signed int ((
+/*
+ * symbol: ltt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ltt)[((1) < (2))]);
+signed int ((
+/*
+ * symbol: ltf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ltf)[((1) < (0))]);
+signed int ((
+/*
+ * symbol: ltet
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ltet)[((1) <= (1))]);
+signed int ((
+/*
+ * symbol: ltef
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ltef)[((1) <= (0))]);
+signed int ((
+/*
+ * symbol: gtt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+gtt)[((2) > (1))]);
+signed int ((
+/*
+ * symbol: gtf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+gtf)[((0) > (1))]);
+signed int ((
+/*
+ * symbol: gtet
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+gtet)[((1) >= (1))]);
+signed int ((
+/*
+ * symbol: gtef
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+gtef)[((0) >= (1))]);
+signed int ((
+/*
+ * symbol: blst
+ * type: array (2 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+blst)[((1) << (1))]);
+signed int ((
+/*
+ * symbol: blsf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+blsf)[((0) << (1))]);
+signed int ((
+/*
+ * symbol: brst
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+brst)[((2) >> (1))]);
+signed int ((
+/*
+ * symbol: brsf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+brsf)[((1) >> (1))]);
+signed int ((
+/*
+ * symbol: plt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+plt)[((1) + (0))]);
+signed int ((
+/*
+ * symbol: plf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+plf)[((0) + (0))]);
+signed int ((
+/*
+ * symbol: mit
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+mit)[((2) - (1))]);
+signed int ((
+/*
+ * symbol: mif
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+mif)[((1) - (1))]);
+signed int ((
+/*
+ * symbol: mut
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+mut)[((1) * (1))]);
+signed int ((
+/*
+ * symbol: muf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+muf)[((1) * (0))]);
+signed int ((
+/*
+ * symbol: dit
+ * type: array (2 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dit)[((2) / (1))]);
+signed int ((
+/*
+ * symbol: dif
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dif)[((1) / (2))]);
+signed int ((
+/*
+ * symbol: remt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+remt)[((10) % (3))]);
+signed int ((
+/*
+ * symbol: remf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+remf)[((9) % (3))]);
+signed int ((
+/*
+ * symbol: largearr1
+ * type: array (2147483647 elements) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+largearr1)[(2147483647)]);
+signed int ((
+/*
+ * symbol: largearr2
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+largearr2)[(-2147483648)]);
+signed int ((
+/*
+ * symbol: umi
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+umi)[(-(1))]);
+signed int ((
+/*
+ * symbol: upl
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+upl)[(+(1))]);
+signed int ((
+/*
+ * symbol: lognegt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+lognegt)[(!(0))]);
+signed int ((
+/*
+ * symbol: lognegf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+lognegf)[(!(1))]);
+signed int ((
+/*
+ * symbol: bwnt
+ * type: array (1 element) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwnt)[(~(-(2)))]);
+signed int ((
+/*
+ * symbol: bwnf
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+bwnf)[(~(-(1)))]);
+signed int ((
+/*
+ * symbol: stre
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+stre)[("abc")]);
+signed int (((fne)[(10)])(signed char (c)));
+signed int ((
+/*
+ * symbol: empty
+ * type: array (unspecified size) of -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+empty)[]);
+signed int (((aoff)[(10)])(void ));

@@ -1,0 +1,62 @@
+int a[5];
+int _2dim[5][10];
+char *cpa[3];
+int tert[1 ? 20 : 10];
+int terf[0 ? 20 : 10];
+int ort[0 || 1];
+int andt[1 && 1];
+int orandt[0 || 1 && 1];
+int bwot[1 | 0];
+int bwof[0 | 0];
+int bwxort[1 ^ 0];
+int bwxorf[1 ^ 1];
+int bwat[1 | 1];
+int bwaf[1 & 0];
+int eqt[1 == 1];
+int eqf[1 == 0];
+int neqt[1 != 0];
+int neqf[1 != 1];
+int ltt[1 < 2];
+int ltf[1 < 0];
+int ltet[1 <= 1];
+int ltef[1 <= 0];
+int gtt[2 > 1];
+int gtf[0 > 1];
+int gtet[1 >= 1];
+int gtef[0 >= 1];
+int blst[1 << 1];
+int blsf[0 << 1];
+int brst[2 >> 1];
+int brsf[1 >> 1];
+int plt[1 + 0];
+int plf[0 + 0];
+int mit[2 - 1];
+int mif[1 - 1];
+int mut[1 * 1];
+int muf[1 * 0];
+int dit[2 / 1];
+int dif[1 / 2];
+int remt[10 % 3];
+int remf[9 % 3];
+int largearr1[2147483647];
+int largearr2[2147483648];
+int umi[-1];
+int upl[+1];
+int lognegt[!0];
+int lognegf[!1];
+int bwnt[~-2];
+int bwnf[~-1];
+int stre["abc"];
+int fne[10](char c);
+int empty[];
+int aoff[10](void);
+
+/*
+int pre[++y];
+int post[y++];
+
+int subs[arr[1]];
+int fc[f(1)];
+
+int ide[y];
+*/

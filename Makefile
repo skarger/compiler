@@ -54,8 +54,15 @@ y.tab.o :
 parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
-parser-main : parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o scope-fsm.o
-	$(CC) parser-main.o y.tab.o traverse.o symbol-utils.o utilities.o scope-fsm.o -o $@
+parser-main : parser-main.o y.tab.o utilities.o traverse.o \
+symbol-utils.o scope-fsm.o
+	$(CC) parser-main.o y.tab.o utilities.o traverse.o \
+symbol-utils.o scope-fsm.o -o $@
+
+symbol-main : symbol-main.o y.tab.o utilities.o traverse.o \
+symbol-utils.o scope-fsm.o
+	$(CC) symbol-main.o y.tab.o utilities.o traverse.o \
+symbol-utils.o scope-fsm.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
@@ -82,9 +89,6 @@ test-symbol-output : test/symbol/test-symbol-output parser
 
 symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c
-
-symbol-main : symbol-main.o y.tab.o traverse.o symbol-utils.o utilities.o
-	$(CC) symbol-main.o y.tab.o traverse.o symbol-utils.o utilities.o -o $@
 
 test-symtab-output : symbol-main
 	./test/symbol/test-symtab-output
