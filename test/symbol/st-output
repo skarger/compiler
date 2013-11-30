@@ -396,3 +396,90 @@ i1)++)));
 }
 
 }
+unsigned short ((
+/*
+ * symbol: fn4
+ * type: function (1 parameter) returning -> unsigned short
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn4)(void ))
+{
+return ((unsigned short ) (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+x));
+}
+signed char ((
+/*
+ * symbol: fn5
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: signed int, name: x
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn5)(signed int (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+x)))
+{
+return (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+x);
+}
+signed int ((
+/*
+ * symbol: errfn1
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn1)(void ))
+{
+return (i);
+}
+signed int ((
+/*
+ * symbol: errfn2
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn2)(void ))
+{
+goto LAB;
+}

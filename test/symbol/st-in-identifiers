@@ -6,7 +6,8 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-int x;
+int x; /* file scope identifier */
+
 long fn1(int y) {
     return x + y;
 }
@@ -37,3 +38,20 @@ void fn3(void) {
     }
 }
 
+unsigned short fn4(void) {
+    /* make sure that x declared up above is still visible */
+    return (unsigned short) x;
+}
+
+char fn5(int x) {
+    /* this x should be the parameter, not the file level version */
+    return x;
+}
+
+int errfn1(void) {
+	return i;
+}
+
+int errfn2(void) {
+    goto LAB;
+}
