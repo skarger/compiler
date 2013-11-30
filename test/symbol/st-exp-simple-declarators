@@ -108,3 +108,41 @@ unsigned short (*(
  * overloading class: other names
  */
 usp));
+signed int (
+/*
+ * symbol: idls1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+idls1), (
+/*
+ * symbol: idls2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+idls2);
+signed char (*(
+/*
+ * symbol: idls3
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+idls3)), (
+/*
+ * symbol: idls4
+ * type: signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+idls4);

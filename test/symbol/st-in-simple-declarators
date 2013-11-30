@@ -9,3 +9,5 @@ char *cp;
 char *******crazyp;
 int *ip;
 unsigned short int *usp;
+int idls1, idls2;
+char *idls3, idls4;
