@@ -49,7 +49,7 @@ void print_symbol_param_list(FILE *out, Symbol *s);
 
 /* symbol creation during traversal */
 void create_symbol_if_necessary(TraversalData *td);
-void reset_current_symbol();
+void reset_current_symbol(TraversalData *td);
 void record_current_symbol(TraversalData *td, Node *n);
 void validate_symbol(Symbol *s, TraversalData *td);
 void validate_function_symbol(Symbol *s, TraversalData *td);

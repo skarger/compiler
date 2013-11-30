@@ -1,0 +1,110 @@
+signed int (
+/*
+ * symbol: i
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i);
+signed long (
+/*
+ * symbol: l
+ * type: signed long
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+l);
+signed short (
+/*
+ * symbol: s
+ * type: signed short
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+s);
+unsigned int (
+/*
+ * symbol: ui
+ * type: unsigned int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ui);
+unsigned long (
+/*
+ * symbol: ul
+ * type: unsigned long
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ul);
+unsigned short (
+/*
+ * symbol: us
+ * type: unsigned short
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+us);
+signed char (
+/*
+ * symbol: c
+ * type: signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+c);
+signed char (*(
+/*
+ * symbol: cp
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+cp));
+signed char (*******(
+/*
+ * symbol: crazyp
+ * type: pointer -> pointer -> pointer -> pointer -> pointer -> pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+crazyp));
+signed int (*(
+/*
+ * symbol: ip
+ * type: pointer -> signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+ip));
+unsigned short (*(
+/*
+ * symbol: usp
+ * type: pointer -> unsigned short
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+usp));

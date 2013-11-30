@@ -73,6 +73,7 @@ void traverse_node(Node *n, TraversalData *td) {
 
     unsigned long array_size;
     SymbolTable *enclosing;
+    Symbol* function_symbol;
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
@@ -142,18 +143,24 @@ void traverse_node(Node *n, TraversalData *td) {
             if (td->processing_parameters) {
                 handle_symbol_error(STE_FUNCTION_POINTER, "function parameter");
             } else {
+                /* save the nascent function symbol then dive into parameters */
+                create_symbol_if_necessary(td);
+                function_symbol = td->current_symbol;
+                reset_current_symbol(td);
+
                 /* second child: parameters */
                 td->processing_parameters = TRUE;
                 traverse_node(n->children.child2, td);
                 td->processing_parameters = FALSE;
+                td->current_symbol = function_symbol;
+
                 /* first child: direct declarator */
                 if (td->function_definition) {
                     /* return back to the file level ST to process it */
-                    /* only for func defintion since prototype has no body ST */ 
+                    /* only for func defn since prototype has no body ST */
                     enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
                     set_current_st(enclosing, td->stc);
                 }
-                create_symbol_if_necessary(td);
                 if (symbol_outer_type(td->current_symbol) == ARRAY) {
                     handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
                 } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
@@ -176,10 +183,8 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             break;
         case PARAMETER_DECL:
-            if (td->processing_parameters) {
-                td->current_param_list =
-                    push_function_parameter(td->current_param_list);
-            }
+            td->current_param_list =
+                push_function_parameter(td->current_param_list);
             /* type specifier */
             traverse_node(n->children.child1, td);
             /* declarator */
@@ -231,7 +236,6 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_node(n->children.child1, td);
             break;
         case PTR_ABS_DECL:
-            create_symbol_if_necessary(td);
             traverse_node(n->children.child1, td);
             traverse_node(n->children.child2, td);
             break;

@@ -1,5 +1,16 @@
 #!/bin/bash
 
+./symbol-main test/symbol/st-in-simple-declarators test/symbol/st-output
+diff test/symbol/st-exp-simple-declarators test/symbol/st-output
+
+if [ $? -eq 0 ]
+then
+    echo "PASS: SIMPLE DECLARATORS"
+else
+    echo " FAIL: SIMPLE DECLARATORS"
+fi
+
+
 ./symbol-main test/symbol/st-in-array-declarators test/symbol/st-output
 diff test/symbol/st-exp-array-declarators test/symbol/st-output
 
@@ -8,4 +19,15 @@ then
     echo "PASS: ARRAY DECLARATORS"
 else
     echo " FAIL: ARRAY DECLARATORS"
+fi
+
+
+./symbol-main test/symbol/st-in-function-declarators test/symbol/st-output
+diff test/symbol/st-exp-function-declarators test/symbol/st-output
+
+if [ $? -eq 0 ]
+then
+    echo "PASS: FUNCTION DECLARATORS"
+else
+    echo " FAIL: FUNCTION DECLARATORS"
 fi

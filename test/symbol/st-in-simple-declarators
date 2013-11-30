@@ -1,0 +1,11 @@
+int i;
+long l;
+short s;
+unsigned ui;
+unsigned long int ul;
+unsigned short us;
+char c;
+char *cp;
+char *******crazyp;
+int *ip;
+unsigned short int *usp;
