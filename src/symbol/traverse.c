@@ -43,7 +43,7 @@ void initialize_traversal_data(TraversalData *td) {
     td->current_base_type = NO_DATA_TYPE;
     td->current_symbol = NULL;
     td->current_param_list = NULL;
-    td->dummy_prototype_parameter = create_symbol();
+    td->dummy_symbol = create_symbol();
     td->processing_parameters = FALSE;
     td->function_definition = FALSE;
     td->function_prototype = FALSE;
@@ -74,27 +74,21 @@ void traverse_node(Node *n, TraversalData *td) {
     unsigned long array_size;
     SymbolTable *enclosing;
     Symbol* function_symbol;
+    Symbol *id_symbol;
 
     /* this node may or may not imply a scope transition */
     transition_scope(n, START, td->stc);
 
     switch (n->n_type) {
-        case IDENTIFIER_EXPR:
-            break;
         case IDENTIFIER:
-            /*
-                if processing decl
-                    add to type tree
-                    check current symbol table for duplicate id
-                    if duplicated
-                        if it is a function def duplicating a func prototype or vice versa
-                            check that num params and param types match
-                        else
-                            error
-                else
-                    look for id in symbol table and enclosing
-                    if not found error
-            */
+        case IDENTIFIER_EXPR:
+            id_symbol = find_symbol(get_current_st(td->stc), n->data.str);
+            if (id_symbol != NULL) {
+                set_symbol_table_entry(n, id_symbol);
+            } else {
+                handle_symbol_error(STE_ID_UNDECLARED, n->data.str);
+                set_symbol_table_entry(n, td->dummy_symbol);
+            }
             break;
         case FUNCTION_DEFINITION:
             td->function_definition = TRUE;
@@ -631,7 +625,7 @@ void record_current_symbol(TraversalData *td, Node *n) {
         append_function_prototype(td->stc->function_prototypes, s);
         set_symbol_table_entry(n, s);
     } else {
-        set_symbol_table_entry(n, td->dummy_prototype_parameter);
+        set_symbol_table_entry(n, td->dummy_symbol);
     }
 }
 
@@ -673,7 +667,7 @@ void print_symbol_param_list(FILE *out, Symbol *s) {
 }
 
 void print_symbol(FILE *out, Symbol *s) {
-    if (s == td->dummy_prototype_parameter) {
+    if (s == td->dummy_symbol) {
         return;
     }
     fprintf(out, "\n/*\n");

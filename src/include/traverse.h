@@ -25,7 +25,7 @@ struct TraversalData {
     enum data_type current_base_type;
     FunctionParameter *current_param_list;
     Symbol *current_symbol;
-    Symbol *dummy_prototype_parameter;
+    Symbol *dummy_symbol;
     enum Boolean processing_parameters;
     enum Boolean function_definition;
     enum Boolean function_prototype;

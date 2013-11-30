@@ -41,7 +41,8 @@ enum symbol_error {
     STE_NOT_FUNCTION = -13,
     STE_PROTO_MISMATCH = -14,
     STE_FUNC_DECL_SCOPE = -15,
-    STE_ABS_DECL_FUNC = -16
+    STE_ABS_DECL_FUNC = -16,
+    STE_ID_UNDECLARED = -17
 };
 
 

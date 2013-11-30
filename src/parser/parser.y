@@ -1029,6 +1029,7 @@ int parenthesize(enum data_type nt) {
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
 
+        /* abstract declarator */
         case PTR_ABS_DECL:
         case DIR_ABS_DECL:
 

@@ -543,6 +543,9 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_ABS_DECL_FUNC:
             error(0, 0, "error: %s: function parameters must be named", data);
             return;
+        case STE_ID_UNDECLARED:
+            error(0, 0, "error: %s undeclared", data);
+            return;
         default:
             return;
     }
