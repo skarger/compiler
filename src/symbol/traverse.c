@@ -235,6 +235,8 @@ void traverse_node(Node *n, TraversalData *td) {
                 /* intentionally converting type from ARRAY to POINTER */
                 push_parameter_type(td->current_param_list, POINTER);
                 push_symbol_type(td->current_symbol, POINTER);
+                /* array size is irrelevant but it may have nested symbols */
+                array_size = resolve_array_size(td, n->children.child2);
             } else {
                 push_symbol_type(td->current_symbol, ARRAY);
                 /* second child: constant expr */
