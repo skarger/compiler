@@ -5,7 +5,7 @@
  * CSCI-E95 C language scanner.
  */
 #include <sys/types.h>
-#include "literal.h"
+#include "utilities.h"
 
 
 #ifndef LEXER_H

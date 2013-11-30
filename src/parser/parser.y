@@ -69,10 +69,8 @@ function_def_specifier : declarator
         }
     | type_specifier declarator
         {
-            /* basic checks, not comprehensive */
             Node *n = $2;
-            if (n->n_type != FUNCTION_DECLARATOR &&
-                n->n_type != POINTER_DECLARATOR) {
+            if (!n->is_func_decl) {
                 yyerror("invalid function declarator"); yyerrok;
             }
             $$ = create_node(FUNCTION_DEF_SPEC, $1, $2);
@@ -84,9 +82,9 @@ function_def_specifier : declarator
 /* decl and close children */
 decl : type_specifier initialized_declarator_list SEMICOLON
         {
-            Node *n = $1;
-            if (n->data.attributes[TYPE_SPEC] == VOID) {
-                { yyerror("void declaration not permitted"); yyerrok; }
+            Node *n1 = $1, *n2 = $2;
+            if (n1->data.attributes[TYPE_SPEC] == VOID && !(n2->is_func_decl)) {
+                yyerror("void declaration not permitted"); yyerrok;
             }
             $$ = create_node(DECL, $1, $2);
         }
@@ -94,7 +92,12 @@ decl : type_specifier initialized_declarator_list SEMICOLON
 
 initialized_declarator_list : initialized_declarator
     | initialized_declarator_list COMMA initialized_declarator
-        { $$ = create_node(INIT_DECL_LIST, $1, $3); }
+        {
+            Node *n = create_node(INIT_DECL_LIST, $1, $3);
+            Node *n1 = $1, *n3 = $3;
+            n->is_func_decl = n1->is_func_decl && n3->is_func_decl;
+            $$ = n;
+        }
     ;
 
 /* initializer productions created for error checking */
@@ -119,7 +122,14 @@ declarator : pointer_declarator
     ;
 
 pointer_declarator : pointer direct_declarator
-        { $$ = create_node(POINTER_DECLARATOR, $1, $2);  }
+        {
+            Node *n = create_node(POINTER_DECLARATOR, $1, $2);
+            Node *n2 = $2;
+            if (n2->is_func_decl) {
+                n->is_func_decl = TRUE;
+            }
+            $$ = n;
+        }
     ;
 
 pointer : ASTERISK
@@ -131,6 +141,11 @@ pointer : ASTERISK
 direct_declarator : simple_declarator
     | parenthesized_declarator
     | function_declarator
+        {
+            Node *n = $1;
+            n->is_func_decl = TRUE;
+            $$ = n;
+        }
     | array_declarator
     ;
 
@@ -809,6 +824,7 @@ void *construct_node(enum data_type nt) {
     Node *n;
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
+    n->is_func_decl = FALSE;
     n->st_entry = NULL;
     return n;
 }

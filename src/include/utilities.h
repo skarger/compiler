@@ -10,6 +10,12 @@
 /* conveniently our 4 byte long implies 10 digits max as well 4,294,967,295 */
 #define MAX_MESSAGE_DIGITS 10
 
+enum Boolean {
+    FALSE = 0,
+    TRUE = 1
+};
+typedef enum Boolean boolean;
+
 enum util_error {
     UE_SUCCESS = 0,
     UE_MALLOC = -1,

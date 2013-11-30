@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "symbol.h"
+#include "utilities.h"
 
 /* contains data definitions for parse tree nodes. */
 #ifndef PARSE_TREE_H
@@ -112,6 +113,7 @@ union NodeData {
  */
 struct Node {
     enum data_type n_type;  /* node type */
+    boolean is_func_decl;
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
     struct {
