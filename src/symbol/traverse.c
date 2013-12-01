@@ -24,8 +24,8 @@ Boolean invalid_operand(long operand);
  * start_traversal
  * Purpose: Kick off traversal of parse tree. Meant for parser to call.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
- *          the children of np.
+ *  n       Node * The node to start traversing from. Recursively traverses
+ *          the children of n.
  * Returns: None
  * Side-effects: Allocates heap memory
  */
@@ -58,8 +58,8 @@ void initialize_traversal_data(TraversalData *td) {
  * Purpose: Recursively traverse nodes of parse tree.
  *          Perform processing at nodes, e.g. update symbol table.
  * Parameters:
- *  np      Node * The node to start traversing from. Recursively traverses
- *          the children of np.
+ *  n       Node * The node to start traversing from. Recursively traverses
+ *          the children of n.
  *  td      TraversalData * symbol table related data
             to carry through traversals
  * Returns: None
@@ -339,13 +339,12 @@ void traverse_node(Node *n, TraversalData *td) {
  * Purpose: Helper function for traverse_node.
  *          Traverses iterative statements.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
- *          the children of np.
+ *  n       Node * The node to start traversing from. Recursively traverses
+ *          the children of n.
  * Returns: None
  * Side-effects: None
  */
-void traverse_iterative_statement(void *np, TraversalData *td) {
-    Node *n = (Node *) np;
+void traverse_iterative_statement(Node *n, TraversalData *td) {
     if (n == NULL) {
         return;
     }
@@ -372,13 +371,12 @@ void traverse_iterative_statement(void *np, TraversalData *td) {
  * Purpose: Helper function for traverse_node.
  *          Traverses conditional statements.
  * Parameters:
- *  np      void * The node to start traversing from. Recursively traverses
- *          the children of np.
+ *  n       Node * The node to start traversing from. Recursively traverses
+ *          the children of n.
  * Returns: None
  * Side-effects: None
  */
-void traverse_conditional_statement(void *np, TraversalData *td) {
-    Node *n = (Node *) np;
+void traverse_conditional_statement(Node *n, TraversalData *td) {
     if (n == NULL) {
         return;
     }

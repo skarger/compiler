@@ -37,9 +37,9 @@ typedef struct TraversalData TraversalData;
 /* tree traversal */
 void start_traversal(Node *n);
 void traverse_node(Node *n, TraversalData *td);
-void traverse_direct_abstract_declarator(void *np, TraversalData *td);
-void traverse_conditional_statement(void *np, TraversalData *td);
-void traverse_iterative_statement(void *np, TraversalData *td);
+void traverse_direct_abstract_declarator(Node *n, TraversalData *td);
+void traverse_conditional_statement(Node *n, TraversalData *td);
+void traverse_iterative_statement(Node *n, TraversalData *td);
 void traverse_pointers(Node *np, TraversalData *td);
 unsigned long resolve_constant_expr(Node *n);
 
