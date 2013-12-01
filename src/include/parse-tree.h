@@ -113,7 +113,7 @@ union NodeData {
  */
 struct Node {
     enum data_type n_type;  /* node type */
-    boolean is_func_decl;
+    Boolean is_func_decl;
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
     struct {

@@ -14,7 +14,7 @@ enum Boolean {
     FALSE = 0,
     TRUE = 1
 };
-typedef enum Boolean boolean;
+typedef enum Boolean Boolean;
 
 enum util_error {
     UE_SUCCESS = 0,

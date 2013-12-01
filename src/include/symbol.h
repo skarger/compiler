@@ -58,7 +58,7 @@ struct Symbol {
     char *name;          /* the name of the symbol */
     TypeNode *type_tree;
     FunctionParameter *param_list;      /* function parameter list */
-    boolean label_defined;              /* statement label flag */
+    Boolean label_defined;              /* statement label flag */
     struct Symbol *next;                /* adjacent item in symbol table */
     struct SymbolTable *symbol_table;   /* the symbol's symbol table */
 };

@@ -225,11 +225,11 @@ char *get_symbol_name(Symbol *s) {
     return s->name;
 }
 
-void set_label_defined(Symbol *s, boolean b) {
+void set_label_defined(Symbol *s, Boolean b) {
     s->label_defined = b;
 }
 
-boolean label_is_defined(Symbol *s) {
+Boolean label_is_defined(Symbol *s) {
     return s->label_defined;
 }
 
