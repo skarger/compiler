@@ -46,62 +46,64 @@ enum symbol_error {
     STE_LAB_UNDEFINED = -18
 };
 
-
-/* symbol table management functions */
+/* symbol table container */
 SymbolTableContainer *create_st_container();
-SymbolTable *create_symbol_table(int scope, int overloading_class);
+void initialize_st_container(SymbolTableContainer *stc);
 SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc);
-SymbolTable *create_function_prototypes();
-void set_st_symbols(SymbolTable *st, Symbol *s);
-Symbol *st_symbols(SymbolTable *st);
 void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
 SymbolTable *get_current_st(SymbolTableContainer *stc);
+
+/* symbol table */
+SymbolTable *create_symbol_table(int scope, int overloading_class);
+void initialize_st(SymbolTable *st, int scope, int overloading_class);
+SymbolTable *create_function_prototypes();
+void append_symbol(SymbolTable *st, Symbol *s);
+void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev);
+Symbol *st_symbols(SymbolTable *st);
 int st_scope(SymbolTable *st);
 char *st_scope_name(SymbolTable *st);
 int st_overloading_class(SymbolTable *st);
 char *st_overloading_class_name(SymbolTable *st);
-
-Symbol *create_symbol();
-Symbol *create_scalar_symbol();
-Symbol *create_function_symbol();
-Symbol *create_array_symbol();
-int get_function_parameter_count(Symbol *s);
-enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
-void append_symbol(SymbolTable *st, Symbol *s);
-void set_symbol_name(Symbol *s, char *name);
-char *get_symbol_name(Symbol *s);
-SymbolTable *get_symbol_table(Symbol *s);
-char *symbol_type_string(Symbol *s);
-enum Boolean all_array_bounds_specified(Symbol *s);
-int symbol_outer_type(Symbol *s);
-void set_symbol_func_params(Symbol *s, FunctionParameter *fp);
 Symbol *find_prototype(SymbolTable *prototypes, char *name);
 Symbol *find_symbol(SymbolTable *st, char *name);
+
+/* symbol */
+Symbol *create_symbol();
+void push_symbol_type(Symbol *s, int t);
+int symbol_outer_type(Symbol *s);
+void set_symbol_name(Symbol *s, char *name);
+char *get_symbol_name(Symbol *s);
 void set_label_defined(Symbol *s, boolean b);
 boolean label_is_defined(Symbol *s);
+void set_symbol_func_params(Symbol *s, FunctionParameter *fp);
+SymbolTable *get_symbol_table(Symbol *s);
+FunctionParameter *first_parameter(Symbol *);
+void set_symbol_array_size(Symbol *s, int n);
+enum Boolean all_array_bounds_specified(Symbol *s);
+enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
+char *symbol_type_string(Symbol *s);
 
-/* helpers */
+/* function parameter */
+FunctionParameter *create_function_parameter();
+FunctionParameter *push_function_parameter(FunctionParameter *param_list);
+void set_parameter_name(FunctionParameter *fp, char *pname);
+char *get_parameter_name(FunctionParameter *fp);
+void push_parameter_type(FunctionParameter *fp, int t);
+char *parameter_type_string(FunctionParameter *fp);
+enum Boolean parameters_same_type(FunctionParameter *fp1,
+                                    FunctionParameter *fp2);
+
+/* type node */
 TypeNode *create_type_node(int type);
 TypeNode *push_type(TypeNode *type_tree, int t);
-enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
-char *get_type_tree_name(int type);
-char *get_type_category_name(int type);
-char *type_tree_to_string(TypeNode *tn);
 void set_array_size(TypeNode *tn, int size);
 int get_array_size(TypeNode *tn);
 int get_parameter_count(TypeNode *tn);
-
-
-FunctionParameter *create_function_parameter();
-FunctionParameter *first_parameter(Symbol *);
-FunctionParameter *last_parameter(Symbol *s);
-void set_parameter_name(FunctionParameter *fp, char *pname);
-char *get_parameter_name(FunctionParameter *fp);
-FunctionParameter *push_function_parameter(FunctionParameter *param_list);
-void push_parameter_type(FunctionParameter *fp, int t);
-enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2);
-
+enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
+char *type_tree_to_string(TypeNode *tn);
+char *get_type_tree_name(int type);
+char *get_type_category_name(int type);
 
 
 /* error handling */

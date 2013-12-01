@@ -8,15 +8,6 @@
 #include "../include/literal.h"
 #include "../include/utilities.h"
 
-
-/* helper functions */
-
-/* symbol table */
-void initialize_st_container(SymbolTableContainer *stc);
-void initialize_st(SymbolTable *st, int scope, int overloading_class);
-void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev);
-
-
 /* symbol table container */
 SymbolTableContainer *create_st_container() {
     SymbolTableContainer *stc;
@@ -41,6 +32,41 @@ void initialize_st_container(SymbolTableContainer *stc) {
     stc->current_oc = OTHER_NAMES;
 }
 
+SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc) {
+    SymbolTable *st = create_symbol_table(scope, oc);
+    insert_symbol_table(st, stc);
+    set_current_st(st, stc);
+    return st;
+}
+
+/*
+ * insert_symbol_table
+ * Purpose:
+ *      Insert a new symbol table into the ST container, linking it to its
+ *      enclosing scope.
+ *      The new ST is either first in its overloading class (largest scope)
+ *      or it has a non-null enclosing scope.
+ *
+ * Parameters:
+ *      new - the new symbol table to insert
+ *      stc - the symbol table container.
+ *
+ * Returns:
+ *      None
+ * Side Effects:
+ *      Updates the current symbol table pointer of the ST container.
+ */
+void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
+    /* oc is OTHER_NAMES or STATEMENT_LABELS */
+    int oc = st_overloading_class(new);
+    SymbolTable *enc = stc->current_st[oc];
+    if (enc == NULL) {
+        stc->symbol_tables[oc] = new;
+    }
+    /* link new to its enclosing scope (even if it is NULL) */
+    new->enclosing = enc;
+}
+
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc) {
     int oc = st_overloading_class(st);
     stc->current_st[oc] = st;
@@ -50,7 +76,11 @@ SymbolTable *get_current_st(SymbolTableContainer *stc) {
     return stc->current_st[stc->current_oc];
 }
 
+
+
+
 /* symbol table */
+
 /*
  * create_symbol_table
  */
@@ -61,10 +91,6 @@ SymbolTable *create_symbol_table(int scope, int overloading_class) {
     return st;
 }
 
-SymbolTable *create_function_prototypes() {
-    return create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
-}
-
 void initialize_st(SymbolTable *st, int scope, int overloading_class) {
     st->scope = scope;
     st->oc = overloading_class;
@@ -72,38 +98,8 @@ void initialize_st(SymbolTable *st, int scope, int overloading_class) {
     st->enclosing = NULL;
 }
 
-Symbol *st_symbols(SymbolTable *st) {
-    return st->symbols;
-}
-
-int st_scope(SymbolTable *st) {
-    return st->scope;
-}
-
-int st_overloading_class(SymbolTable *st) {
-    return st->oc;
-}
-
-char *st_scope_name(SymbolTable *st) {
-    switch(st->scope) {
-        case TOP_LEVEL_SCOPE:
-            return "file";
-        case FUNCTION_SCOPE:
-            return "function";
-        default:
-            return "block";
-    }
-}
-
-char *st_overloading_class_name(SymbolTable *st) {
-    switch(st->oc) {
-        case OTHER_NAMES:
-            return "other names";
-        case STATEMENT_LABELS:
-            return "statement labels";
-        default:
-            return "";
-    }
+SymbolTable *create_function_prototypes() {
+    return create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
 }
 
 /* append the symbol s to the symbol table st */
@@ -146,39 +142,38 @@ void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev) {
     s->symbol_table = st;
 }
 
-/*
- * insert_symbol_table
- * Purpose:
- *      Insert a new symbol table into the ST container, linking it to its
- *      enclosing scope.
- *      The new ST is either first in its overloading class (largest scope)
- *      or it has a non-null enclosing scope.
- *
- * Parameters:
- *      new - the new symbol table to insert
- *      stc - the symbol table container.
- *
- * Returns:
- *      None
- * Side Effects:
- *      Updates the current symbol table pointer of the ST container.
- */
-void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
-    /* oc is OTHER_NAMES or STATEMENT_LABELS */
-    int oc = st_overloading_class(new);
-    SymbolTable *enc = stc->current_st[oc];
-    if (enc == NULL) {
-        stc->symbol_tables[oc] = new;
-    }
-    /* link new to its enclosing scope (even if it is NULL) */
-    new->enclosing = enc;
+Symbol *st_symbols(SymbolTable *st) {
+    return st->symbols;
 }
 
-SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc) {
-    SymbolTable *st = create_symbol_table(scope, oc);
-    insert_symbol_table(st, stc);
-    set_current_st(st, stc);
-    return st;
+int st_scope(SymbolTable *st) {
+    return st->scope;
+}
+
+int st_overloading_class(SymbolTable *st) {
+    return st->oc;
+}
+
+char *st_scope_name(SymbolTable *st) {
+    switch(st->scope) {
+        case TOP_LEVEL_SCOPE:
+            return "file";
+        case FUNCTION_SCOPE:
+            return "function";
+        default:
+            return "block";
+    }
+}
+
+char *st_overloading_class_name(SymbolTable *st) {
+    switch(st->oc) {
+        case OTHER_NAMES:
+            return "other names";
+        case STATEMENT_LABELS:
+            return "statement labels";
+        default:
+            return "";
+    }
 }
 
 Symbol *find_prototype(SymbolTable *prototypes, char *name) {
@@ -199,7 +194,9 @@ Symbol *find_symbol(SymbolTable *st, char *name) {
     return find_symbol(st->enclosing, name);
 }
 
-/* Symbol functions */
+
+
+/* symbol */
 Symbol *create_symbol() {
     Symbol *s;
     util_emalloc((void **) &s, sizeof(Symbol));
@@ -216,6 +213,26 @@ void push_symbol_type(Symbol *s, int t) {
     s->type_tree = push_type(s->type_tree, t);
 }
 
+int symbol_outer_type(Symbol *s) {
+    return s->type_tree->type;
+}
+
+void set_symbol_name(Symbol *s, char *name) {
+    s->name = name;
+}
+
+char *get_symbol_name(Symbol *s) {
+    return s->name;
+}
+
+void set_label_defined(Symbol *s, boolean b) {
+    s->label_defined = b;
+}
+
+boolean label_is_defined(Symbol *s) {
+    return s->label_defined;
+}
+
 void set_symbol_func_params(Symbol *s, FunctionParameter *fp) {
     FunctionParameter *cur;
     if (symbol_outer_type(s) != FUNCTION) {
@@ -227,6 +244,10 @@ void set_symbol_func_params(Symbol *s, FunctionParameter *fp) {
         s->type_tree->n.param_count++;
         cur = cur->next;
     }
+}
+
+SymbolTable *get_symbol_table(Symbol *s) {
+    return s->symbol_table;
 }
 
 FunctionParameter *first_parameter(Symbol *s) {
@@ -241,8 +262,15 @@ void set_symbol_array_size(Symbol *s, int n) {
     set_array_size(s->type_tree, n);
 }
 
-int symbol_outer_type(Symbol *s) {
-    return s->type_tree->type;
+enum Boolean all_array_bounds_specified(Symbol *s) {
+    TypeNode *tn = s->type_tree;
+    while (tn != NULL) {
+        if (tn->type == ARRAY && tn->n.array_size == UNSPECIFIED_VALUE) {
+            return FALSE;
+        }
+        tn = tn->next;
+    }
+    return TRUE;
 }
 
 enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
@@ -278,43 +306,14 @@ enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     return TRUE;
 }
 
-void set_symbol_name(Symbol *s, char *name) {
-    s->name = name;
-}
-
-char *get_symbol_name(Symbol *s) {
-    return s->name;
-}
-
-void set_label_defined(Symbol *s, boolean b) {
-    s->label_defined = b;
-}
-
-boolean label_is_defined(Symbol *s) {
-    return s->label_defined;
-}
-
-SymbolTable *get_symbol_table(Symbol *s) {
-    return s->symbol_table;
-}
-
 char *symbol_type_string(Symbol *s) {
     return type_tree_to_string(s->type_tree);
 }
 
-enum Boolean all_array_bounds_specified(Symbol *s) {
-    TypeNode *tn = s->type_tree;
-    while (tn != NULL) {
-        if (tn->type == ARRAY && tn->n.array_size == UNSPECIFIED_VALUE) {
-            return FALSE;
-        }
-        tn = tn->next;
-    }
-    return TRUE;
-}
 
 
-/* FunctionParameter helpers */
+
+/* FunctionParameter */
 FunctionParameter *create_function_parameter() {
     FunctionParameter *fp;
     util_emalloc((void **) &fp, sizeof(FunctionParameter));
@@ -336,10 +335,6 @@ char *get_parameter_name(FunctionParameter *fp) {
     return fp->name;
 }
 
-char *parameter_type_string(FunctionParameter *fp) {
-    return type_tree_to_string(fp->type_tree);
-}
-
 void push_parameter_type(FunctionParameter *fp, int t) {
     if (fp == NULL) {
         handle_symbol_error(STE_NULL_PARAM, "push_symbol_parameter_type");
@@ -348,13 +343,26 @@ void push_parameter_type(FunctionParameter *fp, int t) {
     fp->type_tree = push_type(fp->type_tree, t);
 }
 
+char *parameter_type_string(FunctionParameter *fp) {
+    return type_tree_to_string(fp->type_tree);
+}
+
 enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2) {
     TypeNode *tn1 = fp1->type_tree;
     TypeNode *tn2 = fp2->type_tree;
     return equal_types(tn1, tn2);
 }
 
+
 /* TypeNode helpers */
+TypeNode *create_type_node(int type) {
+    TypeNode *tn;
+    util_emalloc((void **) &tn, sizeof(TypeNode));
+    tn->type = type;
+    tn->next = NULL;
+    return tn;
+}
+
 TypeNode *push_type(TypeNode *type_tree, int t) {
     TypeNode *tn = create_type_node(t);
     if (t == FUNCTION) {
@@ -363,14 +371,6 @@ TypeNode *push_type(TypeNode *type_tree, int t) {
         tn->n.array_size = 0;
     }
     tn->next = type_tree;
-    return tn;
-}
-
-TypeNode *create_type_node(int type) {
-    TypeNode *tn;
-    util_emalloc((void **) &tn, sizeof(TypeNode));
-    tn->type = type;
-    tn->next = NULL;
     return tn;
 }
 
@@ -391,6 +391,22 @@ int get_parameter_count(TypeNode *tn) {
                             "parameter count requested from non-function");
     }
     return tn->n.param_count;
+}
+
+enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
+    while(t1 != NULL && t2 != NULL) {
+        if (t1->type != t2->type) {
+            return FALSE;
+        }
+        t1 = t1->next;
+        t2 = t2->next;
+    }
+    /* exited while loop so at least one must be NULL */
+    /* if the other is not then it's different */
+    if (t1 != NULL || t2 != NULL) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /*
@@ -475,22 +491,6 @@ char *get_type_category_name(int type) {
     }
 }
 
-
-enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
-    while(t1 != NULL && t2 != NULL) {
-        if (t1->type != t2->type) {
-            return FALSE;
-        }
-        t1 = t1->next;
-        t2 = t2->next;
-    }
-    /* exited while loop so at least one must be NULL */
-    /* if the other is not then it's different */
-    if (t1 != NULL || t2 != NULL) {
-        return FALSE;
-    }
-    return TRUE;
-}
 
 /*
  * handle_symbol_error
