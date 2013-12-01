@@ -124,24 +124,22 @@ void traverse_node(Node *n, TraversalData *td) {
             td->current_base_type = decl_base_type;
             traverse_node(n->children.child2, td);
             break;
+        case PARAMETER_DECL:
+            td->current_param_list =
+                push_function_parameter(td->current_param_list);
+            /* type specifier */
+            traverse_node(n->children.child1, td);
+            /* declarator */
+            traverse_node(n->children.child2, td);
+            /* this reset is redundant unless we had an abstract declarator */
+            reset_current_symbol(td);
+            break;
         case TYPE_SPECIFIER:
             td->current_base_type = n->data.attributes[TYPE_SPEC];
             if (td->processing_parameters) {
                 push_parameter_type(td->current_param_list,
                                     n->data.attributes[TYPE_SPEC]);
             }
-            break;
-        case SIMPLE_DECLARATOR:
-            /* have an identifier */
-            create_symbol_if_necessary(td);
-            set_symbol_name(td->current_symbol, n->data.str);
-            if (td->processing_parameters) {
-                set_parameter_name(td->current_param_list, n->data.str);
-                record_current_symbol(td, n);
-            } else {
-                record_current_symbol(td, n);
-            }
-            reset_current_symbol(td);
             break;
         case POINTER_DECLARATOR:
             create_symbol_if_necessary(td);
@@ -199,16 +197,6 @@ void traverse_node(Node *n, TraversalData *td) {
             /* first child: parameter list or parameter_decl */
             traverse_node(n->children.child1, td);
             break;
-        case PARAMETER_DECL:
-            td->current_param_list =
-                push_function_parameter(td->current_param_list);
-            /* type specifier */
-            traverse_node(n->children.child1, td);
-            /* declarator */
-            traverse_node(n->children.child2, td);
-            /* this reset is redundant unless we had an abstract declarator */
-            reset_current_symbol(td);
-            break;
         case COMPOUND_STATEMENT:
             /* verify that we have an inner block to avoid creating an extra */
             /* ST for function blocks after we created it for the parameters */
@@ -248,6 +236,18 @@ void traverse_node(Node *n, TraversalData *td) {
             }
             /* first child: direct declarator */
             traverse_node(n->children.child1, td);
+            break;
+        case SIMPLE_DECLARATOR:
+            /* have an identifier */
+            create_symbol_if_necessary(td);
+            set_symbol_name(td->current_symbol, n->data.str);
+            if (td->processing_parameters) {
+                set_parameter_name(td->current_param_list, n->data.str);
+                record_current_symbol(td, n);
+            } else {
+                record_current_symbol(td, n);
+            }
+            reset_current_symbol(td);
             break;
         case ABSTRACT_DECLARATOR:
             if (td->function_def_spec && td->processing_parameters) {
@@ -449,6 +449,11 @@ long resolve_array_size(TraversalData *td, Node *n) {
     return (signed long) array_size;
 }
 
+Boolean array_bound_optional(TraversalData *td) {
+    return (td->processing_parameters &&
+            all_array_bounds_specified(td->current_symbol));
+}
+
 unsigned long resolve_constant_expr(Node *n) {
     unsigned long resolve_conditional_expr(Node *n);
     unsigned long resolve_binary_expr(Node *n);
@@ -494,6 +499,7 @@ unsigned long resolve_constant_expr(Node *n) {
     }
 }
 
+/* helpers for resolve constant expr */
 Boolean invalid_operand(long operand) {
     switch (operand) {
         case NON_INTEGRAL_VALUE:
@@ -505,7 +511,6 @@ Boolean invalid_operand(long operand) {
     }
 }
 
-/* helpers for resolve constant expr */
 unsigned long resolve_conditional_expr(Node *n) {
     unsigned long child1, child2, child3;
     if (invalid_operand(child1)) {
@@ -681,11 +686,6 @@ unsigned long resolve_function_call(Node *n) {
     return VARIABLE_VALUE;
 }
 
-Boolean array_bound_optional(TraversalData *td) {
-    return (td->processing_parameters &&
-            all_array_bounds_specified(td->current_symbol));
-}
-
 /*
  * create_symbol_if_necessary
  * Purpose:
@@ -767,19 +767,6 @@ void validate_statement_labels(TraversalData *td) {
     }
 }
 
-void print_symbol_param_list(FILE *out, Symbol *s) {
-    FunctionParameter *fp = first_parameter(s);
-    char *param_name;
-    fprintf(out, " * parameters:\n");
-    while (fp != NULL) {
-        param_name = get_parameter_name(fp);
-        param_name = strcmp(param_name, "") == 0 ? "(none)" : param_name;
-        fprintf(out, " * type: %s", parameter_type_string(fp));
-        fprintf(out, ", name: %s\n", param_name);
-        fp = fp->next;
-    }
-}
-
 void print_symbol(FILE *out, Symbol *s) {
     if (s == td->dummy_symbol) {
         return;
@@ -793,6 +780,19 @@ void print_symbol(FILE *out, Symbol *s) {
     fprintf(out, " *\n");
     print_symbol_table(out, get_symbol_table(s));
     fprintf(out, " */\n");
+}
+
+void print_symbol_param_list(FILE *out, Symbol *s) {
+    FunctionParameter *fp = first_parameter(s);
+    char *param_name;
+    fprintf(out, " * parameters:\n");
+    while (fp != NULL) {
+        param_name = get_parameter_name(fp);
+        param_name = strcmp(param_name, "") == 0 ? "(none)" : param_name;
+        fprintf(out, " * type: %s", parameter_type_string(fp));
+        fprintf(out, ", name: %s\n", param_name);
+        fp = fp->next;
+    }
 }
 
 void print_symbol_table(FILE *out, SymbolTable *st) {
