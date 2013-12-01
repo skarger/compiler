@@ -1,8 +1,0 @@
-/* node type: FUNCTION_DEFINITION, creating a new symbol table at scope: 0 */
-/* node type: TYPE_SPECIFIER, creating a new symbol table at scope: 1 */
-/* node type: PARAMETER_LIST, creating a new symbol table at scope: 1 */
-/* node type: PARAMETER_DECL, creating a new symbol table at scope: 1 */
-/* node type: COMPOUND_STATEMENT, creating a new symbol table at scope: 2 */
-/* node type: PARAMETER_DECL, creating a new symbol table at scope: 1 */
-/* node type: COMPOUND_STATEMENT, creating a new symbol table at scope: 2 */
-/* node type: COMPOUND_STATEMENT, creating a new symbol table at scope: 2 */
