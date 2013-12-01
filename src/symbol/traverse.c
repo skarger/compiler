@@ -152,41 +152,45 @@ void traverse_node(Node *n, TraversalData *td) {
             traverse_pointers(n, td);
             break;
         case FUNCTION_DECLARATOR:
+            create_symbol_if_necessary(td);
             if (!(td->function_def_spec)) {
                 td->function_prototype = TRUE;
             }
+
             if (td->processing_parameters) {
                 handle_symbol_error(STE_FUNCTION_POINTER, "function parameter");
-            } else {
-                create_symbol_if_necessary(td);
-                if (symbol_outer_type(td->current_symbol) == ARRAY) {
-                    handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
-                } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
-                    handle_symbol_error(STE_FUNC_RET_FUNC, "function decl");
-                }
-                /* save the nascent function symbol then dive into parameters */
-                function_symbol = td->current_symbol;
-                reset_current_symbol(td);
-
-                /* second child: parameters */
-                td->processing_parameters = TRUE;
-                traverse_node(n->children.child2, td);
-                td->processing_parameters = FALSE;
-                if (td->function_def_spec) {
-                    /* return back to the file level ST to process it */
-                    /* only for func defn since prototype has no body ST */
-                    enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
-                    set_current_st(enclosing, td->stc);
-                }
-                /* first child: direct declarator */
-                /* resurrect the function symbol */
-                td->current_symbol = function_symbol;
-                push_symbol_type(td->current_symbol, FUNCTION);
-                set_symbol_func_params(td->current_symbol,
-                                        td->current_param_list);
-                td->current_param_list = NULL;
-                traverse_node(n->children.child1, td);
             }
+            if (symbol_outer_type(td->current_symbol) == ARRAY) {
+                handle_symbol_error(STE_FUNC_RET_ARRAY, "function decl");
+            } else if (symbol_outer_type(td->current_symbol) == FUNCTION) {
+                handle_symbol_error(STE_FUNC_RET_FUNC, "function decl");
+            }
+
+            /* save the nascent function symbol then dive into parameters */
+            function_symbol = td->current_symbol;
+            reset_current_symbol(td);
+
+            /* second child: parameters */
+            td->processing_parameters = TRUE;
+            traverse_node(n->children.child2, td);
+            td->processing_parameters = FALSE;
+            if (td->function_def_spec) {
+                /* return back to the file level ST to process it */
+                /* only for func defn since prototype has no body ST */
+                enclosing = td->stc->current_st[OTHER_NAMES]->enclosing;
+                set_current_st(enclosing, td->stc);
+            }
+
+            /* resurrect the function symbol */
+            td->current_symbol = function_symbol;
+            push_symbol_type(td->current_symbol, FUNCTION);
+            set_symbol_func_params(td->current_symbol,
+                                    td->current_param_list);
+            td->current_param_list = NULL;
+
+            /* first child: direct declarator */
+            traverse_node(n->children.child1, td);
+
             td->function_prototype = FALSE;
             break;
         case PARAMETER_LIST:

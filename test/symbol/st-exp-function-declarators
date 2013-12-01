@@ -227,3 +227,26 @@ signed int (((
  * overloading class: other names
  */
 errfn3)(void ))[(10)]);
+signed short ((
+/*
+ * symbol: errfn4
+ * type: function (0 parameters) returning -> signed short
+ * parameters:
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn4)(signed char ((
+/*
+ * symbol: funcparam
+ * type: function (2 parameters) returning -> signed char
+ * parameters:
+ * type: signed int, name: a
+ * type: signed char, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+funcparam)(signed int (a)))));

@@ -16,3 +16,4 @@ unsigned long fn15(void), fn16(char c);
 char errfn1(int i)[10];
 char errfn2(int i)(int j);
 int errfn3(void)[10];
+short errfn4(char funcparam(int a));
