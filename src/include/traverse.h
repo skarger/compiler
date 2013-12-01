@@ -26,9 +26,9 @@ struct TraversalData {
     FunctionParameter *current_param_list;
     Symbol *current_symbol;
     Symbol *dummy_symbol;
-    enum Boolean processing_parameters;
-    enum Boolean function_def_spec;
-    enum Boolean function_prototype;
+    Boolean processing_parameters;
+    Boolean function_def_spec;
+    Boolean function_prototype;
     FILE *outfile;
 };
 typedef struct TraversalData TraversalData;

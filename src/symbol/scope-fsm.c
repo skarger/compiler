@@ -10,7 +10,7 @@
 static enum scope_state current_state = TOP_LEVEL;
 static int scope = TOP_LEVEL;
 static int overloading_class = OTHER_NAMES;
-static enum Boolean fsm_initialized = FALSE;
+static Boolean fsm_initialized = FALSE;
 
 static void set_state(int state);
 static void set_scope(int s);
@@ -18,7 +18,7 @@ static void set_overloading_class(int oc);
 static void new_scope();
 static void previous_scope();
 
-static enum Boolean fsm_is_ready();
+static Boolean fsm_is_ready();
 static void scope_fsm_start(Node *n);
 static void scope_fsm_end(Node *n);
 static int node_is_function_param(Node *);
@@ -141,7 +141,7 @@ void scope_fsm_end(Node *n) {
     }
 }
 
-enum Boolean fsm_is_ready() {
+Boolean fsm_is_ready() {
     return fsm_initialized;
 }
 
@@ -233,6 +233,6 @@ char *get_overloading_class_name(int oc) {
   }
 }
 
-enum Boolean is_inner_block(int scope) {
+Boolean is_inner_block(int scope) {
     return scope > FUNCTION_SCOPE;
 }

@@ -80,8 +80,8 @@ void set_symbol_func_params(Symbol *s, FunctionParameter *fp);
 SymbolTable *get_symbol_table(Symbol *s);
 FunctionParameter *first_parameter(Symbol *);
 void set_symbol_array_size(Symbol *s, int n);
-enum Boolean all_array_bounds_specified(Symbol *s);
-enum Boolean symbols_same_type(Symbol *s1, Symbol *s2);
+Boolean all_array_bounds_specified(Symbol *s);
+Boolean symbols_same_type(Symbol *s1, Symbol *s2);
 char *symbol_type_string(Symbol *s);
 
 /* function parameter */
@@ -91,7 +91,7 @@ void set_parameter_name(FunctionParameter *fp, char *pname);
 char *get_parameter_name(FunctionParameter *fp);
 void push_parameter_type(FunctionParameter *fp, int t);
 char *parameter_type_string(FunctionParameter *fp);
-enum Boolean parameters_same_type(FunctionParameter *fp1,
+Boolean parameters_same_type(FunctionParameter *fp1,
                                     FunctionParameter *fp2);
 
 /* type node */
@@ -100,7 +100,7 @@ TypeNode *push_type(TypeNode *type_tree, int t);
 void set_array_size(TypeNode *tn, int size);
 int get_array_size(TypeNode *tn);
 int get_parameter_count(TypeNode *tn);
-enum Boolean equal_types(TypeNode *t1, TypeNode *t2);
+Boolean equal_types(TypeNode *t1, TypeNode *t2);
 char *type_tree_to_string(TypeNode *tn);
 char *get_type_tree_name(int type);
 char *get_type_category_name(int type);

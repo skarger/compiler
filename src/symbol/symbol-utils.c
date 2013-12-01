@@ -262,7 +262,7 @@ void set_symbol_array_size(Symbol *s, int n) {
     set_array_size(s->type_tree, n);
 }
 
-enum Boolean all_array_bounds_specified(Symbol *s) {
+Boolean all_array_bounds_specified(Symbol *s) {
     TypeNode *tn = s->type_tree;
     while (tn != NULL) {
         if (tn->type == ARRAY && tn->n.array_size == UNSPECIFIED_VALUE) {
@@ -273,7 +273,7 @@ enum Boolean all_array_bounds_specified(Symbol *s) {
     return TRUE;
 }
 
-enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
+Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     if (s1 == NULL || s2 == NULL) {
         if (s1 == NULL && s2 == NULL) {
             return TRUE;
@@ -283,7 +283,7 @@ enum Boolean symbols_same_type(Symbol *s1, Symbol *s2) {
     }
     TypeNode *tn1 = s1->type_tree;
     TypeNode *tn2 = s2->type_tree;
-    enum Boolean equal = equal_types(tn1, tn2);
+    Boolean equal = equal_types(tn1, tn2);
     if (!equal) {
         return FALSE;
     }
@@ -347,7 +347,7 @@ char *parameter_type_string(FunctionParameter *fp) {
     return type_tree_to_string(fp->type_tree);
 }
 
-enum Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2) {
+Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2) {
     TypeNode *tn1 = fp1->type_tree;
     TypeNode *tn2 = fp2->type_tree;
     return equal_types(tn1, tn2);
@@ -393,7 +393,7 @@ int get_parameter_count(TypeNode *tn) {
     return tn->n.param_count;
 }
 
-enum Boolean equal_types(TypeNode *t1, TypeNode *t2) {
+Boolean equal_types(TypeNode *t1, TypeNode *t2) {
     while(t1 != NULL && t2 != NULL) {
         if (t1->type != t2->type) {
             return FALSE;

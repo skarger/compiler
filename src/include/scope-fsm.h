@@ -23,7 +23,7 @@ enum scope_state {
 
 /* finite state machine functions */
 void transition_scope(Node *n, int action, SymbolTableContainer *stc);
-enum Boolean is_inner_block(int scope);
+Boolean is_inner_block(int scope);
 
 /* TODO: these should be static methods. they are only visible for testing */
 void initialize_fsm();

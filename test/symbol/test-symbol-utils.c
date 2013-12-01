@@ -40,11 +40,11 @@ int assert_equal_string(char *str1, char *str2) {
     return (strcmp(str1, str2) == 0 ? PASS : FAIL);
 }
 
-int assert_true(enum Boolean b) {
+int assert_true(Boolean b) {
     return (b == TRUE ? PASS : FAIL);
 }
 
-int assert_not_true(enum Boolean b) {
+int assert_not_true(Boolean b) {
     return (b == FALSE ? PASS : FAIL);
 }
 

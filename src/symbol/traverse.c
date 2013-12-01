@@ -17,8 +17,8 @@ TraversalData *td = NULL;
 /* file helper procs */
 void initialize_traversal_data(TraversalData *td);
 long resolve_array_size(TraversalData *td, Node *n);
-enum Boolean array_bound_optional(TraversalData *td);
-enum Boolean invalid_operand(long operand);
+Boolean array_bound_optional(TraversalData *td);
+Boolean invalid_operand(long operand);
 
 /*
  * start_traversal
@@ -496,7 +496,7 @@ unsigned long resolve_constant_expr(Node *n) {
     }
 }
 
-enum Boolean invalid_operand(long operand) {
+Boolean invalid_operand(long operand) {
     switch (operand) {
         case NON_INTEGRAL_VALUE:
         case VARIABLE_VALUE:
@@ -683,7 +683,7 @@ unsigned long resolve_function_call(Node *n) {
     return VARIABLE_VALUE;
 }
 
-enum Boolean array_bound_optional(TraversalData *td) {
+Boolean array_bound_optional(TraversalData *td) {
     return (td->processing_parameters &&
             all_array_bounds_specified(td->current_symbol));
 }
