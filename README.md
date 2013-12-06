@@ -1,6 +1,8 @@
 compiler
 ========
 
+Only tested on Linux. Currently will not compile OS X; untested on Windows.
+
 Symbol Table - traverse a parse tree and create symbol tables for each
 identifier, for both declarations and references.
 
@@ -14,8 +16,8 @@ Pretty prints the parse tree with comments for each symbol.
 Note: prints error messages to stderr.
 
 Test:
-make test-symbol        # redirects error messages to /dev/null
-make test-symtab-errors # shows error messages emitted by program
+make test-symbol (redirects error messages to /dev/null)
+make test-symtab-errors (shows error messages emitted by program)
 
 
 Parser - construct a parse tree for a subset of the C language and print it.
