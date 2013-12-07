@@ -19,7 +19,7 @@ class IrTest : public ::testing::Test {
     
     /* 
      * Opens a pipe for directing input. Anything printed to 
-     * test_input will be read by lex.
+     * test_input will be read by yyparse.
      */
     void SetUp() {
       int fds[2];
@@ -37,7 +37,7 @@ class IrTest : public ::testing::Test {
       
     }
     
-    void ExpectIntString(int i, const char *input) {
+    void ExpectString(const char *input) {
       fputs(input, test_input);
       fclose(test_input);
       
@@ -52,7 +52,4 @@ TEST_F(IrTest, ValTest) {
   EXPECT_EQ(0, f(0));
 }
 
-/* 
- * The next two tests are similar to SlashTest but have been refactored to use
- * the ExpectTokenOnly method from the fixture. */
-TEST_F(IrTest, PlusTest) { this->ExpectIntString(1, "+"); }
+TEST_F(IrTest, StrTest) { this->ExpectString("str"); }

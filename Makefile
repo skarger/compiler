@@ -12,7 +12,7 @@ GTEST_DIR = test/gtest-1.7.0
 VPATH = src
 
 
-TESTS = test-ir test-symbol-utils test/symbol/st-output
+TESTS = libgtest.a test-ir test-symbol-utils test/symbol/st-output
 EXECS = lexer parser-main symbol-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/symbol/traverse.c \
