@@ -6,11 +6,13 @@ CFLAGS += -pedantic -Wall -Wextra
 CXXFLAGS += -g -Wall -Wextra
 LDLIBS += -lfl -ly
 YFLAGS += -d
+GTEST_DIR = test/gtest-1.7.0
+
 
 VPATH = src
 
 
-TESTS = test-symbol-utils test/symbol/st-output
+TESTS = test-ir test-symbol-utils test/symbol/st-output
 EXECS = lexer parser-main symbol-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/symbol/traverse.c \
@@ -76,6 +78,12 @@ traverse.o : src/symbol/traverse.c
 scope-fsm.o : src/symbol/scope-fsm.c
 	$(CC) -c src/symbol/scope-fsm.c
 
+ir-main.o : src/ir/ir-main.c
+	$(CC) -c src/ir/ir-main.c
+
+ir-utils.o : src/ir/ir-utils.c
+	$(CC) -c src/ir/ir-utils.c
+
 # tests
 test-parser-output : parser-main
 	./test/parser/test-parser-output 2>/dev/null
@@ -94,8 +102,19 @@ test-symbol-utils.o : test/symbol/test-symbol-utils.c
 	$(CC) -c test/symbol/test-symbol-utils.c
 
 test-symbol-utils : symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o
-	$(CC) symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o -o $@	
+	$(CC) symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o -o $@
 
 test-symtab-output : symbol-main
 
+test-ir : test/ir/test-ir.cpp libgtest.a \
+ir-utils.o y.tab.o scope-fsm.o symbol-utils.o utilities.o traverse.o
+	g++ -isystem ${GTEST_DIR}/include -pthread test/ir/test-ir.cpp libgtest.a \
+ir-utils.o y.tab.o scope-fsm.o symbol-utils.o utilities.o traverse.o -o $@
+
+libgtest.a : gtest-all.o
+	ar -rv libgtest.a gtest-all.o
+
+gtest-all.o :
+	g++ -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
+-pthread -c ${GTEST_DIR}/src/gtest-all.cc
 
