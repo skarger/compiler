@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
     /* do the work */
     rv = yyparse();
 
-
     /* cleanup */
     if (output != stdout) {
         fclose(output);

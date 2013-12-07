@@ -57,9 +57,9 @@ parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
 parser-main : parser-main.o y.tab.o utilities.o traverse.o \
-symbol-utils.o scope-fsm.o
+symbol-traversal.o symbol-utils.o scope-fsm.o
 	$(CC) parser-main.o y.tab.o utilities.o traverse.o \
-symbol-utils.o scope-fsm.o -o $@
+symbol-traversal.o symbol-utils.o scope-fsm.o -o $@
 
 symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c -o $@

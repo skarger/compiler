@@ -29,18 +29,15 @@ typedef struct SymbolCreationData SymbolCreationData;
 
 /* tree traversal */
 void traverse_node(Node *n, SymbolCreationData *scd);
-void traverse_direct_abstract_declarator(Node *n, SymbolCreationData *scd);
-void traverse_conditional_statement(Node *n, SymbolCreationData *scd);
-void traverse_iterative_statement(Node *n, SymbolCreationData *scd);
-void traverse_pointers(Node *np, SymbolCreationData *scd);
-unsigned long resolve_constant_expr(Node *n);
 
+/* symbol printing */
 void print_symbol(FILE *out, Symbol *s);
 void print_symbol_table(FILE *out, SymbolTable *st);
 void print_symbol_param_list(FILE *out, Symbol *s);
 
 /* symbol creation during traversal */
 void create_symbol_if_necessary(SymbolCreationData *scd);
+unsigned long resolve_constant_expr(Node *n);
 void reset_current_symbol(SymbolCreationData *scd);
 void record_current_symbol(SymbolCreationData *scd, Node *n);
 void validate_symbol(Symbol *s, SymbolCreationData *scd);

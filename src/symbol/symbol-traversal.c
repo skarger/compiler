@@ -132,7 +132,12 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             traverse_node(n->children.child2, scd);
             break;
         case POINTER:
-            traverse_pointers(n, scd);
+            /* push pointers onto type tree */
+            push_symbol_type(scd->current_symbol, POINTER);
+            if (scd->processing_parameters) {
+                push_parameter_type(scd->current_param_list, POINTER);
+            }
+            traverse_node(n->children.child1, scd);
             break;
         case FUNCTION_DECLARATOR:
             create_symbol_if_necessary(scd);
@@ -273,7 +278,14 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             traverse_node(n->children.child2, scd);
             break;
         /* nodes we simply pass through with respect to symbol table */
+        case FOR_STATEMENT:
+            traverse_node(n->children.child1, scd);
+            traverse_node(n->children.child2, scd);
+            traverse_node(n->children.child3, scd);
+            traverse_node(n->children.child4, scd);
+            break;
         case CONDITIONAL_EXPR:
+        case IF_THEN_ELSE:
             traverse_node(n->children.child1, scd);
             traverse_node(n->children.child2, scd);
             traverse_node(n->children.child3, scd);
@@ -281,6 +293,9 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
         case DECL:
         case PTR_ABS_DECL:
         case DECL_OR_STMT_LIST:
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
+        case IF_THEN:
         case CAST_EXPR:
         case TYPE_NAME:
         case BINARY_EXPR:
@@ -297,19 +312,9 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
         case PREFIX_EXPR:
             traverse_node(n->children.child1, scd);
             break;
-        case IF_THEN:
-        case IF_THEN_ELSE:
-            traverse_conditional_statement(n, scd);
-            break;
-        case WHILE_STATEMENT:
-        case DO_STATEMENT:
-        case FOR_STATEMENT:
-            traverse_iterative_statement(n, scd);
-            break;
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
-            break;
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
         case STRING_CONSTANT:
@@ -321,77 +326,6 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
     transition_scope(n, END, scd->stc);
 }
 
-/*
- * traverse_iterative_statement
- * Purpose: Helper function for traverse_node.
- *          Traverses iterative statements.
- * Parameters:
- *  n       Node * The node to start traversing from. Recursively traverses
- *          the children of n.
- * Returns: None
- * Side-effects: None
- */
-void traverse_iterative_statement(Node *n, SymbolCreationData *scd) {
-    if (n == NULL) {
-        return;
-    }
-    switch (n->n_type) {
-        case WHILE_STATEMENT:
-        case DO_STATEMENT:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            break;
-        case FOR_STATEMENT:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            traverse_node(n->children.child3, scd);
-            traverse_node(n->children.child4, scd);
-            break;
-        default:
-            break;
-
-    }
-}
-
-/*
- * traverse_conditional_statement
- * Purpose: Helper function for traverse_node.
- *          Traverses conditional statements.
- * Parameters:
- *  n       Node * The node to start traversing from. Recursively traverses
- *          the children of n.
- * Returns: None
- * Side-effects: None
- */
-void traverse_conditional_statement(Node *n, SymbolCreationData *scd) {
-    if (n == NULL) {
-        return;
-    }
-    switch (n->n_type) {
-        case IF_THEN:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            break;
-        case IF_THEN_ELSE:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            traverse_node(n->children.child3, scd);
-            break;
-        default:
-            break;
-    }
-}
-
-void traverse_pointers(Node *n, SymbolCreationData *scd) {
-    /* push pointers onto type tree */
-    while (n != NULL && n->n_type == POINTER) {
-        push_symbol_type(scd->current_symbol, POINTER);
-        if (scd->processing_parameters) {
-            push_parameter_type(scd->current_param_list, POINTER);
-        }
-        n = n->children.child1;
-    }
-}
 
 /*
  * resolve_array_size

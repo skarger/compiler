@@ -2,12 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
-
 FILE *output;
 int main(int argc, char *argv[]) {
     extern FILE *yyin;
     FILE *input;
-
 
     int rv;
 
