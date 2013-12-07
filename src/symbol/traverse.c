@@ -3,8 +3,7 @@
 #include "../include/symbol-traversal.h"
 
 
-/* external variable for traversal data. this is the defining declaration. */
-TraversalData *td = NULL;
+extern SymbolCreationData *scd;
 
 /*
  * start_traversal
@@ -17,10 +16,10 @@ TraversalData *td = NULL;
  */
 void start_traversal(Node *n) {
     FILE *output = stdout;
-    if (td == NULL) {
-        util_emalloc((void **) &td, sizeof(TraversalData));
-        initialize_traversal_data(td);
-        td->outfile = output;
+    if (scd == NULL) {
+        util_emalloc((void **) &scd, sizeof(SymbolCreationData));
+        initialize_traversal_data(scd);
+        scd->outfile = output;
     }
-    traverse_node(n, td);
+    traverse_node(n, scd);
 }

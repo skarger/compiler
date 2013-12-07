@@ -13,7 +13,7 @@
 #define NON_INTEGRAL_VALUE  -2147483645
 #define CAST_VALUE          -2147483644
 
-struct TraversalData {
+struct SymbolCreationData {
     SymbolTableContainer *stc;
     enum data_type current_base_type;
     FunctionParameter *current_param_list;
@@ -24,15 +24,15 @@ struct TraversalData {
     Boolean function_prototype;
     FILE *outfile;
 };
-typedef struct TraversalData TraversalData;
+typedef struct SymbolCreationData SymbolCreationData;
 
 
 /* tree traversal */
-void traverse_node(Node *n, TraversalData *td);
-void traverse_direct_abstract_declarator(Node *n, TraversalData *td);
-void traverse_conditional_statement(Node *n, TraversalData *td);
-void traverse_iterative_statement(Node *n, TraversalData *td);
-void traverse_pointers(Node *np, TraversalData *td);
+void traverse_node(Node *n, SymbolCreationData *scd);
+void traverse_direct_abstract_declarator(Node *n, SymbolCreationData *scd);
+void traverse_conditional_statement(Node *n, SymbolCreationData *scd);
+void traverse_iterative_statement(Node *n, SymbolCreationData *scd);
+void traverse_pointers(Node *np, SymbolCreationData *scd);
 unsigned long resolve_constant_expr(Node *n);
 
 void print_symbol(FILE *out, Symbol *s);
@@ -40,12 +40,12 @@ void print_symbol_table(FILE *out, SymbolTable *st);
 void print_symbol_param_list(FILE *out, Symbol *s);
 
 /* symbol creation during traversal */
-void create_symbol_if_necessary(TraversalData *td);
-void reset_current_symbol(TraversalData *td);
-void record_current_symbol(TraversalData *td, Node *n);
-void validate_symbol(Symbol *s, TraversalData *td);
-void validate_function_symbol(Symbol *s, TraversalData *td);
-void validate_statement_labels(TraversalData *td);
+void create_symbol_if_necessary(SymbolCreationData *scd);
+void reset_current_symbol(SymbolCreationData *scd);
+void record_current_symbol(SymbolCreationData *scd, Node *n);
+void validate_symbol(Symbol *s, SymbolCreationData *scd);
+void validate_function_symbol(Symbol *s, SymbolCreationData *scd);
+void validate_statement_labels(SymbolCreationData *scd);
 
 
 #endif
