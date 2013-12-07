@@ -6,7 +6,8 @@
 
 FILE *output;
 
-int f(int a);
+int reg_idx = 0;
+char cur_reg[MAX_REG_LEN];
 
 int m(int argc, char *argv[]) {
     FILE *input;
@@ -44,4 +45,12 @@ int m(int argc, char *argv[]) {
 
 int f(int a) {
     return a;
+}
+
+char *current_reg(void) {
+    snprintf(cur_reg, MAX_REG_LEN, "$r%d", reg_idx);
+}
+
+char *next_reg() {
+    snprintf(cur_reg, MAX_REG_LEN, "$r%d", ++reg_idx);
 }

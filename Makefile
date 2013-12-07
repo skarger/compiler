@@ -110,9 +110,11 @@ test-symbol-utils : symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o
 test-symtab-output : symbol-main
 
 test-ir : test/ir/test-ir.cpp libgtest.a \
-ir-utils.o y.tab.o scope-fsm.o symbol-utils.o utilities.o traverse.o
+ir-utils.o y.tab.o traverse.o scope-fsm.o symbol-collection.o symbol-utils.o \
+utilities.o
 	g++ -isystem ${GTEST_DIR}/include -pthread test/ir/test-ir.cpp libgtest.a \
-ir-utils.o y.tab.o scope-fsm.o symbol-utils.o utilities.o traverse.o -o $@
+ir-utils.o y.tab.o traverse.o scope-fsm.o symbol-collection.o symbol-utils.o \
+utilities.o -o $@
 
 libgtest.a : gtest-all.o
 	ar -rv libgtest.a gtest-all.o

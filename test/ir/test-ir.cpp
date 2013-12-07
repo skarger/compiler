@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "gtest/gtest.h"
 
+extern "C" {
 #include "../../src/include/ir.h"
+}
 
 extern FILE *yyin;
-extern "C" int f(int a);
 
 int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
@@ -43,6 +45,15 @@ class IrTest : public ::testing::Test {
       
       EXPECT_EQ(0, f(0));
     }
+
+    void ExpectReg(void) {
+        char *r0 = current_reg();
+        char *r1 = next_reg();
+        char *r2 = current_reg();
+        EXPECT_STREQ("$r0", r0);
+        EXPECT_STREQ("$r1", r1);
+        EXPECT_EQ(0, strcmp(r1, r2));
+    }
 };
 
 TEST_F(IrTest, ValTest) {
@@ -53,3 +64,6 @@ TEST_F(IrTest, ValTest) {
 }
 
 TEST_F(IrTest, StrTest) { this->ExpectString("str"); }
+
+TEST_F(IrTest, RegIdxTest) { this->ExpectReg(); }
+
