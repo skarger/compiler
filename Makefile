@@ -57,23 +57,23 @@ parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
 parser-main : parser-main.o y.tab.o utilities.o traverse.o \
-symbol-traversal.o symbol-utils.o scope-fsm.o
+symbol-collection.o symbol-utils.o scope-fsm.o
 	$(CC) parser-main.o y.tab.o utilities.o traverse.o \
-symbol-traversal.o symbol-utils.o scope-fsm.o -o $@
+symbol-collection.o symbol-utils.o scope-fsm.o -o $@
 
 symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c -o $@
 
 symbol-main : symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-traversal.o symbol-utils.o scope-fsm.o
+symbol-collection.o symbol-utils.o scope-fsm.o
 	$(CC) symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-traversal.o symbol-utils.o scope-fsm.o -o $@
+symbol-collection.o symbol-utils.o scope-fsm.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
 
-symbol-traversal.o : src/symbol/symbol-traversal.c
-	$(CC) -c src/symbol/symbol-traversal.c
+symbol-collection.o : src/symbol/symbol-collection.c
+	$(CC) -c src/symbol/symbol-collection.c
 
 traverse.o : src/symbol/traverse.c
 	$(CC) -c src/symbol/traverse.c

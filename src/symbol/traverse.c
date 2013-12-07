@@ -1,6 +1,6 @@
 
 #include "../include/traverse.h"
-#include "../include/symbol-traversal.h"
+#include "../include/symbol-collection.h"
 
 
 extern SymbolCreationData *scd;

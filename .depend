@@ -1,7 +1,7 @@
 y.tab.o: y.tab.c src/include/lexer.h src/include/utilities.h \
   src/include/parser.h src/include/parse-tree.h src/include/symbol.h \
   src/include/utilities.h src/include/traverse.h \
-  src/include/symbol-traversal.h src/include/literal.h lex.yy.c y.tab.h
+  src/include/symbol-collection.h src/include/literal.h lex.yy.c y.tab.h
 lex.yy.o: lex.yy.c src/include/lexer.h src/include/utilities.h y.tab.h
 lexer.o: src/lexer/lexer.c src/lexer/../include/lexer.h \
   src/lexer/../include/utilities.h src/lexer/../../y.tab.h
@@ -13,13 +13,13 @@ parser-main.o: src/parser/parser-main.c
 traverse.o: src/symbol/traverse.c src/symbol/../include/traverse.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
   src/symbol/../include/utilities.h \
-  src/symbol/../include/symbol-traversal.h \
+  src/symbol/../include/symbol-collection.h \
   src/symbol/../include/literal.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/utilities.h src/symbol/../include/symbol-utils.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
   src/symbol/../include/literal.h src/symbol/../include/scope-fsm.h \
-  src/symbol/../include/symbol-traversal.h \
+  src/symbol/../include/symbol-collection.h \
   src/symbol/../include/literal.h src/symbol/../include/utilities.h
 test-symbol-utils.o: test/symbol/test-symbol-utils.c \
   test/symbol/../../src/include/symbol.h \

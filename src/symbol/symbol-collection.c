@@ -3,7 +3,7 @@
  */
 
 #include <stdio.h>
-#include "../include/symbol-traversal.h"
+#include "../include/symbol-collection.h"
 #include "../include/parse-tree.h"
 #include "../include/symbol-utils.h"
 #include "../include/scope-fsm.h"

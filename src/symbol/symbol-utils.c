@@ -4,7 +4,7 @@
 #include "../include/symbol.h"
 #include "../include/symbol-utils.h"
 #include "../include/scope-fsm.h"
-#include "../include/symbol-traversal.h"
+#include "../include/symbol-collection.h"
 #include "../include/literal.h"
 #include "../include/utilities.h"
 

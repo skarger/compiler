@@ -1,5 +1,5 @@
-#ifndef SYMBOL_TRAVERSAL_H
-#define SYMBOL_TRAVERSAL_H
+#ifndef SYMBOL_COLLECTION_H
+#define SYMBOL_COLLECTION_H
 
 #include <stdio.h>
 #include "parse-tree.h"
