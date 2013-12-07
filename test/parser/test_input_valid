@@ -90,8 +90,22 @@ while ( i > 0 ) i--;
 }
 
 int main(void) {
+int i, j;
+
 for ( i = 1; i < len; i++ )
 j++;
+}
+
+for (i = 1; i < 2;) {
+;
+}
+
+for ( ; 1 < 2; j++) {
+;
+}
+
+for (;;) {
+;
 }
 
 int main(void) {

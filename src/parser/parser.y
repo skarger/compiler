@@ -267,6 +267,20 @@ do_statement : DO statement WHILE LEFT_PAREN expr RIGHT_PAREN SEMICOLON
 
 for_statement : FOR LEFT_PAREN expr SEMICOLON expr SEMICOLON expr RIGHT_PAREN statement
         { $$ = create_node(FOR_STATEMENT, $3, $5, $7, $9); }
+    | FOR LEFT_PAREN expr SEMICOLON expr SEMICOLON RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, $3, $5, NULL, $8); }
+    | FOR LEFT_PAREN expr SEMICOLON SEMICOLON expr RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, $3, NULL, $6, $8); }
+    | FOR LEFT_PAREN SEMICOLON expr SEMICOLON expr RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, NULL, $4, $6, $8); }
+    | FOR LEFT_PAREN expr SEMICOLON SEMICOLON RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, $3, NULL, NULL, $7); }
+    | FOR LEFT_PAREN SEMICOLON SEMICOLON expr RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, NULL, NULL, $5, $7); }
+    | FOR LEFT_PAREN SEMICOLON expr SEMICOLON RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, NULL, $4, NULL, $7); }
+    | FOR LEFT_PAREN SEMICOLON SEMICOLON RIGHT_PAREN statement
+        { $$ = create_node(FOR_STATEMENT, NULL, NULL, NULL, $6); }
     ;
 
 return_statement : RETURN SEMICOLON
