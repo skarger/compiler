@@ -3,11 +3,11 @@
 #include <string.h>
 
 #include "../include/ir.h"
+#include "../include/utilities.h"
 
 FILE *output;
 
 int reg_idx = 0;
-char cur_reg[MAX_REG_LEN];
 
 int m(int argc, char *argv[]) {
     FILE *input;
@@ -43,14 +43,16 @@ int m(int argc, char *argv[]) {
     return rv;
 }
 
-int f(int a) {
-    return a;
-}
-
 char *current_reg(void) {
-    snprintf(cur_reg, MAX_REG_LEN, "$r%d", reg_idx);
+    char *buf;
+    util_emalloc((void **) &buf, MAX_REG_LEN);
+    snprintf(buf, MAX_REG_LEN, "$r%d", reg_idx);
+    return buf;
 }
 
 char *next_reg() {
-    snprintf(cur_reg, MAX_REG_LEN, "$r%d", ++reg_idx);
+    char *buf;
+    util_emalloc((void **) &buf, MAX_REG_LEN);
+    snprintf(buf, MAX_REG_LEN, "$r%d", ++reg_idx);
+    return buf;
 }

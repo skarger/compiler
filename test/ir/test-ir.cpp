@@ -39,13 +39,6 @@ class IrTest : public ::testing::Test {
       
     }
     
-    void ExpectString(const char *input) {
-      fputs(input, test_input);
-      fclose(test_input);
-      
-      EXPECT_EQ(0, f(0));
-    }
-
     void ExpectReg(void) {
         char *r0 = current_reg();
         char *r1 = next_reg();
@@ -60,10 +53,7 @@ TEST_F(IrTest, ValTest) {
   fputs("/", test_input);
   fclose(test_input);
 
-  EXPECT_EQ(0, f(0));
+  EXPECT_EQ(0, 0);
 }
 
-TEST_F(IrTest, StrTest) { this->ExpectString("str"); }
-
-TEST_F(IrTest, RegIdxTest) { this->ExpectReg(); }
-
+TEST_F(IrTest, RegTest) { this->ExpectReg(); }
