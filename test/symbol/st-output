@@ -1,0 +1,619 @@
+signed int ((
+/*
+ * symbol: main
+ * type: function (2 parameters) returning -> signed int
+ * parameters:
+ * type: signed int, name: argc
+ * type: pointer -> pointer -> signed char, name: argv
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+main)(signed int (
+/*
+ * symbol: argc
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argc), signed char (**(
+/*
+ * symbol: argv
+ * type: pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argv))))
+{
+if ( ((
+/*
+ * symbol: argc
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argc) > (1)) ) 
+{
+signed char (*(
+/*
+ * symbol: str
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+str));
+
+((
+/*
+ * symbol: str
+ * type: pointer -> signed char
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+str) = ((
+/*
+ * symbol: argv
+ * type: pointer -> pointer -> signed char
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+argv)[(1)]));
+}
+
+return (0);
+}
+signed int (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+x);
+signed int (
+/*
+ * symbol: dup1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
+signed int (
+/*
+ * symbol: dup1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
+signed char (
+/*
+ * symbol: dup1
+ * type: signed char
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+dup1);
+signed long ((
+/*
+ * symbol: fn1
+ * type: function (1 parameter) returning -> signed long
+ * parameters:
+ * type: signed int, name: y
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn1)(signed int (
+/*
+ * symbol: y
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+y)))
+{
+return ((
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+x) + (
+/*
+ * symbol: y
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+y));
+}
+signed int (
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1);
+signed int ((
+/*
+ * symbol: fn2
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: signed int, name: i2
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn2)(signed int (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2)))
+{
+signed int (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3);
+
+
+{
+signed int (
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4), (
+/*
+ * symbol: i5
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i5);
+
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) = ((((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) + (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2)) + (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3)) + (
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4)));
+}
+
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) += (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i3));
+((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1) -= (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i2));
+return (
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+i1);
+}
+void ((
+/*
+ * symbol: fn3
+ * type: function (1 parameter) returning -> void
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn3)(void ))
+{
+signed int (
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i1);
+
+
+{
+signed int (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i2);
+
+
+{
+signed int (
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i3);
+
+
+{
+signed int (
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4);
+
+((
+/*
+ * symbol: i4
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i4) = (((
+/*
+ * symbol: i3
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i3) * (
+/*
+ * symbol: i2
+ * type: signed int
+ *
+ * symbol table:
+ * scope: block
+ * overloading class: other names
+ */
+i2)) - ((
+/*
+ * symbol: i1
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+i1)++)));
+}
+
+}
+
+}
+
+}
+unsigned short ((
+/*
+ * symbol: fn4
+ * type: function (1 parameter) returning -> unsigned short
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn4)(void ))
+{
+return ((unsigned short ) (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+x));
+}
+signed char ((
+/*
+ * symbol: fn5
+ * type: function (1 parameter) returning -> signed char
+ * parameters:
+ * type: signed int, name: x
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn5)(signed int (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+x)))
+{
+return (
+/*
+ * symbol: x
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+x);
+}
+signed int ((
+/*
+ * symbol: fn6
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+fn6)(void ))
+{
+goto 
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END;
+
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END : return (0);
+}
+signed int ((
+/*
+ * symbol: errfn1
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn1)(void ))
+{
+return (i);
+}
+signed int ((
+/*
+ * symbol: errfn2
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn2)(void ))
+{
+goto 
+/*
+ * symbol: LAB
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+LAB;
+}
+signed int ((
+/*
+ * symbol: errfn3
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn3)(void ))
+{
+signed int (
+/*
+ * symbol: dup
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+dup);
+
+signed int (
+/*
+ * symbol: dup
+ * type: signed int
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: other names
+ */
+dup);
+
+}
+signed int ((
+/*
+ * symbol: errfn4
+ * type: function (1 parameter) returning -> signed int
+ * parameters:
+ * type: void, name: (none)
+ *
+ * symbol table:
+ * scope: file
+ * overloading class: other names
+ */
+errfn4)(void ))
+{
+goto 
+/*
+ * symbol: END
+ * type: named label
+ *
+ * symbol table:
+ * scope: function
+ * overloading class: statement labels
+ */
+END;
+return (0);
+}

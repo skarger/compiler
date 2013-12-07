@@ -6,6 +6,7 @@
 #include "src/include/parser.h"
 #include "src/include/utilities.h"
 #include "src/include/traverse.h"
+#include "src/include/symbol-traversal.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H

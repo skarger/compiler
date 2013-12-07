@@ -65,12 +65,15 @@ symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c -o $@
 
 symbol-main : symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-utils.o scope-fsm.o
+symbol-traversal.o symbol-utils.o scope-fsm.o
 	$(CC) symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-utils.o scope-fsm.o -o $@
+symbol-traversal.o symbol-utils.o scope-fsm.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
+
+symbol-traversal.o : src/symbol/symbol-traversal.c
+	$(CC) -c src/symbol/symbol-traversal.c
 
 traverse.o : src/symbol/traverse.c
 	$(CC) -c src/symbol/traverse.c
