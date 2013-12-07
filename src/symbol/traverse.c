@@ -16,10 +16,17 @@ extern SymbolCreationData *scd;
  */
 void start_traversal(Node *n) {
     FILE *output = stdout;
+    #ifdef COLLECT_SYMBOLS
     if (scd == NULL) {
         util_emalloc((void **) &scd, sizeof(SymbolCreationData));
-        initialize_traversal_data(scd);
+        initialize_symbol_creation_data(scd);
         scd->outfile = output;
     }
-    traverse_node(n, scd);
+    collect_symbol_data(n, scd);
+    #endif
+
+    #ifdef PRETTY_PRINT
+    pretty_print(n);
+    #endif
+
 }

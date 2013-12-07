@@ -7,8 +7,7 @@
 #define DEBUG
 #undef  DEBUG
 
-/* define PRETTY_PRINT for parser tests */
-#define PRETTY_PRINT
+
 
 
 /*

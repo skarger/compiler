@@ -37,21 +37,11 @@ void yyerror(char *s);
 %%      /*  beginning  of  rules  section  */
 translation_unit : top_level_decl
         {
-            #ifdef TRAVERSE
             start_traversal($1);
-            #endif
-            #ifdef PRETTY_PRINT
-            pretty_print($1);
-            #endif
         }
     | translation_unit top_level_decl
         {
-            #ifdef TRAVERSE
             start_traversal($2);
-            #endif
-            #ifdef PRETTY_PRINT
-            pretty_print($2);
-            #endif
         }
     ;
 
@@ -1177,7 +1167,7 @@ void print_data_node(void *np) {
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
-            #ifdef TRAVERSE
+            #ifdef COLLECT_SYMBOLS
             print_symbol(output, n->st_entry);
             #endif
             fprintf(output, "%s", n->data.str);

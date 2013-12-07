@@ -28,7 +28,7 @@ typedef struct SymbolCreationData SymbolCreationData;
 
 
 /* tree traversal */
-void traverse_node(Node *n, SymbolCreationData *scd);
+void collect_symbol_data(Node *n, SymbolCreationData *scd);
 
 /* symbol printing */
 void print_symbol(FILE *out, Symbol *s);

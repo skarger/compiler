@@ -16,13 +16,13 @@
 SymbolCreationData *scd = NULL;
 
 /* file helper procs */
-void initialize_traversal_data(SymbolCreationData *scd);
+void initialize_symbol_creation_data(SymbolCreationData *scd);
 long resolve_array_size(SymbolCreationData *scd, Node *n);
 Boolean array_bound_optional(SymbolCreationData *scd);
 Boolean invalid_operand(long operand);
 
 
-void initialize_traversal_data(SymbolCreationData *scd) {
+void initialize_symbol_creation_data(SymbolCreationData *scd) {
     scd->current_base_type = NO_DATA_TYPE;
     scd->current_symbol = NULL;
     scd->current_param_list = NULL;
@@ -37,9 +37,9 @@ void initialize_traversal_data(SymbolCreationData *scd) {
 }
 
 /*
- * traverse_node
- * Purpose: Recursively traverse nodes of parse tree.
- *          Perform processing at nodes, e.g. update symbol table.
+ * collect_symbol_data
+ * Purpose: Recursively traverse nodes of parse tree and collect data
+ *          to create symbols and insert in symbol table.
  * Parameters:
  *  n       Node * The node to start traversing from. Recursively traverses
  *          the children of n.
@@ -49,7 +49,7 @@ void initialize_traversal_data(SymbolCreationData *scd) {
  * Side-effects: None
  */
 
-void traverse_node(Node *n, SymbolCreationData *scd) {
+void collect_symbol_data(Node *n, SymbolCreationData *scd) {
     if (n == NULL) {
         return;
     }
@@ -82,17 +82,17 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             function_statement_labels_st =
                 new_current_st(FUNCTION_SCOPE, STATEMENT_LABELS, scd->stc);
             /* first child: function def spec */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             /* second child: compound statement */
             /* traversing function def spec returned us to the file level ST */
             /* now switch back to function body ST */
             set_current_st(function_other_names_st, scd->stc);
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             break;
         case FUNCTION_DEF_SPEC:
             scd->function_def_spec = TRUE;
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child1, scd);
+            collect_symbol_data(n->children.child2, scd);
             scd->function_def_spec = FALSE;
             break;
         case INIT_DECL_LIST:
@@ -101,19 +101,19 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             /* we may encounter a function declarator whose parameters */
             /* will overwrite the current base type, but we'll need it again */
             decl_base_type = scd->current_base_type;
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             /* second child: initialized declarator */
             /* restore the base type of the decl */
             scd->current_base_type = decl_base_type;
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             break;
         case PARAMETER_DECL:
             scd->current_param_list =
                 push_function_parameter(scd->current_param_list);
             /* type specifier */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             /* declarator */
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             /* this reset is redundant unless we had an abstract declarator */
             reset_current_symbol(scd);
             break;
@@ -127,9 +127,9 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
         case POINTER_DECLARATOR:
             create_symbol_if_necessary(scd);
             /* pointer(s) */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             /* direct declarator */
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             break;
         case POINTER:
             /* push pointers onto type tree */
@@ -137,7 +137,7 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             if (scd->processing_parameters) {
                 push_parameter_type(scd->current_param_list, POINTER);
             }
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             break;
         case FUNCTION_DECLARATOR:
             create_symbol_if_necessary(scd);
@@ -160,7 +160,7 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
 
             /* second child: parameters */
             scd->processing_parameters = TRUE;
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             scd->processing_parameters = FALSE;
             if (scd->function_def_spec) {
                 /* return back to the file level ST to process it */
@@ -177,7 +177,7 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             scd->current_param_list = NULL;
 
             /* first child: direct declarator */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
 
             scd->function_prototype = FALSE;
             break;
@@ -185,9 +185,9 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             /* second child: parameter decl */
             /* process the second child first so that we can push each */
             /* one onto the front and have them in order at the end */
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             /* first child: parameter list or parameter_decl */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             break;
         case COMPOUND_STATEMENT:
             /* verify that we have an inner block to avoid creating an extra */
@@ -195,7 +195,7 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             if (is_inner_block(scd->stc->current_scope)) {
                 new_current_st(scd->stc->current_scope, OTHER_NAMES, scd->stc);
             }
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             /* return to the STs at the enclosing scope */
             enclosing = scd->stc->current_st[OTHER_NAMES]->enclosing;
             set_current_st(enclosing, scd->stc);
@@ -227,7 +227,7 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
                 set_symbol_array_size(scd->current_symbol, array_size);
             }
             /* first child: direct declarator */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             break;
         case SIMPLE_DECLARATOR:
             /* have an identifier */
@@ -246,11 +246,11 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
                 handle_symbol_error(STE_ABS_DECL_PARAM, "abstract declarator");
             }
             create_symbol_if_necessary(scd);
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             break;
         case DIR_ABS_DECL:
             /* first child: direct_abstract_declarator */
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             if (scd->processing_parameters) {
                 /* intentionally converting type from ARRAY to POINTER */
                 push_parameter_type(scd->current_param_list, POINTER);
@@ -271,24 +271,24 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
             }
             break;
         case LABELED_STATEMENT:
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             id_symbol = find_symbol(scd->stc->current_st[STATEMENT_LABELS],
                                     n->children.child1->data.str);
             set_label_defined(id_symbol, TRUE);
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child2, scd);
             break;
         /* nodes we simply pass through with respect to symbol table */
         case FOR_STATEMENT:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            traverse_node(n->children.child3, scd);
-            traverse_node(n->children.child4, scd);
+            collect_symbol_data(n->children.child1, scd);
+            collect_symbol_data(n->children.child2, scd);
+            collect_symbol_data(n->children.child3, scd);
+            collect_symbol_data(n->children.child4, scd);
             break;
         case CONDITIONAL_EXPR:
         case IF_THEN_ELSE:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
-            traverse_node(n->children.child3, scd);
+            collect_symbol_data(n->children.child1, scd);
+            collect_symbol_data(n->children.child2, scd);
+            collect_symbol_data(n->children.child3, scd);
             break;
         case DECL:
         case PTR_ABS_DECL:
@@ -302,15 +302,15 @@ void traverse_node(Node *n, SymbolCreationData *scd) {
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
         case POSTFIX_EXPR:
-            traverse_node(n->children.child1, scd);
-            traverse_node(n->children.child2, scd);
+            collect_symbol_data(n->children.child1, scd);
+            collect_symbol_data(n->children.child2, scd);
             break;
         case EXPRESSION_STATEMENT:
         case RETURN_STATEMENT:
         case GOTO_STATEMENT:
         case UNARY_EXPR:
         case PREFIX_EXPR:
-            traverse_node(n->children.child1, scd);
+            collect_symbol_data(n->children.child1, scd);
             break;
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
@@ -721,4 +721,3 @@ void print_symbol_table(FILE *out, SymbolTable *st) {
     fprintf(out, " * scope: %s\n", st_scope_name(st));
     fprintf(out, " * overloading class: %s\n", st_overloading_class_name(st));
 }
-
