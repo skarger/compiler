@@ -25,7 +25,7 @@ enum data_type {
     UNSIGNED_INT,
     SIGNED_LONG,
     UNSIGNED_LONG,
-    OVERFLOW,
+    INTEGER_OVERFLOW,
     SCALAR,
     ARRAY,
     FUNCTION,

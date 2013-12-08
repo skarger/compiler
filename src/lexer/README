@@ -57,9 +57,9 @@ type = <number_type>            an enumerated type indicating the size of
                                 integer constant found,
                                 if token = NUMBER_CONSTANT
                                 one of:
-                                        OVERFLOW, SIGNED_SHORT, UNSIGNED_SHORT,
-                                        SIGNED_INT, UNSIGNED_INT,
-                                        SIGNED_LONG, UNSIGNED_LONG
+                                        INTEGER_OVERFLOW, SIGNED_SHORT,
+                                        UNSIGNED_SHORT, SIGNED_INT,
+                                        UNSIGNED_INT, SIGNED_LONG, UNSIGNED_LONG
                                     
 value = <integer>               the value of the integer constant, if 
                                 token = NUMBER_CONSTANT

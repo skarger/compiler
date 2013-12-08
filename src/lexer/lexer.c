@@ -215,7 +215,7 @@ while (0 != token) {
 char *get_integer_type(enum data_type type) {
     switch (type) {
     #define CASE_FOR(token) case token: return #token
-        CASE_FOR(OVERFLOW);
+        CASE_FOR(INTEGER_OVERFLOW);
         CASE_FOR(SIGNED_SHORT);
         CASE_FOR(UNSIGNED_SHORT);
         CASE_FOR(SIGNED_INT);

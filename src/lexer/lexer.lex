@@ -184,7 +184,7 @@ while return WHILE;
 0 |
 [1-9][0-9]* {
     yylval = (YYSTYPE) create_number(yytext);
-    if ( ((struct Number *) yylval)->type == OVERFLOW ) {
+    if ( ((struct Number *) yylval)->type == INTEGER_OVERFLOW ) {
         handle_error(E_INTEGER_OVERFLOW, yytext, yylineno);
         return UNRECOGNIZED;
     }
@@ -341,7 +341,7 @@ struct Number *create_number(char *digit_str) {
         * Integer constant was too large for unsigned long. value will be
         * MAX_ULONG, as defined by strtoul.
         */
-        n->type = OVERFLOW;
+        n->type = INTEGER_OVERFLOW;
     }  else if (n->value > 2147483647) {
         n->type = UNSIGNED_LONG;
     } else if (n->value > 65535) {

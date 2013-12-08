@@ -6,8 +6,6 @@
 
 FILE *input, *output;
 
-int f(int a);
-
 int main(int argc, char *argv[]) {
 
     int rv;
@@ -28,7 +26,9 @@ int main(int argc, char *argv[]) {
 
     /* do the work */
     //rv = yyparse();
-
+    IrNode *irn = create_ir_node(RETURN);
+    print_ir_node(stdout, irn);
+    fprintf(stdout, "\n");
 
     /* cleanup */
     if (output != stdout) {
@@ -39,8 +39,4 @@ int main(int argc, char *argv[]) {
     }
 
     return rv;
-}
-
-int f(int a) {
-    return a;
 }

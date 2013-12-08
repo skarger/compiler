@@ -35,6 +35,7 @@ lex.yy.c
 lexer
 parser-main
 symbol-main
+ir-main
 test-symbol-utils
 test-ir
 
