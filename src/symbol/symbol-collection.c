@@ -290,6 +290,7 @@ void collect_symbol_data(Node *n, SymbolCreationData *scd) {
             collect_symbol_data(n->children.child2, scd);
             collect_symbol_data(n->children.child3, scd);
             break;
+        case TRANSLATION_UNIT:
         case DECL:
         case PTR_ABS_DECL:
         case DECL_OR_STMT_LIST:

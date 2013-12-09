@@ -34,6 +34,7 @@ enum data_type {
      * equivalent to a lexical token, but often the type has a higher-level
      * semantic value that the parser ascertains.
      */
+    TRANSLATION_UNIT,
     FUNCTION_DEFINITION,
     FUNCTION_DEF_SPEC,
     DECL_OR_STMT_LIST,

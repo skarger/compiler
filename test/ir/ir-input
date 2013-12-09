@@ -1,15 +1,19 @@
+/*
 int starting_value;
 starting_value = 0;
+*/
 
-int add(int a, int b);
+/* int add(int a, int b); */
 
+int a;
 int main(void) {
-    int x;
-    x = add(starting_value, 10);
-    return x;
+    a = 3;
+    return 0;
 }
 
+/*
 int add(int a, int b) {
     return a + b;
 }
+*/
 

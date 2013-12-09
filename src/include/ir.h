@@ -9,9 +9,9 @@ struct IrNode {
     struct IrNode *prev;
     struct IrNode *next;
     int instruction;
-    int reg_idx1;
-    int reg_idx2;
-    int reg_idx3;
+    int arg1_idx;
+    int arg2_idx;
+    int res_idx;
 };
 typedef struct IrNode IrNode;
 
@@ -23,6 +23,9 @@ typedef struct IrList IrList;
 
 enum ir_instruction {
     LOAD_ADDR,
+    LOAD_INDIRECT_BYTE,
+    LOAD_INDIRECT_HALF_WORD,
+    LOAD_INDIRECT_WORD,
     LOAD_CONST,
     LOAD_INT,
     LOAD_WORD_INDIRECT,

@@ -18,7 +18,7 @@ void yyerror(char *s);
 
 %}
 
-%start  translation_unit
+%start root
 
 %token UNRECOGNIZED CHAR_CONSTANT STRING_CONSTANT NUMBER_CONSTANT IDENTIFIER
 %token BREAK CHAR CONTINUE DO ELSE FOR GOTO IF INT
@@ -35,13 +35,26 @@ void yyerror(char *s);
 
 
 %%      /*  beginning  of  rules  section  */
+root : translation_unit
+        {
+            #ifndef INTERACTIVE
+            start_traversal($1);
+            #endif
+        }
+    ;
 translation_unit : top_level_decl
         {
+            $$ = create_node(TRANSLATION_UNIT, NULL, $1);
+            #ifdef INTERACTIVE
             start_traversal($1);
+            #endif
         }
     | translation_unit top_level_decl
         {
+            $$ = create_node(TRANSLATION_UNIT, $1, $2);
+            #ifdef INTERACTIVE
             start_traversal($2);
+            #endif
         }
     ;
 
@@ -732,6 +745,7 @@ int number_of_children(enum data_type nt) {
         case POSTFIX_EXPR:
         case ABSTRACT_DECLARATOR:
             return 1;
+        case TRANSLATION_UNIT:
         case DECL_OR_STMT_LIST:
         case INIT_DECL_LIST:
         case FUNCTION_DEFINITION:
@@ -883,6 +897,7 @@ void pretty_print(void *np) {
         case PTR_ABS_DECL:
         case POINTER_DECLARATOR:
         case FUNCTION_DEFINITION:
+        case TRANSLATION_UNIT:
             pretty_print(n->children.child1);
             pretty_print(n->children.child2);
             break;
@@ -1304,6 +1319,7 @@ char *get_node_name(enum data_type nt) {
     /* parser productions */
     switch (nt) {
     #define CASE_FOR(nt) case nt: return #nt
+        CASE_FOR(TRANSLATION_UNIT);
         CASE_FOR(FUNCTION_DEFINITION);
         CASE_FOR(FUNCTION_DEF_SPEC);
         CASE_FOR(DECL_OR_STMT_LIST);
