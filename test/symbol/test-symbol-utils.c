@@ -28,24 +28,24 @@ int main() {
 }
 
 char *get_test_result_name(int res) {
-    if (res == PASS) return "PASS";
-    if (res == FAIL) return "FAIL";
+    if (res == SU_PASS) return "PASS";
+    if (res == SU_FAIL) return "FAIL";
 }
 
 int assert_equal_int(int i, int j) {
-    return (i == j ? PASS : FAIL);
+    return (i == j ? SU_PASS : SU_FAIL);
 }
 
 int assert_equal_string(char *str1, char *str2) {
-    return (strcmp(str1, str2) == 0 ? PASS : FAIL);
+    return (strcmp(str1, str2) == 0 ? SU_PASS : SU_FAIL);
 }
 
 int assert_true(Boolean b) {
-    return (b == TRUE ? PASS : FAIL);
+    return (b == TRUE ? SU_PASS : SU_FAIL);
 }
 
 int assert_not_true(Boolean b) {
-    return (b == FALSE ? PASS : FAIL);
+    return (b == FALSE ? SU_PASS : SU_FAIL);
 }
 
 void test_symbol_data() {
@@ -166,40 +166,40 @@ void test_st_data() {
     SymbolTableContainer *stc = create_st_container();
 
     /* verify expected size and values */
-    test_res = (sizeof(*stc) == sizeof(SymbolTableContainer) ? PASS : FAIL);
+    test_res = (sizeof(*stc) == sizeof(SymbolTableContainer) ? SU_PASS : SU_FAIL);
     printf("%s SymbolTableContainer: size\n", get_test_result_name(test_res));
 
-    test_res = (stc->symbol_tables[OTHER_NAMES] ==  NULL ? PASS : FAIL);
+    test_res = (stc->symbol_tables[OTHER_NAMES] ==  NULL ? SU_PASS : SU_FAIL);
     printf("%s SymbolTableContainer: initialize other names\n", get_test_result_name(test_res));
 
-    test_res = (stc->symbol_tables[STATEMENT_LABELS] ==  NULL ? PASS : FAIL);
+    test_res = (stc->symbol_tables[STATEMENT_LABELS] ==  NULL ? SU_PASS : SU_FAIL);
     printf("%s SymbolTableContainer: initialize statement labels\n", get_test_result_name(test_res));
 
     oc = get_overloading_class();
-    test_res = (stc->current_st[oc] != NULL ? PASS : FAIL);
+    test_res = (stc->current_st[oc] != NULL ? SU_PASS : SU_FAIL);
     printf("%s SymbolTableContainer: initialize current_st\n", get_test_result_name(test_res));
 
     SymbolTable *st = create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
 
 
-    test_res = (sizeof(*st) == sizeof(SymbolTable) ? PASS : FAIL);
+    test_res = (sizeof(*st) == sizeof(SymbolTable) ? SU_PASS : SU_FAIL);
     printf("%s SymbolTable: initialize size\n", get_test_result_name(test_res));
 
-    test_res = (st->scope == TOP_LEVEL_SCOPE ? PASS : FAIL);
+    test_res = (st->scope == TOP_LEVEL_SCOPE ? SU_PASS : SU_FAIL);
     printf("%s SymbolTable: initialize scope\n", get_test_result_name(test_res));
 
-    test_res = (st->oc == OTHER_NAMES ? PASS : FAIL);
+    test_res = (st->oc == OTHER_NAMES ? SU_PASS : SU_FAIL);
     printf("%s SymbolTable: initialize overloading class\n", get_test_result_name(test_res));
 
     /* check insertion */
     insert_symbol_table(st, stc);
     set_current_st(st, stc);
 
-    test_res = (stc->current_st[OTHER_NAMES] == st ? PASS : FAIL);
+    test_res = (stc->current_st[OTHER_NAMES] == st ? SU_PASS : SU_FAIL);
     printf("%s insert_symbol_table: insert into container\n", get_test_result_name(test_res));
 
     oc = get_overloading_class();
-    test_res = (stc->current_st[oc] == st ? PASS : FAIL);
+    test_res = (stc->current_st[oc] == st ? SU_PASS : SU_FAIL);
     printf("%s insert_symbol_table: update current_st\n", get_test_result_name(test_res));
 }
 
@@ -271,9 +271,9 @@ void verify_st_fsm(enum scope_state expected_state, int expected_scope, int expe
     int scope = get_scope();
     int oc = get_overloading_class();
 
-    test_state = (cur == expected_state ? PASS : FAIL);
-    test_scope = (scope == expected_scope ? PASS : FAIL);
-    test_oc    = (oc == expected_oc ? PASS : FAIL);
+    test_state = (cur == expected_state ? SU_PASS : SU_FAIL);
+    test_scope = (scope == expected_scope ? SU_PASS : SU_FAIL);
+    test_oc    = (oc == expected_oc ? SU_PASS : SU_FAIL);
 
     printf("%s current state: %s\n", get_test_result_name(test_state),
                                     get_scope_state_name(cur));

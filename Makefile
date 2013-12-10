@@ -118,7 +118,6 @@ utilities.o
 	g++ -isystem ${GTEST_DIR}/include -pthread test/ir/test-ir.cpp libgtest.a \
 ir-utils.o y.tab.o traverse.o scope-fsm.o symbol-collection.o symbol-utils.o \
 utilities.o -o $@
-	./test-ir
 
 libgtest.a : gtest-all.o
 	ar -rv libgtest.a gtest-all.o

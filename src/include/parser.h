@@ -35,7 +35,7 @@ int parenthesize(enum data_type nt);
 void print_pointers(Node *n);
 
 /* node constructor, setters, and getters */
-void *create_node(enum data_type nt, ...);
+Node *create_node(int node_type, ...);
 void *construct_node(enum data_type nt);
 void initialize_children(Node *n);
 void append_children(Node *n, int num_children, ...);

@@ -48,7 +48,7 @@ SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc) {
  *      or it has a non-null enclosing scope.
  *
  * Parameters:
- *      new - the new symbol table to insert
+ *      st - the new symbol table to insert
  *      stc - the symbol table container.
  *
  * Returns:
@@ -56,15 +56,15 @@ SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc) {
  * Side Effects:
  *      Updates the current symbol table pointer of the ST container.
  */
-void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc) {
+void insert_symbol_table(SymbolTable *st, SymbolTableContainer *stc) {
     /* oc is OTHER_NAMES or STATEMENT_LABELS */
-    int oc = st_overloading_class(new);
+    int oc = st_overloading_class(st);
     SymbolTable *enc = stc->current_st[oc];
     if (enc == NULL) {
-        stc->symbol_tables[oc] = new;
+        stc->symbol_tables[oc] = st;
     }
-    /* link new to its enclosing scope (even if it is NULL) */
-    new->enclosing = enc;
+    /* link st to its enclosing scope (even if it is NULL) */
+    st->enclosing = enc;
 }
 
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc) {

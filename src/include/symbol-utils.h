@@ -6,8 +6,8 @@
 #define SYMBOL_UTILS_H
 
 /* for testing */
-#define PASS 1
-#define FAIL 2
+#define SU_PASS 1
+#define SU_FAIL 2
 
 
 /* limit on the length of a type tree chain in string format */
@@ -50,7 +50,7 @@ enum symbol_error {
 SymbolTableContainer *create_st_container();
 void initialize_st_container(SymbolTableContainer *stc);
 SymbolTable *new_current_st(int scope, int oc, SymbolTableContainer *stc);
-void insert_symbol_table(SymbolTable *new, SymbolTableContainer *stc);
+void insert_symbol_table(SymbolTable *st, SymbolTableContainer *stc);
 void set_current_st(SymbolTable *st, SymbolTableContainer *stc);
 SymbolTable *get_current_st(SymbolTableContainer *stc);
 

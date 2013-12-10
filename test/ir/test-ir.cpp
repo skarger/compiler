@@ -6,6 +6,13 @@
 
 extern "C" {
 #include "../../src/include/ir.h"
+
+#include "../../src/include/traverse.h"
+#include "../../src/include/lexer.h"
+#include "../../y.tab.h"
+#include "../../src/include/parse-tree.h"
+#include "../../src/include/parser.h"
+#include "../../src/include/symbol-utils.h"
 }
 
 extern FILE *yyin;
@@ -24,19 +31,19 @@ class IrTest : public ::testing::Test {
      * test_input will be read by yyparse.
      */
     void SetUp() {
-      int fds[2];
-      ASSERT_EQ(0, pipe(fds));
+        int fds[2];
+        ASSERT_EQ(0, pipe(fds));
 
 
-      yyin = fdopen(fds[0], "r");
-      ASSERT_TRUE(yyin);
-      
-      test_input = fdopen(fds[1], "w");
-      ASSERT_TRUE(test_input);
+        yyin = fdopen(fds[0], "r");
+        ASSERT_TRUE(yyin);
+
+        test_input = fdopen(fds[1], "w");
+        ASSERT_TRUE(test_input);
     }
     
     void TearDown() {
-      
+
     }
     
     void ExpectReg(void) {
@@ -46,6 +53,31 @@ class IrTest : public ::testing::Test {
         EXPECT_STREQ("$r0", r0);
         EXPECT_STREQ("$r1", r1);
         EXPECT_EQ(0, strcmp(r1, r2));
+    }
+
+    void ExpectIR(void) {
+        YYSTYPE data;
+        char str1[] = "a";
+        data = (YYSTYPE) create_string(1);
+        strcpy( ((struct String *) data)->str, str1 );
+        Node *var = create_node(IDENTIFIER, data);
+        set_node_type(var, IDENTIFIER_EXPR);
+
+        char str2[] = "1";
+        data = create_number(str2);
+        Node *val = create_node(NUMBER_CONSTANT, data);
+
+        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, var, val);
+
+        Symbol *s = create_symbol();
+        push_symbol_type(s, SIGNED_INT);
+        set_symbol_table_entry(var, s);
+
+        IrList *ir_list = NULL;
+
+        compute_ir(bin_expr, ir_list);
+
+        EXPECT_EQ(0,0);
     }
 };
 
@@ -58,4 +90,38 @@ TEST_F(IrTest, ValTest) {
 
 TEST_F(IrTest, RegTest) { this->ExpectReg(); }
 
+TEST_F(IrTest, IrList1) { this->ExpectIR(); }
 
+/*
+Source:
+int a;
+
+int main(void) {
+    a = 1;
+}
+
+Suppose the assignment expression "a = 1" has a parse tree like this:
+        BINARY_EXPR (op: ASSIGN)
+        /               \
+IDENTIFIER_EXPR     NUMBER_CONSTANT
+
+Doing a post order traversal, compute the following info:
+
+IDENTIFIER_EXPR
+type: signed int
+lvalue: yes
+IR: loadaddress($r0, a)
+location:  $r0
+
+NUMBER_CONSTANT
+type: signed int
+lvalue: no
+IR: loadsignedint($r1, 1)
+location: $r1
+
+BINARY_EXPR (op: ASSIGN)
+type: signed int
+lvalue: no
+IR: loadaddress($r0, a), loadsignedint($r1, 1), storewordindirect($r1, $r0)
+location: $r0
+*/

@@ -28,9 +28,9 @@ char *next_reg() {
 IrNode *create_ir_node(int instr) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
-    irn->instruction = RETURN;
+    irn->instruction = instr;
     switch (instr) {
-        case RETURN:
+        case RETURNED_WORD:
             break;
         default:
             break;
@@ -59,6 +59,14 @@ void compute_ir(Node *n, IrList *irl) {
     }
 
     switch (n->n_type) {
+        case BINARY_EXPR:
+            compute_ir(n->children.child1, irl);
+            compute_ir(n->children.child2, irl);
+            /* type: the type of the assigned value */
+            /* lvalue: no */
+            /* IR */
+            /* location: register */
+            break;
         case EXPRESSION_STATEMENT:
         case GOTO_STATEMENT:
         case UNARY_EXPR:
@@ -66,7 +74,7 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
-            create_ir_node(RETURN);
+            create_ir_node(RETURNED_WORD);
             break;
         default:
             break;
@@ -76,8 +84,8 @@ void compute_ir(Node *n, IrList *irl) {
 void print_ir_node(FILE *out, IrNode *irn) {
     fprintf(out, "(");
     switch(irn->instruction) {
-        case RETURN:
-            fprintf(out, "return");
+        case RETURNED_WORD:
+            fprintf(out, "returnedword");
         default:
             break;
     }

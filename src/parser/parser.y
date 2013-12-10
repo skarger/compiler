@@ -596,8 +596,8 @@ void yyerror(char *s) {
  * create_node
  * Purpose: Create a new node for the parse tree.
  * Parameters:
- *      nt - the node type of the node to be created. The created Node
- *          will have n_type set to nt. Also create_node uses nt
+ *      node_type - the node type of the node to be created. The created Node
+ *          will have n_type set to node_type. Also create_node uses node_type
  *          to decide how to parse the rest of the parameters.
  *      ... - variable argument list depending on node type. The pattern is
  *          to first pass data values that will become fields in the created
@@ -611,26 +611,26 @@ void yyerror(char *s) {
  * Returns: A reference to the created node
  * Side effects: Allocates and sets heap storage
  */
-void *create_node(enum data_type nt, ...) {
-    Node *n = construct_node(nt);
+Node *create_node(int node_type, ...) {
+    Node *n = construct_node(node_type);
     Node *child1, *child2, *child3, *child4;
     initialize_children(n);
     va_list ap;
-    va_start(ap, nt);
+    va_start(ap, node_type);
 
-    if (has_operator(nt)) {
+    if (has_operator(node_type)) {
         set_operator(n, va_arg(ap, int));
     }
 
-    if (nt == TYPE_SPECIFIER) {
+    if (node_type == TYPE_SPECIFIER) {
         set_type(n, va_arg(ap, int));
     }
 
-    if (has_literal_data(nt)) {
+    if (has_literal_data(node_type)) {
         set_literal_data(n, va_arg(ap, YYSTYPE));
     }
 
-    int num_children = number_of_children(nt);
+    int num_children = number_of_children(node_type);
     switch (num_children) {
         case 1:
             child1 = va_arg(ap, Node *);

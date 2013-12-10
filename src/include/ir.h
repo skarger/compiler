@@ -34,7 +34,6 @@ enum ir_instruction {
     END_PROC,
     CALL,
     SYSCALL,
-    RETURN,
     RETURNED_WORD,
     STORE_WORD,
     STORE_WORD_INDIRECT,
