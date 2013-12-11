@@ -17,6 +17,7 @@ typedef struct IrNode IrNode;
 
 struct IrList {
     IrNode *head;
+    IrNode *tail;
     IrNode *cur;
 };
 typedef struct IrList IrList;
@@ -52,11 +53,15 @@ enum ir_instruction {
 };
 
 
+void compute_ir(Node *n, IrList *irl);
+
 char *current_reg(void);
 char *next_reg(void);
 IrNode *create_ir_node(int instr);
 IrList *create_ir_list(void);
-void compute_ir(Node *n, IrList *irl);
+IrNode *append_ir_node(IrNode *irn, IrList *irl);
+
+
 
 void print_ir_node(FILE *out, IrNode *irn);
 

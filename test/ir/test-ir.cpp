@@ -73,11 +73,40 @@ class IrTest : public ::testing::Test {
         push_symbol_type(s, SIGNED_INT);
         set_symbol_table_entry(var, s);
 
-        IrList *ir_list = NULL;
+        IrList *ir_list = create_ir_list();
+
 
         compute_ir(bin_expr, ir_list);
 
+
         EXPECT_EQ(0,0);
+    }
+
+    void ExpectIRList(void) {
+        IrNode *ir_node1 = create_ir_node(LOAD_ADDR);
+        IrNode *ir_node2 = create_ir_node(LOAD_INDIRECT_WORD);
+        IrList *ir_list = create_ir_list();
+
+        EXPECT_EQ(NULL, ir_list->head);
+        EXPECT_EQ(NULL, ir_list->tail);
+        EXPECT_EQ(NULL, ir_list->cur);
+
+        append_ir_node(ir_node1, ir_list);
+
+        EXPECT_EQ(ir_node1, ir_list->head);
+        EXPECT_EQ(ir_node1, ir_list->tail);
+        EXPECT_EQ(NULL, ir_list->head->next);
+        EXPECT_EQ(NULL, ir_list->tail->next);
+        EXPECT_EQ(NULL, ir_list->head->prev);
+        EXPECT_EQ(NULL, ir_list->tail->prev);
+
+        append_ir_node(ir_node2, ir_list);
+        EXPECT_EQ(ir_node1, ir_list->head);
+        EXPECT_EQ(ir_node2, ir_list->tail);
+        EXPECT_EQ(ir_node2, ir_list->head->next);
+        EXPECT_EQ(NULL, ir_list->tail->next);
+        EXPECT_EQ(NULL, ir_list->head->prev);
+        EXPECT_EQ(ir_node1, ir_list->tail->prev);
     }
 };
 
@@ -91,6 +120,8 @@ TEST_F(IrTest, ValTest) {
 TEST_F(IrTest, RegTest) { this->ExpectReg(); }
 
 TEST_F(IrTest, IrList1) { this->ExpectIR(); }
+
+TEST_F(IrTest, IrList2) { this->ExpectIRList(); }
 
 /*
 Source:

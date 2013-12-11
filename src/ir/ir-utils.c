@@ -43,10 +43,23 @@ IrList *create_ir_list(void) {
     IrList *irl;
     util_emalloc((void **) &irl, sizeof(IrList));
     irl->head = NULL;
+    irl->tail = NULL;
     irl->cur = NULL;
     return irl;
 }
 
+IrNode *append_ir_node(IrNode *irn, IrList *irl) {
+    if (irl->head == NULL) {
+        irl->head = irn;
+        irn->prev = NULL;
+    } else {
+        irl->tail->next = irn;
+        irn->prev = irl->tail;
+        irn->next = NULL;
+    }
+    irn->next = NULL;
+    irl->tail = irn;
+}
 
 
 void compute_ir(Node *n, IrList *irl) {
