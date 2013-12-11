@@ -61,6 +61,13 @@ IrNode *append_ir_node(IrNode *irn, IrList *irl) {
     irl->tail = irn;
 }
 
+int instruction(IrNode *irn) {
+    if (irn == NULL) {
+        return NO_IR_INSTRUCTION;
+    }
+    return irn->instruction;
+}
+
 
 void compute_ir(Node *n, IrList *irl) {
     if (n == NULL) {
@@ -75,6 +82,7 @@ void compute_ir(Node *n, IrList *irl) {
         case BINARY_EXPR:
             compute_ir(n->children.child1, irl);
             compute_ir(n->children.child2, irl);
+            append_ir_node(create_ir_node(STORE_WORD_INDIRECT), irl);
             /* type: the type of the assigned value */
             /* lvalue: no */
             /* IR */

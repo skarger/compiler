@@ -78,13 +78,18 @@ class IrTest : public ::testing::Test {
 
         compute_ir(bin_expr, ir_list);
 
+        EXPECT_EQ(STORE_WORD_INDIRECT, instruction(ir_list->tail));
 
-        EXPECT_EQ(0,0);
+    }
+
+    void ExpectIRNode(void) {
+        IrNode *ir_node = create_ir_node(LOAD_ADDR);
+        EXPECT_EQ(LOAD_ADDR, instruction(ir_node));
     }
 
     void ExpectIRList(void) {
         IrNode *ir_node1 = create_ir_node(LOAD_ADDR);
-        IrNode *ir_node2 = create_ir_node(LOAD_INDIRECT_WORD);
+        IrNode *ir_node2 = create_ir_node(LOAD_WORD_INDIRECT);
         IrList *ir_list = create_ir_list();
 
         EXPECT_EQ(NULL, ir_list->head);
@@ -122,6 +127,8 @@ TEST_F(IrTest, RegTest) { this->ExpectReg(); }
 TEST_F(IrTest, IrList1) { this->ExpectIR(); }
 
 TEST_F(IrTest, IrList2) { this->ExpectIRList(); }
+
+TEST_F(IrTest, IrNode1) { this->ExpectIRNode(); }
 
 /*
 Source:

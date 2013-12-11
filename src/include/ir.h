@@ -23,13 +23,13 @@ struct IrList {
 typedef struct IrList IrList;
 
 enum ir_instruction {
+    NO_IR_INSTRUCTION,
     LOAD_ADDR,
-    LOAD_INDIRECT_BYTE,
-    LOAD_INDIRECT_HALF_WORD,
-    LOAD_INDIRECT_WORD,
+    LOAD_BYTE_INDIRECT,
+    LOAD_HALF_WORD_INDIRECT,
+    LOAD_WORD_INDIRECT,
     LOAD_CONST,
     LOAD_INT,
-    LOAD_WORD_INDIRECT,
     PARAMETER,
     BEGIN_PROC,
     END_PROC,
@@ -60,6 +60,7 @@ char *next_reg(void);
 IrNode *create_ir_node(int instr);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
+int instruction(IrNode *irn);
 
 
 
