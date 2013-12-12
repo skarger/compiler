@@ -344,10 +344,10 @@ struct Number *create_number(char *digit_str) {
         n->type = INTEGER_OVERFLOW;
     }  else if (n->value > 2147483647) {
         n->type = UNSIGNED_LONG;
-    } else if (n->value > 65535) {
-        n->type = SIGNED_INT;
     } else {
-        n->type = SIGNED_SHORT;
+        /* 65535 is the largest SIGNED_SHORT */
+        /* but just call it an int */
+        n->type = SIGNED_INT;
     }
 
     return n;

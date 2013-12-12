@@ -60,18 +60,18 @@ class IrTest : public ::testing::Test {
         char str1[] = "a";
         data = (YYSTYPE) create_string(1);
         strcpy( ((struct String *) data)->str, str1 );
-        Node *var = create_node(IDENTIFIER, data);
-        set_node_type(var, IDENTIFIER_EXPR);
+        Node *id_expr = create_node(IDENTIFIER, data);
+        set_node_type(id_expr, IDENTIFIER_EXPR);
 
         char str2[] = "1";
         data = create_number(str2);
-        Node *val = create_node(NUMBER_CONSTANT, data);
+        Node *num_const = create_node(NUMBER_CONSTANT, data);
 
-        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, var, val);
+        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, id_expr, num_const);
 
         Symbol *s = create_symbol();
         push_symbol_type(s, SIGNED_INT);
-        set_symbol_table_entry(var, s);
+        set_symbol_table_entry(id_expr, s);
 
         IrList *ir_list = create_ir_list();
 
@@ -79,6 +79,12 @@ class IrTest : public ::testing::Test {
         compute_ir(bin_expr, ir_list);
 
         EXPECT_EQ(STORE_WORD_INDIRECT, instruction(ir_list->tail));
+        EXPECT_EQ(FALSE, node_is_lvalue(bin_expr));
+
+        EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
+        EXPECT_EQ(FALSE, node_is_lvalue(num_const));
+
+        //EXPECT_EQ(NO_DATA_TYPE, expression_outer_type(bin_expr));
 
     }
 

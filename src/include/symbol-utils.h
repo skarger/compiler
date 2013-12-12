@@ -94,6 +94,11 @@ char *parameter_type_string(FunctionParameter *fp);
 Boolean parameters_same_type(FunctionParameter *fp1,
                                     FunctionParameter *fp2);
 
+/* expression */
+void push_expression_type(Node *n, int t);
+int expression_outer_type(Node *n);
+void set_expression_type(Node *n, Symbol *s);
+
 /* type node */
 TypeNode *create_type_node(int type);
 TypeNode *push_type(TypeNode *type_tree, int t);

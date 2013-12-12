@@ -13,12 +13,6 @@
 
 #define YYSTYPE void *
 
-#define CHAR_BYTES 1
-#define SHORT_BYTES 2
-#define INT_BYTES 4
-#define LONG_BYTES 4
-
-
 enum lexer_error {
     E_SUCCESS,
     E_ESCAPE_SEQ = -1,

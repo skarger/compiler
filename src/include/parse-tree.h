@@ -109,12 +109,22 @@ union NodeData {
 };
 
 /*
+ * A subset of Nodes are expressions
+ */
+struct Expression {
+    Boolean lvalue;         /* is this expression an lvalue? */
+    TypeNode *type_tree;    /* the expression type */
+};
+
+/*
  * Node
  * The main data structure for the parse tree.
  */
 struct Node {
     enum data_type n_type;  /* node type */
     Boolean is_func_decl;
+    struct Expression expr;
+    Symbol *st_entry;       /* symbol table entry */
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
     struct {
@@ -123,7 +133,6 @@ struct Node {
         Node *child3;
         Node *child4;
     } children;
-    Symbol *st_entry;       /* symbol table entry */
 };
 
 #endif

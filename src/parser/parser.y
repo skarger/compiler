@@ -781,6 +781,25 @@ int number_of_children(enum data_type nt) {
     }
 }
 
+Boolean is_expression(int node_type) {
+    switch (node_type) {
+        case CONDITIONAL_EXPR:
+        case BINARY_EXPR:
+        case CAST_EXPR:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+        case POSTFIX_EXPR:
+        case FUNCTION_CALL:
+        case SUBSCRIPT_EXPR:
+        case STRING_CONSTANT:
+        case NUMBER_CONSTANT:
+        case CHAR_CONSTANT:
+            return TRUE;
+        default:
+            return FALSE;
+    }
+}
+
 
 /*
  * append_children
@@ -847,6 +866,10 @@ void *construct_node(enum data_type nt) {
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
     n->is_func_decl = FALSE;
+    if (is_expression(nt)) {
+        n->expr.lvalue = FALSE;
+        push_expression_type(n, NO_DATA_TYPE);
+    }
     n->st_entry = NULL;
     return n;
 }

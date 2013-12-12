@@ -4,6 +4,7 @@
 
 #include "../include/ir.h"
 #include "../include/utilities.h"
+#include "../../y.tab.h"
 
 FILE *output;
 
@@ -68,6 +69,10 @@ int instruction(IrNode *irn) {
     return irn->instruction;
 }
 
+Boolean node_is_lvalue(Node *n) {
+    return n->expr.lvalue;
+}
+
 
 void compute_ir(Node *n, IrList *irl) {
     if (n == NULL) {
@@ -88,6 +93,9 @@ void compute_ir(Node *n, IrList *irl) {
             /* IR */
             /* location: register */
             break;
+        case IDENTIFIER_EXPR:
+            n->expr.lvalue = TRUE;
+        case NUMBER_CONSTANT:
         case EXPRESSION_STATEMENT:
         case GOTO_STATEMENT:
         case UNARY_EXPR:

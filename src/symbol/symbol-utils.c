@@ -353,6 +353,19 @@ Boolean parameters_same_type(FunctionParameter *fp1, FunctionParameter *fp2) {
     return equal_types(tn1, tn2);
 }
 
+/* expression */
+void push_expression_type(Node *n, int t) {
+    push_type(n->expr.type_tree, t);
+}
+
+void set_expression_type(Node *n, Symbol *s) {
+    n->expr.type_tree = s->type_tree;
+}
+
+int expression_outer_type(Node *n) {
+    return n->expr.type_tree->type;
+}
+
 
 /* TypeNode helpers */
 TypeNode *create_type_node(int type) {

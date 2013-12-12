@@ -46,6 +46,7 @@ void set_node_type(Node *n, enum data_type nt);
 int has_literal_data(enum data_type nt);
 int has_operator(enum data_type nt);
 int number_of_children(enum data_type nt);
+Boolean is_expression(int node_type);
 void set_symbol_table_entry(Node *n, Symbol *s);
 
 /* error handling */

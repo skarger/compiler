@@ -5,6 +5,12 @@
 
 #define MAX_REG_LEN 24
 
+#define CHAR_BYTES 1
+#define SHORT_BYTES 2
+#define INT_BYTES 4
+#define LONG_BYTES 4
+
+
 struct IrNode {
     struct IrNode *prev;
     struct IrNode *next;
@@ -61,7 +67,7 @@ IrNode *create_ir_node(int instr);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
 int instruction(IrNode *irn);
-
+Boolean node_is_lvalue(Node *n);
 
 
 void print_ir_node(FILE *out, IrNode *irn);
