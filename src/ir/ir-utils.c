@@ -70,17 +70,16 @@ int instruction(IrNode *irn) {
 }
 
 Boolean node_is_lvalue(Node *n) {
-    return n->expr.lvalue;
+    return n->lvalue;
 }
 
+void start_ir_computation(void) {
+    ir_list = create_ir_list();
+}
 
 void compute_ir(Node *n, IrList *irl) {
     if (n == NULL) {
         return;
-    }
-
-    if (irl == NULL) {
-        irl = create_ir_list();
     }
 
     switch (n->n_type) {
@@ -88,13 +87,13 @@ void compute_ir(Node *n, IrList *irl) {
             compute_ir(n->children.child1, irl);
             compute_ir(n->children.child2, irl);
             append_ir_node(create_ir_node(STORE_WORD_INDIRECT), irl);
-            /* type: the type of the assigned value */
+            /* type: assume SIGNED_INT */
             /* lvalue: no */
             /* IR */
             /* location: register */
             break;
         case IDENTIFIER_EXPR:
-            n->expr.lvalue = TRUE;
+            n->lvalue = TRUE;
         case NUMBER_CONSTANT:
         case EXPRESSION_STATEMENT:
         case GOTO_STATEMENT:

@@ -866,10 +866,7 @@ void *construct_node(enum data_type nt) {
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
     n->is_func_decl = FALSE;
-    if (is_expression(nt)) {
-        n->expr.lvalue = FALSE;
-        push_expression_type(n, NO_DATA_TYPE);
-    }
+    n->lvalue = FALSE;
     n->st_entry = NULL;
     return n;
 }

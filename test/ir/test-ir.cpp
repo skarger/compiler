@@ -40,6 +40,8 @@ class IrTest : public ::testing::Test {
 
         test_input = fdopen(fds[1], "w");
         ASSERT_TRUE(test_input);
+
+        start_ir_computation();
     }
     
     void TearDown() {
@@ -84,7 +86,6 @@ class IrTest : public ::testing::Test {
         EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
         EXPECT_EQ(FALSE, node_is_lvalue(num_const));
 
-        //EXPECT_EQ(NO_DATA_TYPE, expression_outer_type(bin_expr));
 
     }
 

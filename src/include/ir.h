@@ -59,6 +59,7 @@ enum ir_instruction {
 };
 
 
+void start_ir_computation(void);
 void compute_ir(Node *n, IrList *irl);
 
 char *current_reg(void);

@@ -108,13 +108,6 @@ union NodeData {
     char *str;         /* IDENTIFIER, STRING_CONSTANT */
 };
 
-/*
- * A subset of Nodes are expressions
- */
-struct Expression {
-    Boolean lvalue;         /* is this expression an lvalue? */
-    TypeNode *type_tree;    /* the expression type */
-};
 
 /*
  * Node
@@ -123,7 +116,7 @@ struct Expression {
 struct Node {
     enum data_type n_type;  /* node type */
     Boolean is_func_decl;
-    struct Expression expr;
+    Boolean lvalue;
     Symbol *st_entry;       /* symbol table entry */
     union NodeData data;
     /* accommodate all node types, regardless of number of children */
