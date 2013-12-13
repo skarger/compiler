@@ -80,6 +80,11 @@ class IrTest : public ::testing::Test {
 
         compute_ir(bin_expr, ir_list);
 
+
+        EXPECT_EQ(LOAD_WORD_INDIRECT, instruction(ir_list->head));
+        EXPECT_EQ(LOAD_CONSTANT, instruction(ir_list->head->next));
+
+
         EXPECT_EQ(STORE_WORD_INDIRECT, instruction(ir_list->tail));
         EXPECT_EQ(FALSE, node_is_lvalue(bin_expr));
 
@@ -90,13 +95,13 @@ class IrTest : public ::testing::Test {
     }
 
     void ExpectIRNode(void) {
-        IrNode *ir_node = create_ir_node(LOAD_ADDR);
+        IrNode *ir_node = create_ir_node(LOAD_ADDR, 0, 0 , 0, "", 0);
         EXPECT_EQ(LOAD_ADDR, instruction(ir_node));
     }
 
     void ExpectIRList(void) {
-        IrNode *ir_node1 = create_ir_node(LOAD_ADDR);
-        IrNode *ir_node2 = create_ir_node(LOAD_WORD_INDIRECT);
+        IrNode *ir_node1 = create_ir_node(LOAD_ADDR, 0, 0 , 0, "", 0);
+        IrNode *ir_node2 = create_ir_node(LOAD_WORD_INDIRECT, 0, 0 , 0, "", 0);
         IrList *ir_list = create_ir_list();
 
         EXPECT_EQ(NULL, ir_list->head);

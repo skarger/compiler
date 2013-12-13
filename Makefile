@@ -81,8 +81,11 @@ traverse.o : src/symbol/traverse.c
 scope-fsm.o : src/symbol/scope-fsm.c
 	$(CC) -c src/symbol/scope-fsm.c
 
-ir-main : ir-main.o ir-utils.o utilities.o
-	$(CC) ir-main.o ir-utils.o utilities.o -o $@
+ir-main : ir-main.o ir-utils.o y.tab.o traverse.o \
+scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
+	$(CC) ir-main.o ir-utils.o y.tab.o traverse.o \
+scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
+
 
 ir-main.o : src/ir/ir-main.c
 	$(CC) -c src/ir/ir-main.c

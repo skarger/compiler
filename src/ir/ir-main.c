@@ -4,7 +4,19 @@
 
 #include "../include/ir.h"
 
+#include "../include/traverse.h"
+#include "../include/lexer.h"
+#include "../../y.tab.h"
+#include "../include/parse-tree.h"
+#include "../include/parser.h"
+#include "../include/symbol-utils.h"
+
+
+
+
 FILE *input, *output;
+
+void test_print_ir(void);
 
 int main(int argc, char *argv[]) {
 
@@ -26,8 +38,7 @@ int main(int argc, char *argv[]) {
 
     /* do the work */
     //rv = yyparse();
-    IrNode *irn = create_ir_node(RETURN);
-    print_ir_node(stdout, irn);
+    test_print_ir();
     fprintf(stdout, "\n");
 
     /* cleanup */
@@ -39,4 +50,30 @@ int main(int argc, char *argv[]) {
     }
 
     return rv;
+}
+
+void test_print_ir(void) {
+        YYSTYPE data;
+        char str1[] = "a";
+        data = (YYSTYPE) create_string(1);
+        strcpy( ((struct String *) data)->str, str1 );
+        Node *id_expr = create_node(IDENTIFIER, data);
+        set_node_type(id_expr, IDENTIFIER_EXPR);
+
+        char str2[] = "1";
+        data = create_number(str2);
+        Node *num_const = create_node(NUMBER_CONSTANT, data);
+
+        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, id_expr, num_const);
+
+        Symbol *s = create_symbol();
+        push_symbol_type(s, SIGNED_INT);
+        set_symbol_table_entry(id_expr, s);
+
+        IrList *ir_list = create_ir_list();
+
+
+        compute_ir(bin_expr, ir_list);
+
+        print_ir_list(stdout, ir_list);
 }

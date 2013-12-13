@@ -8,7 +8,7 @@
 
 FILE *output;
 
-int reg_idx = 0;
+static int reg_idx = 0;
 IrList *ir_list = NULL;
 
 
@@ -26,10 +26,15 @@ char *next_reg() {
     return buf;
 }
 
-IrNode *create_ir_node(int instr) {
+IrNode *create_ir_node(int instr, int res_idx, int arg1_idx, int arg2_idx, char *label, int num) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
     irn->instruction = instr;
+    irn->res_idx;
+    irn->arg1_idx;
+    irn->arg2_idx;
+    irn->label = label;
+    irn->num = num;
     switch (instr) {
         case RETURNED_WORD:
             break;
@@ -86,7 +91,7 @@ void compute_ir(Node *n, IrList *irl) {
         case BINARY_EXPR:
             compute_ir(n->children.child1, irl);
             compute_ir(n->children.child2, irl);
-            append_ir_node(create_ir_node(STORE_WORD_INDIRECT), irl);
+            append_ir_node(create_ir_node(STORE_WORD_INDIRECT, ++reg_idx, 0, 0, "", 0), irl);
             /* type: assume SIGNED_INT */
             /* lvalue: no */
             /* IR */
@@ -94,7 +99,13 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case IDENTIFIER_EXPR:
             n->lvalue = TRUE;
+            /* get name from symbol */
+            append_ir_node(create_ir_node(LOAD_WORD_INDIRECT, ++reg_idx, 0, 0, n->data.str, 0), irl);
+            break;
         case NUMBER_CONSTANT:
+            n->lvalue = FALSE;
+            append_ir_node(create_ir_node(LOAD_CONSTANT, ++reg_idx, 0, 0, "", n->data.num), irl);
+            break;
         case EXPRESSION_STATEMENT:
         case GOTO_STATEMENT:
         case UNARY_EXPR:
@@ -102,10 +113,18 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
-            create_ir_node(RETURNED_WORD);
+            create_ir_node(RETURNED_WORD, 0, 0, 0, "", 0);
             break;
         default:
             break;
+    }
+}
+
+void print_ir_list(FILE *out, IrList *irl) {
+    irl->cur = irl->head;
+    while (irl->cur != NULL) {
+        print_ir_node(stdout, irl->cur);
+        irl->cur = irl->cur->next;
     }
 }
 
@@ -114,8 +133,18 @@ void print_ir_node(FILE *out, IrNode *irn) {
     switch(irn->instruction) {
         case RETURNED_WORD:
             fprintf(out, "returnedword");
+            break;
+        case STORE_WORD_INDIRECT:
+            fprintf(out, "storewordindirect, $r%d, $r%d", irn->arg1_idx, irn->res_idx);
+            break;
+        case LOAD_WORD_INDIRECT:
+            fprintf(out, "loadwordindirect, $r%d, %s", irn->res_idx, irn->label);
+            break;
+        case LOAD_CONSTANT:
+            fprintf(out, "loadconstant, $r%d, %d", irn->res_idx, irn->num);
+            break;
         default:
             break;
     }
-    fprintf(out, ")");
+    fprintf(out, ")\n");
 }
