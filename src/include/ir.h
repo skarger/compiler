@@ -11,26 +11,6 @@
 #define INT_BYTES 4
 #define LONG_BYTES 4
 
-
-struct IrNode {
-    struct IrNode *prev;
-    struct IrNode *next;
-    enum ir_instruction instruction;
-    int res_idx;
-    int arg1_idx;
-    int arg2_idx;
-    Symbol *s;
-    int num; /* constant maybe delete */
-};
-typedef struct IrNode IrNode;
-
-struct IrList {
-    IrNode *head;
-    IrNode *tail;
-    IrNode *cur;
-};
-typedef struct IrList IrList;
-
 enum ir_instruction {
     NO_IR_INSTRUCTION,
     LOAD_ADDR,
@@ -61,13 +41,31 @@ enum ir_instruction {
     SUBU
 };
 
+struct IrNode {
+    struct IrNode *prev;
+    struct IrNode *next;
+    enum ir_instruction instruction;
+    int n1;
+    int n2;
+    int n3;
+    Symbol *s;
+};
+typedef struct IrNode IrNode;
+
+struct IrList {
+    IrNode *head;
+    IrNode *tail;
+    IrNode *cur;
+};
+typedef struct IrList IrList;
+
 
 void start_ir_computation(void);
 void compute_ir(Node *n, IrList *irl);
 
 char *current_reg(void);
 char *next_reg(void);
-IrNode *create_ir_node(int instr, int res_idx, int arg1_idx, int arg2_idx, char *label, int num);
+IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
 int instruction(IrNode *irn);
