@@ -68,8 +68,8 @@ void test_print_ir(void) {
         data = create_number(str2);
         Node *num_const = create_node(NUMBER_CONSTANT, data);
 
-        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, id_expr, num_const);
-
+        /* Node *bin_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const); */
+        Node *bin_expr = create_node(BINARY_EXPR, LOGICAL_OR, id_expr, num_const);
 
         IrList *ir_list = create_ir_list();
 

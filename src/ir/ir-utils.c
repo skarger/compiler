@@ -47,6 +47,10 @@ IrNode *irn_store_number_constant(int instr, int val, int to_idx) {
     return create_ir_node(instr, val, to_idx, NR, NULL);
 }
 
+IrNode *irn_logical(int instr, int to_idx, int oprnd1, int oprnd2) {
+    return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL);
+}
+
 IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
@@ -112,13 +116,26 @@ void compute_ir(Node *n, IrList *irl) {
     }
 
     switch (n->n_type) {
-        case BINARY_EXPR:
+        case ASSIGNMENT_EXPR:
             child1 = n->children.child1;
             child2 = n->children.child2;
             compute_ir(child1, irl);
             compute_ir(child2, irl);
             irn1 = irn_store_number_constant(STORE_WORD_INDIRECT,
                             child2->expr->location, child1->expr->location);
+            append_ir_node(irn1, irl);
+            break;
+        case BINARY_EXPR:
+            child1 = n->children.child1;
+            child2 = n->children.child2;
+            compute_ir(child1, irl);
+            compute_ir(child2, irl);
+
+            n->expr->lvalue = FALSE;
+            n->expr->location = ++reg_idx;
+            irn1 = irn_logical(LOG_OR, n->expr->location,
+                                child2->expr->location, child1->expr->location);
+
             append_ir_node(irn1, irl);
             /* type: assume SIGNED_INT */
             /* lvalue: no */
@@ -176,6 +193,9 @@ void print_ir_node(FILE *out, IrNode *irn) {
             break;
         case LOAD_CONSTANT:
             fprintf(out, "loadconstant, $r%d, %d", irn->n1, irn->n2);
+            break;
+        case LOG_OR:
+            fprintf(out, "logicalor, $r%d, $r%d, $r%d", irn->n1, irn->n2, irn->n3);
             break;
         default:
             break;

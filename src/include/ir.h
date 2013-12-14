@@ -38,7 +38,8 @@ enum ir_instruction {
     SUB,
     MULT,
     ADDU,
-    SUBU
+    SUBU,
+    LOG_OR
 };
 
 struct IrNode {

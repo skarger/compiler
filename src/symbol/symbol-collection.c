@@ -299,6 +299,7 @@ void collect_symbol_data(Node *n, SymbolCreationData *scd) {
         case IF_THEN:
         case CAST_EXPR:
         case TYPE_NAME:
+        case ASSIGNMENT_EXPR:
         case BINARY_EXPR:
         case SUBSCRIPT_EXPR:
         case FUNCTION_CALL:
@@ -379,6 +380,7 @@ Boolean array_bound_optional(SymbolCreationData *scd) {
 unsigned long resolve_constant_expr(Node *n) {
     unsigned long resolve_conditional_expr(Node *n);
     unsigned long resolve_binary_expr(Node *n);
+    unsigned long resolve_assignment_expr(Node *n);
     unsigned long resolve_cast_expr(Node *n);
     unsigned long resolve_unary_expr(Node *n);
     unsigned long resolve_prefix_expr(Node *n);
@@ -398,6 +400,8 @@ unsigned long resolve_constant_expr(Node *n) {
             return resolve_conditional_expr(n);
         case BINARY_EXPR:
             return resolve_binary_expr(n);
+        case ASSIGNMENT_EXPR:
+            return resolve_assignment_expr(n);
         case UNARY_EXPR:
             return resolve_unary_expr(n);
         /* error cases */
@@ -497,6 +501,23 @@ unsigned long resolve_binary_expr(Node *n) {
             return child1 / child2;
         case REMAINDER:
             return child1 % child2;
+        default:
+            /* error */
+            return VARIABLE_VALUE;
+    }
+}
+
+unsigned long resolve_assignment_expr(Node *n) {
+    unsigned long child1, child2;
+    child1 = resolve_constant_expr(n->children.child1);
+    child2 = resolve_constant_expr(n->children.child2);
+    if (invalid_operand(child1)) {
+        return child1;
+    }
+    if (invalid_operand(child2)) {
+        return child2;
+    }
+    switch (n->data.attributes[OPERATOR]) {
         /* value of assignment and comma expression is the value of the RHS */
         case ASSIGN:
         case ADD_ASSIGN:
@@ -512,7 +533,6 @@ unsigned long resolve_binary_expr(Node *n) {
         case COMMA:
             return VARIABLE_VALUE;
         default:
-            /* error */
             return VARIABLE_VALUE;
     }
 }

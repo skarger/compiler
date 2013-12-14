@@ -62,6 +62,7 @@ enum data_type {
     NULL_STATEMENT,
     CONDITIONAL_EXPR,
     BINARY_EXPR,
+    ASSIGNMENT_EXPR,
     CAST_EXPR,
     UNARY_EXPR,
     PREFIX_EXPR,

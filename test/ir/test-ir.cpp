@@ -68,7 +68,7 @@ class IrTest : public ::testing::Test {
         data = create_number(str2);
         Node *num_const = create_node(NUMBER_CONSTANT, data);
 
-        Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, id_expr, num_const);
+        Node *bin_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const);
 
         Symbol *s = create_symbol();
         push_symbol_type(s, SIGNED_INT);
@@ -150,7 +150,7 @@ int main(void) {
 }
 
 Suppose the assignment expression "a = 1" has a parse tree like this:
-        BINARY_EXPR (op: ASSIGN)
+        ASSIGNMENT_EXPR (op: ASSIGN)
         /               \
 IDENTIFIER_EXPR     NUMBER_CONSTANT
 
@@ -168,7 +168,7 @@ lvalue: no
 IR: loadsignedint($r1, 1)
 location: $r1
 
-BINARY_EXPR (op: ASSIGN)
+ASSIGNMENT_EXPR (op: ASSIGN)
 type: signed int
 lvalue: no
 IR: loadaddress($r0, a), loadsignedint($r1, 1), storewordindirect($r1, $r0)

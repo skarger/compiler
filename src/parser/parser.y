@@ -451,27 +451,27 @@ comma_expr : assignment_expr
 
 assignment_expr : conditional_expr
     | unary_expr ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, ASSIGN, $1, $3); }
     | unary_expr ADD_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, ADD_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, ADD_ASSIGN, $1, $3); }
     | unary_expr SUBTRACT_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, SUBTRACT_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, SUBTRACT_ASSIGN, $1, $3); }
     | unary_expr MULTIPLY_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, MULTIPLY_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, MULTIPLY_ASSIGN, $1, $3); }
     | unary_expr DIVIDE_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, DIVIDE_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, DIVIDE_ASSIGN, $1, $3); }
     | unary_expr REMAINDER_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, REMAINDER_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, REMAINDER_ASSIGN, $1, $3); }
     | unary_expr BITWISE_LSHIFT_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, BITWISE_LSHIFT_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, BITWISE_LSHIFT_ASSIGN, $1, $3); }
     | unary_expr BITWISE_RSHIFT_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, BITWISE_RSHIFT_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, BITWISE_RSHIFT_ASSIGN, $1, $3); }
     | unary_expr BITWISE_AND_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, BITWISE_AND_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, BITWISE_AND_ASSIGN, $1, $3); }
     | unary_expr BITWISE_XOR_ASSSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, BITWISE_XOR_ASSSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, BITWISE_XOR_ASSSIGN, $1, $3); }
     | unary_expr BITWISE_OR_ASSIGN assignment_expr
-        { $$ = create_node(BINARY_EXPR, BITWISE_OR_ASSIGN, $1, $3); }
+        { $$ = create_node(ASSIGNMENT_EXPR, BITWISE_OR_ASSIGN, $1, $3); }
     ;
 
 /* type name and children */
@@ -667,6 +667,7 @@ Node *create_node(int node_type, ...) {
 int has_operator(enum data_type nt) {
     switch (nt) {
         case BINARY_EXPR:
+        case ASSIGNMENT_EXPR:
         case UNARY_EXPR:
         case PREFIX_EXPR:
         case POSTFIX_EXPR:
@@ -769,6 +770,7 @@ int number_of_children(enum data_type nt) {
         case DIR_ABS_DECL:
         case SUBSCRIPT_EXPR:
         case BINARY_EXPR:
+        case ASSIGNMENT_EXPR:
             return 2;
         case IF_THEN_ELSE:
         case CONDITIONAL_EXPR:
@@ -787,6 +789,7 @@ Boolean is_expression(int node_type) {
     switch (node_type) {
         case CONDITIONAL_EXPR:
         case BINARY_EXPR:
+        case ASSIGNMENT_EXPR:
         case CAST_EXPR:
         case UNARY_EXPR:
         case PREFIX_EXPR:
@@ -1017,6 +1020,7 @@ void pretty_print(void *np) {
             fprintf(output, " : ");
             pretty_print(n->children.child3);
             break;
+        case ASSIGNMENT_EXPR:
         case BINARY_EXPR:
             pretty_print(n->children.child1);
             fprintf(output, " %s ",
@@ -1085,6 +1089,7 @@ int parenthesize(enum data_type nt) {
         /* expr */
         case CONDITIONAL_EXPR:
         case BINARY_EXPR:
+        case ASSIGNMENT_EXPR:
         case CAST_EXPR:
         case TYPE_NAME:
         case UNARY_EXPR:
@@ -1376,6 +1381,7 @@ char *get_node_name(enum data_type nt) {
         CASE_FOR(NULL_STATEMENT);
         CASE_FOR(CONDITIONAL_EXPR);
         CASE_FOR(BINARY_EXPR);
+        CASE_FOR(ASSIGNMENT_EXPR);
         CASE_FOR(CAST_EXPR);
         CASE_FOR(UNARY_EXPR);
         CASE_FOR(PREFIX_EXPR);
