@@ -25,7 +25,12 @@ int main(int argc, char *argv[]) {
 class IrTest : public ::testing::Test {    
   protected:
     FILE *test_input;
-    
+    YYSTYPE data;
+    IrList *ir_list;
+    Node *id_expr;
+    Node *num_const;
+    Node *assign_expr;
+    Node *root;
     /* 
      * Opens a pipe for directing input. Anything printed to 
      * test_input will be read by yyparse.
@@ -41,13 +46,59 @@ class IrTest : public ::testing::Test {
         test_input = fdopen(fds[1], "w");
         ASSERT_TRUE(test_input);
 
+        ir_list = create_ir_list(); /* redundant? */
         start_ir_computation();
     }
     
     void TearDown() {
 
     }
-    
+
+    void set_data_string(char str[]) {
+        data = (YYSTYPE) create_string(strlen(str));
+        strcpy( ((struct String *) data)->str, str );
+    }
+
+    void set_data_number(char str[]) {
+        data = create_number(str);
+    }
+
+    void set_int_symbol(Node *n) {
+        Symbol *s = create_symbol();
+        push_symbol_type(s, SIGNED_INT);
+        set_symbol_table_entry(n, s);
+    }
+
+    void create_id_expr(char str[]) {
+        set_data_string(str);
+        id_expr = create_node(IDENTIFIER_EXPR, data);
+    }
+
+    void create_num_constant(char str[]) {
+        set_data_number(str);
+        num_const = create_node(NUMBER_CONSTANT, data);
+    }
+
+    void compute_ir_constant_assignment() {
+        char s[] = "a";
+        create_id_expr(s);
+        set_int_symbol(id_expr);
+        char t[] = "1";
+        create_num_constant(t);
+        assign_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const);
+        compute_ir(assign_expr, ir_list);
+    }
+
+    void compute_ir_binary_expression() {
+        char s[] = "a";
+        create_id_expr(s);
+        set_int_symbol(id_expr);
+        char t[] = "1";
+        create_num_constant(t);
+        root = create_node(BINARY_EXPR, LOGICAL_OR, id_expr, num_const);
+        compute_ir(root, ir_list);
+    }
+
     void ExpectReg(void) {
         char *r0 = current_reg();
         char *r1 = next_reg();
@@ -57,41 +108,6 @@ class IrTest : public ::testing::Test {
         EXPECT_EQ(0, strcmp(r1, r2));
     }
 
-    void ExpectIR(void) {
-        YYSTYPE data;
-        char str1[] = "a";
-        data = (YYSTYPE) create_string(1);
-        strcpy( ((struct String *) data)->str, str1 );
-        Node *id_expr = create_node(IDENTIFIER_EXPR, data);
-
-        char str2[] = "1";
-        data = create_number(str2);
-        Node *num_const = create_node(NUMBER_CONSTANT, data);
-
-        Node *bin_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const);
-
-        Symbol *s = create_symbol();
-        push_symbol_type(s, SIGNED_INT);
-        set_symbol_table_entry(id_expr, s);
-
-        IrList *ir_list = create_ir_list();
-
-
-        compute_ir(bin_expr, ir_list);
-
-        EXPECT_EQ(LOAD_WORD_INDIRECT, instruction(ir_list->head));
-        EXPECT_EQ(LOAD_CONSTANT, instruction(ir_list->head->next));
-
-
-        EXPECT_EQ(STORE_WORD_INDIRECT, instruction(ir_list->tail));
-        EXPECT_EQ(FALSE, node_is_lvalue(bin_expr));
-
-        EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
-
-        EXPECT_EQ(FALSE, node_is_lvalue(num_const));
-
-
-    }
 
     void ExpectIRNode(void) {
         IrNode *ir_node = create_ir_node(LOAD_ADDR, 0, 0 , 0, NULL);
@@ -135,11 +151,33 @@ TEST_F(IrTest, ValTest) {
 
 TEST_F(IrTest, RegTest) { this->ExpectReg(); }
 
-TEST_F(IrTest, IrList1) { this->ExpectIR(); }
+TEST_F(IrTest, IrNodeCreation) { this->ExpectIRNode(); }
 
-TEST_F(IrTest, IrList2) { this->ExpectIRList(); }
+TEST_F(IrTest, IrListCreation) { this->ExpectIRList(); }
 
-TEST_F(IrTest, IrNode1) { this->ExpectIRNode(); }
+TEST_F(IrTest, IrListSimpleAssignment) {
+    this->compute_ir_constant_assignment();
+    EXPECT_EQ(LOAD_WORD_INDIRECT, instruction(ir_list->head));
+    EXPECT_EQ(LOAD_CONSTANT, instruction(ir_list->head->next));
+    EXPECT_EQ(STORE_WORD_INDIRECT, instruction(ir_list->tail));
+}
+
+TEST_F(IrTest, IrListBinaryExpression) {
+    this->compute_ir_binary_expression();
+    EXPECT_EQ(LOAD_WORD_INDIRECT, instruction(ir_list->head));
+    EXPECT_EQ(LOAD_CONSTANT, instruction(ir_list->head->next));
+    EXPECT_EQ(LOG_OR, instruction(ir_list->tail));
+}
+
+
+TEST_F(IrTest, LValue) {
+    this->compute_ir_constant_assignment();
+    EXPECT_EQ(FALSE, node_is_lvalue(assign_expr));
+    EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
+    EXPECT_EQ(FALSE, node_is_lvalue(num_const));
+}
+
+
 
 /*
 Source:

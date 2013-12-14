@@ -47,7 +47,7 @@ IrNode *irn_store_number_constant(int instr, int val, int to_idx) {
     return create_ir_node(instr, val, to_idx, NR, NULL);
 }
 
-IrNode *irn_logical(int instr, int to_idx, int oprnd1, int oprnd2) {
+IrNode *irn_binary_expr(int instr, int to_idx, int oprnd1, int oprnd2) {
     return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL);
 }
 
@@ -133,7 +133,7 @@ void compute_ir(Node *n, IrList *irl) {
 
             n->expr->lvalue = FALSE;
             n->expr->location = ++reg_idx;
-            irn1 = irn_logical(LOG_OR, n->expr->location,
+            irn1 = irn_binary_expr(LOG_OR, n->expr->location,
                                 child2->expr->location, child1->expr->location);
 
             append_ir_node(irn1, irl);

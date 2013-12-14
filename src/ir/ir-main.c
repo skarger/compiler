@@ -53,6 +53,8 @@ int main(int argc, char *argv[]) {
 }
 
 void test_print_ir(void) {
+        IrList *ir_list = create_ir_list();
+
         Symbol *s;
         YYSTYPE data;
         char str1[] = "a";
@@ -68,11 +70,14 @@ void test_print_ir(void) {
         data = create_number(str2);
         Node *num_const = create_node(NUMBER_CONSTANT, data);
 
-        /* Node *bin_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const); */
+
+
+
         Node *bin_expr = create_node(BINARY_EXPR, LOGICAL_OR, id_expr, num_const);
-
-        IrList *ir_list = create_ir_list();
-
         compute_ir(bin_expr, ir_list);
+
+        Node *assign_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const);
+        compute_ir(assign_expr, ir_list);
+
         print_ir_list(stdout, ir_list);
 }
