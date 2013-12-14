@@ -154,8 +154,8 @@ direct_declarator : simple_declarator
     | array_declarator
     ;
 
-simple_declarator : identifier
-        { set_node_type($1, SIMPLE_DECLARATOR); $$ = $1; }
+simple_declarator : IDENTIFIER
+        { $$ = create_node( SIMPLE_DECLARATOR, yylval ); }
     ;
 
 identifier : IDENTIFIER
@@ -731,6 +731,7 @@ int number_of_children(enum data_type nt) {
         case BREAK_STATEMENT:
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
+        case SIMPLE_DECLARATOR:
         case IDENTIFIER:
         case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
