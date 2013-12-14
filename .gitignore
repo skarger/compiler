@@ -39,3 +39,8 @@ ir-main
 test-symbol-utils
 test-ir
 
+# test generated files
+test/symbol/st-output
+test/parser/second_output
+test/parser/test_output
+
