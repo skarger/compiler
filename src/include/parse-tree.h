@@ -78,6 +78,7 @@ enum data_type {
 };
 
 typedef struct Node Node;
+typedef struct Expression Expression;
 
 /* A Node, in addition to having links to its children, can contain data fields.
  * Examples:
@@ -108,6 +109,10 @@ union NodeData {
     char *str;         /* IDENTIFIER, STRING_CONSTANT */
 };
 
+struct Expression {
+    Boolean lvalue;
+    int location;
+};
 
 /*
  * Node
@@ -116,7 +121,7 @@ union NodeData {
 struct Node {
     enum data_type n_type;  /* node type */
     Boolean is_func_decl;
-    Boolean lvalue;
+    Expression *expr;
     Symbol *st_entry;       /* symbol table entry */
     union NodeData data;
     /* accommodate all node types, regardless of number of children */

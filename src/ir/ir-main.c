@@ -58,13 +58,11 @@ void test_print_ir(void) {
         char str1[] = "a";
         data = (YYSTYPE) create_string(1);
         strcpy( ((struct String *) data)->str, str1 );
-        Node *id_expr = create_node(IDENTIFIER, data);
-        set_node_type(id_expr, IDENTIFIER_EXPR);
+        Node *id_expr = create_node(IDENTIFIER_EXPR, data);
         s = create_symbol();
         set_symbol_name(s, id_expr->data.str);
         push_symbol_type(s, SIGNED_INT);
         set_symbol_table_entry(id_expr, s);
-
 
         char str2[] = "1";
         data = create_number(str2);
@@ -73,11 +71,8 @@ void test_print_ir(void) {
         Node *bin_expr = create_node(BINARY_EXPR, ASSIGN, id_expr, num_const);
 
 
-
         IrList *ir_list = create_ir_list();
 
-
         compute_ir(bin_expr, ir_list);
-
         print_ir_list(stdout, ir_list);
 }

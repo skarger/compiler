@@ -5,6 +5,7 @@
 #include "../include/ir.h"
 #include "../include/utilities.h"
 #include "../../y.tab.h"
+#include "../include/parse-tree.h"
 
 FILE *output;
 
@@ -96,7 +97,7 @@ int instruction(IrNode *irn) {
 }
 
 Boolean node_is_lvalue(Node *n) {
-    return n->lvalue;
+    return n->expr->lvalue;
 }
 
 void start_ir_computation(void) {
@@ -104,28 +105,40 @@ void start_ir_computation(void) {
 }
 
 void compute_ir(Node *n, IrList *irl) {
+    IrNode *irn1, *irn2, *irn3;
+    Node *child1, *child2;
     if (n == NULL) {
         return;
     }
 
     switch (n->n_type) {
         case BINARY_EXPR:
-            compute_ir(n->children.child1, irl);
-            compute_ir(n->children.child2, irl);
-            append_ir_node(irn_store_number_constant(STORE_WORD_INDIRECT, 0, ++reg_idx), irl);
+            child1 = n->children.child1;
+            child2 = n->children.child2;
+            compute_ir(child1, irl);
+            compute_ir(child2, irl);
+            irn1 = irn_store_number_constant(STORE_WORD_INDIRECT,
+                            child2->expr->location, child1->expr->location);
+            append_ir_node(irn1, irl);
             /* type: assume SIGNED_INT */
             /* lvalue: no */
             /* IR */
             /* location: register */
             break;
         case IDENTIFIER_EXPR:
-            n->lvalue = TRUE;
+            n->expr->lvalue = TRUE;
+            n->expr->location = ++reg_idx;
             /* get name from symbol */
-            append_ir_node(irn_load_from_global(LOAD_WORD_INDIRECT, ++reg_idx, n->st_entry), irl);
+            irn1 = irn_load_from_global(LOAD_WORD_INDIRECT,
+                        n->expr->location, n->st_entry);
+            append_ir_node(irn1, irl);
             break;
         case NUMBER_CONSTANT:
-            n->lvalue = FALSE;
-            append_ir_node(irn_load_number_constant(LOAD_CONSTANT, ++reg_idx, n->data.num), irl);
+            n->expr->lvalue = FALSE;
+            n->expr->location = ++reg_idx;
+            irn1 = irn_load_number_constant(LOAD_CONSTANT,
+                        n->expr->location, n->data.num);
+            append_ir_node(irn1, irl);
             break;
         case EXPRESSION_STATEMENT:
         case GOTO_STATEMENT:

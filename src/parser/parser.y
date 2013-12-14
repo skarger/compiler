@@ -7,6 +7,7 @@
 #include "src/include/utilities.h"
 #include "src/include/traverse.h"
 #include "src/include/symbol-collection.h"
+#include "src/include/ir.h"
 
 /* creating the tokens here so the lexer should ignore token.h */
 #define TOKEN_H
@@ -415,8 +416,8 @@ postfix_expr : primary_expr
         { $$ = create_node(POSTFIX_EXPR, DECREMENT, $1); }
     ;
 
-primary_expr : identifier
-        { set_node_type($1, IDENTIFIER_EXPR); $$ = $1; }
+primary_expr : IDENTIFIER
+        { $$ = create_node( IDENTIFIER_EXPR, yylval ); }
     | constant
     | LEFT_PAREN expr RIGHT_PAREN
         { $$ = $2; }
@@ -730,6 +731,7 @@ int number_of_children(enum data_type nt) {
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
         case IDENTIFIER:
+        case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
         case NUMBER_CONSTANT:
         case CHAR_CONSTANT:
@@ -791,6 +793,7 @@ Boolean is_expression(int node_type) {
         case POSTFIX_EXPR:
         case FUNCTION_CALL:
         case SUBSCRIPT_EXPR:
+        case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
         case NUMBER_CONSTANT:
         case CHAR_CONSTANT:
@@ -866,7 +869,13 @@ void *construct_node(enum data_type nt) {
     util_emalloc((void **) &n, sizeof(Node));
     n->n_type = nt;
     n->is_func_decl = FALSE;
-    n->lvalue = FALSE;
+    Expression *e = NULL;
+    if (is_expression(nt)) {
+        util_emalloc((void **) &e, sizeof(Expression));
+        e->lvalue = FALSE;
+        e->location = NR;
+    }
+    n->expr = e;
     n->st_entry = NULL;
     return n;
 }
