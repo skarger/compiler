@@ -11,6 +11,7 @@ FILE *output;
 
 static int reg_idx = 0;
 IrList *ir_list = NULL;
+Boolean is_function_def_spec = FALSE;
 
 
 char *current_reg(void) {
@@ -49,6 +50,14 @@ IrNode *irn_store_number_constant(int instr, int val, int to_idx) {
 
 IrNode *irn_binary_expr(int instr, int to_idx, int oprnd1, int oprnd2) {
     return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL);
+}
+
+IrNode *irn_statement(int instr, int res_idx) {
+    return create_ir_node(instr, res_idx, NR, NR, NULL);
+}
+
+IrNode *irn_function(int instr, Symbol *s) {
+    return create_ir_node(instr, NR, NR, NR, s);
 }
 
 IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
@@ -115,7 +124,30 @@ void compute_ir(Node *n, IrList *irl) {
         return;
     }
 
+    /* append IrNodes to the IrList  */
+
+    /* for expressions compute_ir will update the node: */
+    /* type: assume SIGNED_INT unless node is a symbol with a known type */
+    /* lvalue: yes or no */
+    /* location: register index of its result */
+
     switch (n->n_type) {
+        case FUNCTION_DEF_SPEC:
+            is_function_def_spec = TRUE;
+            compute_ir(n->children.child1, irl);
+            compute_ir(n->children.child2, irl);
+            is_function_def_spec = FALSE;
+            break;
+        case FUNCTION_DECLARATOR:
+            child1 = n->children.child1;
+            child2 = n->children.child2;
+            compute_ir(child1, irl);
+            compute_ir(child2, irl);
+            if (is_function_def_spec) {
+                irn1 = irn_function(BEGIN_PROC, child1->st_entry);
+                append_ir_node(irn1, irl);
+            }
+            break;
         case ASSIGNMENT_EXPR:
             child1 = n->children.child1;
             child2 = n->children.child2;
@@ -135,12 +167,7 @@ void compute_ir(Node *n, IrList *irl) {
             n->expr->location = ++reg_idx;
             irn1 = irn_binary_expr(LOG_OR, n->expr->location,
                                 child2->expr->location, child1->expr->location);
-
             append_ir_node(irn1, irl);
-            /* type: assume SIGNED_INT */
-            /* lvalue: no */
-            /* IR */
-            /* location: register */
             break;
         case IDENTIFIER_EXPR:
             n->expr->lvalue = TRUE;
@@ -164,7 +191,11 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
-            create_ir_node(RETURNED_WORD, 0, 0, 0, NULL);
+            if (n->children.child1 != NULL) {
+                irn_statement(RETURN, n->children.child1->expr->location);
+            } else {
+                irn_statement(RETURN, NR);
+            }
             break;
         default:
             break;
@@ -182,8 +213,11 @@ void print_ir_list(FILE *out, IrList *irl) {
 void print_ir_node(FILE *out, IrNode *irn) {
     fprintf(out, "(");
     switch(irn->instruction) {
-        case RETURNED_WORD:
-            fprintf(out, "returnedword");
+        case BEGIN_PROC:
+            fprintf(out, "beginproc, \"%s\"", get_symbol_name(irn->s));
+            break;
+        case RETURN:
+            fprintf(out, "return, $r%d", irn->n1);
             break;
         case STORE_WORD_INDIRECT:
             fprintf(out, "storewordindirect, $r%d, $r%d", irn->n1, irn->n2);

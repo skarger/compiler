@@ -52,6 +52,13 @@ int main(int argc, char *argv[]) {
     return rv;
 }
 
+void set_int_symbol(Node *n) {
+    Symbol *s = create_symbol();
+    set_symbol_name(s, n->data.str);
+    push_symbol_type(s, SIGNED_INT);
+    set_symbol_table_entry(n, s);
+}
+
 void test_print_ir(void) {
         IrList *ir_list = create_ir_list();
 
@@ -61,10 +68,7 @@ void test_print_ir(void) {
         data = (YYSTYPE) create_string(1);
         strcpy( ((struct String *) data)->str, str1 );
         Node *id_expr = create_node(IDENTIFIER_EXPR, data);
-        s = create_symbol();
-        set_symbol_name(s, id_expr->data.str);
-        push_symbol_type(s, SIGNED_INT);
-        set_symbol_table_entry(id_expr, s);
+        set_int_symbol(id_expr);
 
         char str2[] = "1";
         data = create_number(str2);
@@ -78,6 +82,17 @@ void test_print_ir(void) {
 
         Node *assign_expr = create_node(ASSIGNMENT_EXPR, ASSIGN, id_expr, num_const);
         compute_ir(assign_expr, ir_list);
+
+        char str3[] = "f";
+        data = (YYSTYPE) create_string(1);
+        strcpy( ((struct String *) data)->str, str3 );
+        Node *simple_decl = create_node(SIMPLE_DECLARATOR, data);
+
+        set_int_symbol(simple_decl);
+
+        Node *func_decl = create_node(FUNCTION_DECLARATOR, simple_decl, NULL);
+        Node *func_def_spec = create_node(FUNCTION_DEF_SPEC, NULL, func_decl);
+        compute_ir(func_def_spec, ir_list);
 
         print_ir_list(stdout, ir_list);
 }

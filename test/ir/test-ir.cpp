@@ -39,7 +39,6 @@ class IrTest : public ::testing::Test {
         int fds[2];
         ASSERT_EQ(0, pipe(fds));
 
-
         yyin = fdopen(fds[0], "r");
         ASSERT_TRUE(yyin);
 
@@ -108,7 +107,6 @@ class IrTest : public ::testing::Test {
         EXPECT_EQ(0, strcmp(r1, r2));
     }
 
-
     void ExpectIRNode(void) {
         IrNode *ir_node = create_ir_node(LOAD_ADDR, 0, 0 , 0, NULL);
         EXPECT_EQ(LOAD_ADDR, instruction(ir_node));
@@ -169,12 +167,16 @@ TEST_F(IrTest, IrListBinaryExpression) {
     EXPECT_EQ(LOG_OR, instruction(ir_list->tail));
 }
 
-
 TEST_F(IrTest, LValue) {
     this->compute_ir_constant_assignment();
     EXPECT_EQ(FALSE, node_is_lvalue(assign_expr));
     EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
     EXPECT_EQ(FALSE, node_is_lvalue(num_const));
+}
+
+TEST_F(IrTest, Return) {
+    Node *x = create_node(RETURN_STATEMENT, NULL);
+    EXPECT_EQ(0, 0);
 }
 
 
