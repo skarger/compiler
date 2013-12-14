@@ -42,7 +42,6 @@ void append_children(Node *n, int num_children, ...);
 void set_literal_data(Node *n, YYSTYPE data);
 void set_type(Node *n, int type_spec);
 void set_operator(Node *n, int op);
-void set_node_type(Node *n, enum data_type nt);
 int has_literal_data(enum data_type nt);
 int has_operator(enum data_type nt);
 int number_of_children(enum data_type nt);

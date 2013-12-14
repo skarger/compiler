@@ -158,10 +158,6 @@ simple_declarator : IDENTIFIER
         { $$ = create_node( SIMPLE_DECLARATOR, yylval ); }
     ;
 
-identifier : IDENTIFIER
-        { $$ = create_node( IDENTIFIER, yylval ); }
-    ;
-
 parenthesized_declarator : LEFT_PAREN declarator RIGHT_PAREN
         { $$ = $2; }
     ;
@@ -241,11 +237,8 @@ other_matched_statement : expr SEMICOLON
     | CONTINUE SEMICOLON
         { $$ = create_node(CONTINUE_STATEMENT); }
     | return_statement
-    | GOTO identifier SEMICOLON
-        {
-            set_node_type($2, NAMED_LABEL);
-            $$ = create_node(GOTO_STATEMENT, $2);
-        }
+    | GOTO named_label SEMICOLON
+        {  $$ = create_node(GOTO_STATEMENT, $2); }
     | SEMICOLON
         { $$ = create_node(NULL_STATEMENT); }
     ;
@@ -255,11 +248,12 @@ other_open_statement: labeled_statement
     | for_statement
     ;
 
-labeled_statement : identifier COLON statement
-        {
-            set_node_type($1, NAMED_LABEL);
-            $$ = create_node(LABELED_STATEMENT, $1, $3);
-        }
+labeled_statement : named_label COLON statement
+        { $$ = create_node(LABELED_STATEMENT, $1, $3); }
+    ;
+
+named_label : IDENTIFIER
+    { $$ = create_node( NAMED_LABEL, yylval );  }
     ;
 
 while_statement : WHILE LEFT_PAREN expr RIGHT_PAREN statement
@@ -732,6 +726,7 @@ int number_of_children(enum data_type nt) {
         case CONTINUE_STATEMENT:
         case NULL_STATEMENT:
         case SIMPLE_DECLARATOR:
+        case NAMED_LABEL:
         case IDENTIFIER:
         case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
@@ -884,11 +879,6 @@ void *construct_node(enum data_type nt) {
     return n;
 }
 
-
-
-void set_node_type(Node *n, enum data_type nt) {
-    n->n_type = nt;
-}
 
 void set_symbol_table_entry(Node *n, Symbol *s) {
     n->st_entry = s;
