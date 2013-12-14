@@ -62,8 +62,7 @@ class IrTest : public ::testing::Test {
         char str1[] = "a";
         data = (YYSTYPE) create_string(1);
         strcpy( ((struct String *) data)->str, str1 );
-        Node *id_expr = create_node(IDENTIFIER, data);
-        set_node_type(id_expr, IDENTIFIER_EXPR);
+        Node *id_expr = create_node(IDENTIFIER_EXPR, data);
 
         char str2[] = "1";
         data = create_number(str2);
@@ -80,7 +79,6 @@ class IrTest : public ::testing::Test {
 
         compute_ir(bin_expr, ir_list);
 
-
         EXPECT_EQ(LOAD_WORD_INDIRECT, instruction(ir_list->head));
         EXPECT_EQ(LOAD_CONSTANT, instruction(ir_list->head->next));
 
@@ -89,6 +87,7 @@ class IrTest : public ::testing::Test {
         EXPECT_EQ(FALSE, node_is_lvalue(bin_expr));
 
         EXPECT_EQ(TRUE, node_is_lvalue(id_expr));
+
         EXPECT_EQ(FALSE, node_is_lvalue(num_const));
 
 
