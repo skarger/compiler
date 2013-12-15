@@ -198,14 +198,14 @@ void compute_ir(Node *n, IrList *irl) {
             compute_ir(child2, irl);
 
             n->expr->lvalue = FALSE;
-            n->expr->location = ++reg_idx;
+            n->expr->location = reg_idx++;
             irn1 = irn_binary_expr(LOG_OR, n->expr->location,
                                 child2->expr->location, child1->expr->location);
             append_ir_node(irn1, irl);
             break;
         case IDENTIFIER_EXPR:
             n->expr->lvalue = TRUE;
-            n->expr->location = ++reg_idx;
+            n->expr->location = reg_idx++;
             /* get name from symbol */
             irn1 = irn_load_from_global(LOAD_ADDRESS,
                         n->expr->location, n->st_entry);
@@ -213,7 +213,7 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case NUMBER_CONSTANT:
             n->expr->lvalue = FALSE;
-            n->expr->location = ++reg_idx;
+            n->expr->location = reg_idx++;
             irn1 = irn_load_number_constant(LOAD_CONSTANT,
                         n->expr->location, n->data.num);
             append_ir_node(irn1, irl);
