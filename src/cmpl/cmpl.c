@@ -18,7 +18,6 @@ extern IrList *ir_list;
  * Side-effects: Allocates heap memory
  */
 void start_traversal(Node *n) {
-    FILE *output = stdout;
     #ifdef COLLECT_SYMBOLS
     if (scd == NULL) {
         util_emalloc((void **) &scd, sizeof(SymbolCreationData));

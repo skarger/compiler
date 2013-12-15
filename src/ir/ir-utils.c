@@ -286,14 +286,15 @@ void compute_ir_pass_through(Node *n, IrList *irl) {
 }
 
 void print_ir_list(FILE *out, IrList *irl) {
+    fprintf(out, "\n/*\n");
+    fprintf(out, " *** Start IR List ***\n");
     irl->cur = irl->head;
-    if (irl->cur == NULL) {
-        printf("irl cur NULL\n");
-    }
     while (irl->cur != NULL) {
-        print_ir_node(stdout, irl->cur);
+        print_ir_node(out, irl->cur);
         irl->cur = irl->cur->next;
     }
+    fprintf(out, " *** End IR List ***\n");
+    fprintf(out, " */\n");
 }
 
 void print_ir_node(FILE *out, IrNode *irn) {
