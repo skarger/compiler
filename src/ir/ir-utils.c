@@ -15,6 +15,9 @@ IrList *ir_list = NULL;
 static int reg_idx = 0;
 static Boolean is_function_def_spec = FALSE;
 
+/* helper functions */
+void compute_ir_pass_through(Node *n, IrList *irl);
+
 char *current_reg(void) {
     char *buf;
     util_emalloc((void **) &buf, MAX_REG_LEN);
@@ -215,11 +218,6 @@ void compute_ir(Node *n, IrList *irl) {
                         n->expr->location, n->data.num);
             append_ir_node(irn1, irl);
             break;
-        case EXPRESSION_STATEMENT:
-        case GOTO_STATEMENT:
-        case UNARY_EXPR:
-        case PREFIX_EXPR:
-            break;
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
             if (n->children.child1 != NULL) {
@@ -228,11 +226,60 @@ void compute_ir(Node *n, IrList *irl) {
                 irn_statement(RETURN, NR);
             }
             break;
+        default:
+            compute_ir_pass_through(n, irl);
+    }
+}
+
+/* nodes to simply pass through with respect to IR generation */
+void compute_ir_pass_through(Node *n, IrList *irl) {
+    if (n == NULL) {
+        return;
+    }
+    switch (n->n_type) {
+        case FOR_STATEMENT:
+            compute_ir(n->children.child1, irl);
+            compute_ir(n->children.child2, irl);
+            compute_ir(n->children.child3, irl);
+            compute_ir(n->children.child4, irl);
+            break;
+        case CONDITIONAL_EXPR:
+        case IF_THEN_ELSE:
+            compute_ir(n->children.child1, irl);
+            compute_ir(n->children.child2, irl);
+            compute_ir(n->children.child3, irl);
+            break;
         case TRANSLATION_UNIT:
+        case DECL:
+        case PTR_ABS_DECL:
+        case DECL_OR_STMT_LIST:
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
+        case IF_THEN:
+        case CAST_EXPR:
+        case TYPE_NAME:
+        case SUBSCRIPT_EXPR:
+        case FUNCTION_CALL:
+        case POSTFIX_EXPR:
             compute_ir(n->children.child1, irl);
             compute_ir(n->children.child2, irl);
             break;
+        case COMPOUND_STATEMENT:
+        case EXPRESSION_STATEMENT:
+        case RETURN_STATEMENT:
+        case GOTO_STATEMENT:
+        case UNARY_EXPR:
+        case PREFIX_EXPR:
+            compute_ir(n->children.child1, irl);
+            break;
+        case BREAK_STATEMENT:
+        case CONTINUE_STATEMENT:
+        case NULL_STATEMENT:
+        case CHAR_CONSTANT:
+        case STRING_CONSTANT:
+            break;
         default:
+            /* error? */
             break;
     }
 }
