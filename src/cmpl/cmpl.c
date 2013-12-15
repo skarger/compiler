@@ -1,9 +1,12 @@
 
-#include "../include/traverse.h"
+#include "../include/cmpl.h"
 #include "../include/symbol-collection.h"
+#include "../include/symbol.h"
+#include "../include/ir.h"
 
 
 extern SymbolCreationData *scd;
+extern IrList *ir_list;
 
 /*
  * start_traversal
@@ -29,4 +32,9 @@ void start_traversal(Node *n) {
     pretty_print(n);
     #endif
 
+    #ifdef COMPUTE_IR
+    start_ir_computation();
+    compute_ir(n, ir_list);
+    print_ir_list(output, ir_list);
+    #endif
 }

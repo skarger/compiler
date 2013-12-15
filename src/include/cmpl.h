@@ -8,6 +8,8 @@
 
 #define COLLECT_SYMBOLS
 
+#define COMPUTE_IR
+
 /* define INTERACTIVE to receive output from parser for each entered top level decl */
 /* if INTERACTIVE is not defined tree traversal will start upon reaching end-of-file */
 #define INTERACTIVE

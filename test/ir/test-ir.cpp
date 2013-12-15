@@ -7,7 +7,7 @@
 extern "C" {
 #include "../../src/include/ir.h"
 
-#include "../../src/include/traverse.h"
+#include "../../src/include/cmpl.h"
 #include "../../src/include/lexer.h"
 #include "../../y.tab.h"
 #include "../../src/include/parse-tree.h"

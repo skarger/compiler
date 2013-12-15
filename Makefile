@@ -15,7 +15,7 @@ VPATH = src
 TESTS = libgtest.a test-ir test-symbol-utils test/symbol/st-output
 EXECS = lexer parser-main symbol-main ir-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
-src/parser/parser-main.c src/symbol/traverse.c \
+src/parser/parser-main.c src/cmpl/cmpl.c \
 src/symbol/symbol-utils.c test/symbol/test-symbol-utils.c \
 src/symbol/symbol-main.c src/symbol/scope-fsm.c
 
@@ -56,18 +56,18 @@ y.tab.o :
 parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
-parser-main : parser-main.o y.tab.o utilities.o traverse.o \
-symbol-collection.o symbol-utils.o scope-fsm.o
-	$(CC) parser-main.o y.tab.o utilities.o traverse.o \
-symbol-collection.o symbol-utils.o scope-fsm.o -o $@
+parser-main : parser-main.o y.tab.o utilities.o cmpl.o \
+symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o
+	$(CC) parser-main.o y.tab.o utilities.o cmpl.o \
+symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o -o $@
 
 symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c -o $@
 
-symbol-main : symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-collection.o symbol-utils.o scope-fsm.o
-	$(CC) symbol-main.o y.tab.o utilities.o traverse.o \
-symbol-collection.o symbol-utils.o scope-fsm.o -o $@
+symbol-main : symbol-main.o y.tab.o utilities.o cmpl.o \
+symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o
+	$(CC) symbol-main.o y.tab.o utilities.o cmpl.o \
+symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
 	$(CC) -c src/symbol/symbol-utils.c
@@ -75,15 +75,15 @@ symbol-utils.o : src/symbol/symbol-utils.c
 symbol-collection.o : src/symbol/symbol-collection.c
 	$(CC) -c src/symbol/symbol-collection.c
 
-traverse.o : src/symbol/traverse.c
-	$(CC) -c src/symbol/traverse.c
+cmpl.o : src/cmpl/cmpl.c
+	$(CC) -c src/cmpl/cmpl.c
 
 scope-fsm.o : src/symbol/scope-fsm.c
 	$(CC) -c src/symbol/scope-fsm.c
 
-ir-main : ir-main.o ir-utils.o y.tab.o traverse.o \
+ir-main : ir-main.o ir-utils.o y.tab.o cmpl.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
-	$(CC) ir-main.o ir-utils.o y.tab.o traverse.o \
+	$(CC) ir-main.o ir-utils.o y.tab.o cmpl.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
 
 
@@ -116,10 +116,10 @@ test-symbol-utils : symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o
 test-symtab-output : symbol-main
 
 test-ir : test/ir/test-ir.cpp libgtest.a \
-ir-utils.o y.tab.o traverse.o scope-fsm.o symbol-collection.o symbol-utils.o \
+ir-utils.o y.tab.o cmpl.o scope-fsm.o symbol-collection.o symbol-utils.o \
 utilities.o
 	g++ -isystem ${GTEST_DIR}/include -pthread test/ir/test-ir.cpp libgtest.a \
-ir-utils.o y.tab.o traverse.o scope-fsm.o symbol-collection.o symbol-utils.o \
+ir-utils.o y.tab.o cmpl.o scope-fsm.o symbol-collection.o symbol-utils.o \
 utilities.o -o $@
 	./test-ir
 

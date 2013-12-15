@@ -9,10 +9,11 @@
 
 FILE *output;
 
-static int reg_idx = 0;
+/* external variable. this is the defining declaration. */
 IrList *ir_list = NULL;
-Boolean is_function_def_spec = FALSE;
 
+static int reg_idx = 0;
+static Boolean is_function_def_spec = FALSE;
 
 char *current_reg(void) {
     char *buf;
@@ -94,12 +95,23 @@ IrNode *append_ir_node(IrNode *irn, IrList *irl) {
     } else {
         irl->tail->next = irn;
         irn->prev = irl->tail;
-        irn->next = NULL;
     }
     irn->next = NULL;
     irl->tail = irn;
-
     return irl->tail;
+}
+
+IrNode *prepend_ir_node(IrNode *irn, IrList *irl) {
+    if (irl->head == NULL) {
+        irl->head = irn;
+        irn->next = NULL;
+    } else {
+        irl->head->prev = irn;
+        irn->next = irl->head;
+    }
+    irn->prev = NULL;
+    irl->head = irn;
+    return irl->head;
 }
 
 int instruction(IrNode *irn) {
@@ -132,19 +144,38 @@ void compute_ir(Node *n, IrList *irl) {
     /* location: register index of its result */
 
     switch (n->n_type) {
+        case FUNCTION_DEFINITION:
+            /* first child: function def spec */
+            /* recurse over it to obtain the function symbol */
+            compute_ir(n->children.child1, irl);
+            /* now we have appended a BEGIN_PROC node to ir_list */
+            /* it has the function symbol */
+            irn1 = irn_function(END_PROC, ir_list->tail->s);
+            /* second child: compound statement */
+            /* recurse over it to obtain IR nodes for the function body */
+            compute_ir(n->children.child2, irl);
+            /* finally end the proc */
+            append_ir_node(irn1, irl);
+            break;
         case FUNCTION_DEF_SPEC:
             is_function_def_spec = TRUE;
-            compute_ir(n->children.child1, irl);
+            /* only need to recurse over the declarator */
+            /* to go get the function symbol */
             compute_ir(n->children.child2, irl);
             is_function_def_spec = FALSE;
             break;
-        case FUNCTION_DECLARATOR:
-            child1 = n->children.child1;
-            child2 = n->children.child2;
-            compute_ir(child1, irl);
-            compute_ir(child2, irl);
+        case POINTER_DECLARATOR:
             if (is_function_def_spec) {
-                irn1 = irn_function(BEGIN_PROC, child1->st_entry);
+                compute_ir(n->children.child2, irl);
+            }
+        case FUNCTION_DECLARATOR:
+            if (is_function_def_spec) {
+                compute_ir(n->children.child1, irl);
+            }
+            break;
+        case SIMPLE_DECLARATOR:
+            if (is_function_def_spec) {
+                irn1 = irn_function(BEGIN_PROC, n->st_entry);
                 append_ir_node(irn1, irl);
             }
             break;
@@ -197,6 +228,10 @@ void compute_ir(Node *n, IrList *irl) {
                 irn_statement(RETURN, NR);
             }
             break;
+        case TRANSLATION_UNIT:
+            compute_ir(n->children.child1, irl);
+            compute_ir(n->children.child2, irl);
+            break;
         default:
             break;
     }
@@ -204,6 +239,9 @@ void compute_ir(Node *n, IrList *irl) {
 
 void print_ir_list(FILE *out, IrList *irl) {
     irl->cur = irl->head;
+    if (irl->cur == NULL) {
+        printf("irl cur NULL\n");
+    }
     while (irl->cur != NULL) {
         print_ir_node(stdout, irl->cur);
         irl->cur = irl->cur->next;
@@ -215,6 +253,9 @@ void print_ir_node(FILE *out, IrNode *irn) {
     switch(irn->instruction) {
         case BEGIN_PROC:
             fprintf(out, "beginproc, \"%s\"", get_symbol_name(irn->s));
+            break;
+        case END_PROC:
+            fprintf(out, "endproc, \"%s\"", get_symbol_name(irn->s));
             break;
         case RETURN:
             fprintf(out, "return, $r%d", irn->n1);

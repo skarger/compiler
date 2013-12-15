@@ -17,16 +17,16 @@ SymbolTableContainer *create_st_container() {
 }
 
 void initialize_st_container(SymbolTableContainer *stc) {
-    stc->symbol_tables[OTHER_NAMES] = (SymbolTable *) NULL;
-    stc->symbol_tables[STATEMENT_LABELS] = (SymbolTable *) NULL;
     /* create starting symbol tables */
     /* OTHER_NAMES file scope */
-    stc->current_st[OTHER_NAMES] =
+    stc->symbol_tables[OTHER_NAMES] =
         create_symbol_table(TOP_LEVEL_SCOPE, OTHER_NAMES);
     /* STATEMENT_LABELS file scope. should stay empty */
     /* it exists to have an ST enclosing the function level ones */
-    stc->current_st[STATEMENT_LABELS] =
+    stc->symbol_tables[STATEMENT_LABELS] =
         create_symbol_table(TOP_LEVEL_SCOPE, STATEMENT_LABELS);
+    stc->current_st[OTHER_NAMES] = stc->symbol_tables[OTHER_NAMES];
+    stc->current_st[STATEMENT_LABELS] = stc->symbol_tables[STATEMENT_LABELS];
     stc->function_prototypes = create_function_prototypes();
     stc->current_scope = TOP_LEVEL_SCOPE;
     stc->current_oc = OTHER_NAMES;

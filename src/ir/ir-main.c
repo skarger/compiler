@@ -4,7 +4,7 @@
 
 #include "../include/ir.h"
 
-#include "../include/traverse.h"
+#include "../include/cmpl.h"
 #include "../include/lexer.h"
 #include "../../y.tab.h"
 #include "../include/parse-tree.h"
@@ -19,7 +19,7 @@ FILE *input, *output;
 void test_print_ir(void);
 
 int main(int argc, char *argv[]) {
-
+    extern FILE *yyin;
     int rv;
 
     /* Figure out whether we're using stdin/stdout or file in/file out. */
@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
         output = fopen(argv[2], "w");
     }
 
-
+    yyin = input;
     /* do the work */
-    //rv = yyparse();
-    test_print_ir();
+    rv = yyparse();
+    //test_print_ir();
     fprintf(stdout, "\n");
 
     /* cleanup */

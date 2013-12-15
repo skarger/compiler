@@ -69,6 +69,7 @@ char *next_reg(void);
 IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
+IrNode *prepend_ir_node(IrNode *irn, IrList *irl);
 int instruction(IrNode *irn);
 Boolean node_is_lvalue(Node *n);
 

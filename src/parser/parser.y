@@ -5,7 +5,7 @@
 #include "src/include/lexer.h"
 #include "src/include/parser.h"
 #include "src/include/utilities.h"
-#include "src/include/traverse.h"
+#include "src/include/cmpl.h"
 #include "src/include/symbol-collection.h"
 #include "src/include/ir.h"
 
