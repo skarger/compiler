@@ -18,6 +18,7 @@ enum ir_instruction {
     LOAD_HALF_WORD_INDIRECT,
     LOAD_WORD_INDIRECT,
     LOAD_WORD,
+    LOAD_ADDRESS,
     LOAD_CONSTANT,
     PARAMETER,
     BEGIN_PROC,

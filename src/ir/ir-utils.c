@@ -13,6 +13,7 @@ FILE *output;
 IrList *ir_list = NULL;
 
 static int reg_idx = 0;
+static int label_idx = 0;
 static Boolean is_function_def_spec = FALSE;
 
 /* helper functions */
@@ -64,6 +65,10 @@ IrNode *irn_function(int instr, Symbol *s) {
     return create_ir_node(instr, NR, NR, NR, s);
 }
 
+IrNode *irn_label(int instr, int label_idx) {
+    return create_ir_node(instr, label_idx, NR, NR, NULL);
+}
+
 IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
@@ -72,13 +77,6 @@ IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
     irn->n2 = n2;
     irn->n3 = n3;
     irn->s = s;
-    switch (instr) {
-        case RETURNED_WORD:
-            break;
-        default:
-            break;
-    }
-
     return irn;
 }
 
@@ -153,12 +151,14 @@ void compute_ir(Node *n, IrList *irl) {
             compute_ir(n->children.child1, irl);
             /* now we have appended a BEGIN_PROC node to ir_list */
             /* it has the function symbol */
-            irn1 = irn_function(END_PROC, ir_list->tail->s);
+            irn1 = irn_label(LABEL, label_idx++);
+            irn2 = irn_function(END_PROC, ir_list->tail->s);
             /* second child: compound statement */
             /* recurse over it to obtain IR nodes for the function body */
             compute_ir(n->children.child2, irl);
             /* finally end the proc */
             append_ir_node(irn1, irl);
+            append_ir_node(irn2, irl);
             break;
         case FUNCTION_DEF_SPEC:
             is_function_def_spec = TRUE;
@@ -207,7 +207,7 @@ void compute_ir(Node *n, IrList *irl) {
             n->expr->lvalue = TRUE;
             n->expr->location = ++reg_idx;
             /* get name from symbol */
-            irn1 = irn_load_from_global(LOAD_WORD_INDIRECT,
+            irn1 = irn_load_from_global(LOAD_ADDRESS,
                         n->expr->location, n->st_entry);
             append_ir_node(irn1, irl);
             break;
@@ -221,10 +221,11 @@ void compute_ir(Node *n, IrList *irl) {
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
             if (n->children.child1 != NULL) {
-                irn_statement(RETURN, n->children.child1->expr->location);
+                irn1 = irn_statement(RETURN, n->children.child1->expr->location);
             } else {
-                irn_statement(RETURN, NR);
+                irn1 = irn_statement(RETURN, NR);
             }
+            append_ir_node(irn1, irl);
             break;
         default:
             compute_ir_pass_through(n, irl);
@@ -305,19 +306,29 @@ void print_ir_node(FILE *out, IrNode *irn) {
             fprintf(out, "endproc, \"%s\"", get_symbol_name(irn->s));
             break;
         case RETURN:
-            fprintf(out, "return, $r%d", irn->n1);
+            if (irn->n1 == NR) {
+                fprintf(out, "return");
+            } else {
+                fprintf(out, "return, $r%d", irn->n1);
+            }
             break;
         case STORE_WORD_INDIRECT:
             fprintf(out, "storewordindirect, $r%d, $r%d", irn->n1, irn->n2);
             break;
+        case LOAD_ADDRESS:
+            fprintf(out, "loadaddress, $r%d, %s", irn->n1, get_symbol_name(irn->s));
+            break;
         case LOAD_WORD_INDIRECT:
-            fprintf(out, "loadwordindirect, $r%d, %s", irn->n1, get_symbol_name(irn->s));
+            fprintf(out, "loadwordindirect, $r%d, %s", irn->n1, irn->n2);
             break;
         case LOAD_CONSTANT:
             fprintf(out, "loadconstant, $r%d, %d", irn->n1, irn->n2);
             break;
         case LOG_OR:
             fprintf(out, "logicalor, $r%d, $r%d, $r%d", irn->n1, irn->n2, irn->n3);
+            break;
+        case LABEL:
+            fprintf(out, "label, \"LABEL_%d\"", irn->n1);
             break;
         default:
             break;
