@@ -20,10 +20,12 @@ enum ir_instruction {
     LOAD_WORD,
     LOAD_ADDRESS,
     LOAD_CONSTANT,
-    PARAMETER,
     BEGIN_PROC,
     END_PROC,
+    BEGIN_CALL,
+    PARAM,
     CALL,
+    END_CALL,
     SYSCALL,
     RETURNED_WORD,
     STORE_WORD,
@@ -78,6 +80,6 @@ Boolean node_is_lvalue(Node *n);
 
 void print_ir_list(FILE *out, IrList *irl);
 void print_ir_node(FILE *out, IrNode *irn);
-
+char *get_ir_name(enum ir_instruction instr);
 
 #endif

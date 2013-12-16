@@ -15,6 +15,8 @@ IrList *ir_list = NULL;
 static int reg_idx = 0;
 static int label_idx = 0;
 static Boolean is_function_def_spec = FALSE;
+static Boolean is_function_call = FALSE;
+static Boolean is_function_argument = FALSE;
 static IrNode *cur_end_proc_label;
 
 /* helper functions */
@@ -68,6 +70,14 @@ IrNode *irn_return(int instr, int res_idx, IrNode *label) {
 
 IrNode *irn_function(int instr, Symbol *s) {
     return create_ir_node(instr, NR, NR, NR, s, NULL);
+}
+
+IrNode *irn_function_call(int instr, Symbol *s) {
+    return create_ir_node(instr, NR, NR, NR, s, NULL);
+}
+
+IrNode *irn_param(int instr, int par_reg, int src_reg) {
+    return create_ir_node(instr, par_reg, src_reg, NR, NULL, NULL);
 }
 
 IrNode *irn_label(int instr, int label_idx) {
@@ -212,9 +222,12 @@ void compute_ir(Node *n, IrList *irl) {
         case IDENTIFIER_EXPR:
             n->expr->lvalue = TRUE;
             n->expr->location = reg_idx++;
-            /* get name from symbol */
-            irn1 = irn_load_from_global(LOAD_ADDRESS,
-                        n->expr->location, n->st_entry);
+            if (is_function_call) {
+                irn1 = irn_function_call(BEGIN_CALL, n->st_entry);
+            } else {
+                irn1 = irn_load_from_global(LOAD_ADDRESS,
+                            n->expr->location, n->st_entry);
+            }
             append_ir_node(irn1, irl);
             break;
         case NUMBER_CONSTANT:
@@ -223,6 +236,10 @@ void compute_ir(Node *n, IrList *irl) {
             irn1 = irn_load_number_constant(LOAD_CONSTANT,
                         n->expr->location, n->data.num);
             append_ir_node(irn1, irl);
+            if (is_function_argument) {
+                irn1 = irn_param(PARAM, 0, n->expr->location);
+                append_ir_node(irn1, irl);
+            }
             break;
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
@@ -232,6 +249,29 @@ void compute_ir(Node *n, IrList *irl) {
                 irn1 = irn_return(RETURN, NR, cur_end_proc_label);
             }
             append_ir_node(irn1, irl);
+            break;
+        case FUNCTION_CALL:
+            is_function_call = TRUE;
+            /* get func symbol to get name and parameters */
+            /* will append BEGIN_CALL node */
+            compute_ir(n->children.child1, irl);
+            Symbol *s = ir_list->tail->s;
+            /* arguments */
+            is_function_argument = TRUE;
+            compute_ir(n->children.child2, irl);
+            is_function_argument = FALSE;
+/*
+PARAM a0, <param1>
+...
+PARAM a4, <param4>
+*/
+/* CALL <name> */
+            irn2 = irn_function_call(CALL, s);
+/* END_CALL <name> */
+            irn3 = irn_function_call(END_CALL, s);
+            append_ir_node(irn2, irl);
+            append_ir_node(irn3, irl);
+            is_function_call = FALSE;
             break;
         default:
             compute_ir_pass_through(n, irl);
@@ -266,7 +306,6 @@ void compute_ir_pass_through(Node *n, IrList *irl) {
         case CAST_EXPR:
         case TYPE_NAME:
         case SUBSCRIPT_EXPR:
-        case FUNCTION_CALL:
         case POSTFIX_EXPR:
             compute_ir(n->children.child1, irl);
             compute_ir(n->children.child2, irl);
@@ -319,6 +358,18 @@ void print_ir_node(FILE *out, IrNode *irn) {
                 fprintf(out, "return, \"LABEL_%d\", $r%d", irn->branch->n1, irn->n1);
             }
             break;
+        case BEGIN_CALL:
+            fprintf(out, "begincall, \"%s\"", get_symbol_name(irn->s));
+            break;
+        case PARAM:
+            fprintf(out, "param, %d, $r%d", irn->n1, irn->n2);
+            break;
+        case CALL:
+            fprintf(out, "call, \"%s\"", get_symbol_name(irn->s));
+            break;
+        case END_CALL:
+            fprintf(out, "endcall, \"%s\"", get_symbol_name(irn->s));
+            break;
         case STORE_WORD_INDIRECT:
             fprintf(out, "storewordindirect, $r%d, $r%d", irn->n1, irn->n2);
             break;
@@ -341,4 +392,25 @@ void print_ir_node(FILE *out, IrNode *irn) {
             break;
     }
     fprintf(out, ")\n");
+}
+
+char *get_ir_name(enum ir_instruction instr) {
+    switch (instr) {
+    #define CASE_FOR(instr) case instr: return #instr
+        CASE_FOR(BEGIN_PROC);
+        CASE_FOR(END_PROC);
+        CASE_FOR(RETURN);
+        CASE_FOR(BEGIN_CALL);
+        CASE_FOR(PARAM);
+        CASE_FOR(CALL);
+        CASE_FOR(END_CALL);
+        CASE_FOR(STORE_WORD_INDIRECT);
+        CASE_FOR(LOAD_ADDRESS);
+        CASE_FOR(LOAD_WORD_INDIRECT);
+        CASE_FOR(LOAD_CONSTANT);
+        CASE_FOR(LOG_OR);
+        CASE_FOR(LABEL);
+    #undef CASE_FOR
+        default: return "";
+    }
 }
