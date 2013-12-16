@@ -12,7 +12,7 @@ void print_functions(FILE *out, SymbolTableContainer *stc, IrList *irl);
 void ir_to_mips(FILE *out, IrNode *irn);
 
 void compute_mips_asm(FILE *output, SymbolTableContainer *stc, IrList *irl) {
-    fprintf(output, ".data\n");
+    fprintf(output, "    .data\n");
     /* write each file scope non-function symbol */
     SymbolTable *st;
     st = stc->symbol_tables[OTHER_NAMES]; /* this is the file level scope ST */
@@ -20,7 +20,7 @@ void compute_mips_asm(FILE *output, SymbolTableContainer *stc, IrList *irl) {
     /* st = stc->symbol_tables[STATEMENT_LABELS]; */
 
     fprintf(output, "\n");
-    fprintf(output, ".text\n");
+    fprintf(output, "    .text\n");
     /* print each function */
     print_functions(output, stc, irl);
 
@@ -54,8 +54,25 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             fprintf(out, "    sw    $ra, -4($fp)\n");
             break;
         case END_PROC:
-            fprintf(out, "    lw    $ra, -4($fp)    # restore $ra\n");
-            fprintf(out, "    jr    $ra\n");
+            if (strcmp(get_symbol_name(irn->s), "main") == 0) {
+                fprintf(out, "    li    $v0,10    # v0 <- syscall code for exit\n");
+                fprintf(out, "    syscall\n");
+            } else {
+                fprintf(out, "    lw    $ra, -4($fp)    # restore $ra\n");
+                fprintf(out, "    jr    $ra\n");
+            }
+            break;
+        case LOAD_ADDRESS:
+            fprintf(out, "    la    $t%d, %s\n", irn->n1, get_symbol_name(irn->s));
+            break;
+        case LOAD_CONSTANT:
+            fprintf(out, "    li    $t%d, %d\n", irn->n1, irn->n2);
+            break;
+        case STORE_WORD_INDIRECT:
+            fprintf(out, "    sw    $t%d, ($t%d)\n", irn->n1, irn->n2);
+            break;
+        case LABEL:
+            fprintf(out, "LABEL_%d:\n", irn->n1);
             break;
         default:
             fprintf(out, "unknown instruction\n");
