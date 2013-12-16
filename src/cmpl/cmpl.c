@@ -3,7 +3,7 @@
 #include "../include/symbol-collection.h"
 #include "../include/symbol.h"
 #include "../include/ir.h"
-
+#include "../include/mips.h"
 
 extern SymbolCreationData *scd;
 extern IrList *ir_list;
@@ -42,5 +42,9 @@ void start_traversal(Node *n) {
     }
     */
     print_ir_list(output, ir_list);
+    #endif
+
+    #ifdef MIPS_ASM
+    compute_mips_asm(output, ir_list);
     #endif
 }

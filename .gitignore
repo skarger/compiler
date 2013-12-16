@@ -36,6 +36,7 @@ lexer
 parser-main
 symbol-main
 ir-main
+mips-main
 test-symbol-utils
 test-ir
 

@@ -15,7 +15,7 @@ cmpl.o: src/cmpl/cmpl.c src/cmpl/../include/cmpl.h \
   src/cmpl/../include/parse-tree.h src/cmpl/../include/symbol.h \
   src/cmpl/../include/utilities.h src/cmpl/../include/symbol-collection.h \
   src/cmpl/../include/literal.h src/cmpl/../include/symbol.h \
-  src/cmpl/../include/ir.h
+  src/cmpl/../include/ir.h src/cmpl/../include/mips.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/utilities.h src/symbol/../include/symbol-utils.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
@@ -37,3 +37,22 @@ scope-fsm.o: src/symbol/scope-fsm.c src/symbol/../include/parse-tree.h \
   src/symbol/../../y.tab.h src/symbol/../include/symbol-utils.h \
   src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
   src/symbol/../include/scope-fsm.h
+ir-main.o: src/ir/ir-main.c src/ir/../include/ir.h \
+  src/ir/../include/parse-tree.h src/ir/../include/symbol.h \
+  src/ir/../include/utilities.h src/ir/../include/cmpl.h \
+  src/ir/../include/lexer.h src/ir/../../y.tab.h \
+  src/ir/../include/parse-tree.h src/ir/../include/parser.h \
+  src/ir/../include/symbol-utils.h src/ir/../include/literal.h
+ir-utils.o: src/ir/ir-utils.c src/ir/../include/ir.h \
+  src/ir/../include/parse-tree.h src/ir/../include/symbol.h \
+  src/ir/../include/utilities.h src/ir/../include/utilities.h \
+  src/ir/../../y.tab.h src/ir/../include/parse-tree.h
+mips-main.o: src/mips/mips-main.c src/mips/../include/cmpl.h \
+  src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
+  src/mips/../include/utilities.h src/mips/../include/lexer.h \
+  src/mips/../../y.tab.h src/mips/../include/parse-tree.h \
+  src/mips/../include/parser.h src/mips/../include/symbol-utils.h \
+  src/mips/../include/literal.h src/mips/../include/ir.h
+mips-utils.o: src/mips/mips-utils.c src/mips/../include/ir.h \
+  src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
+  src/mips/../include/utilities.h src/mips/../include/mips.h

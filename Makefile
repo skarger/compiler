@@ -13,11 +13,13 @@ VPATH = src
 
 
 TESTS = libgtest.a test-ir test-symbol-utils test/symbol/st-output
-EXECS = lexer parser-main symbol-main ir-main
+EXECS = lexer parser-main symbol-main ir-main mips-main
 SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
 src/parser/parser-main.c src/cmpl/cmpl.c \
 src/symbol/symbol-utils.c test/symbol/test-symbol-utils.c \
-src/symbol/symbol-main.c src/symbol/scope-fsm.c
+src/symbol/symbol-main.c src/symbol/scope-fsm.c \
+src/ir/ir-main.c src/ir/ir-utils.c \
+src/mips/mips-main.c src/mips/mips-utils.c \
 
 
 all : $(EXECS)
@@ -86,12 +88,22 @@ scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
 	$(CC) ir-main.o ir-utils.o y.tab.o cmpl.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
 
-
 ir-main.o : src/ir/ir-main.c
 	$(CC) -c src/ir/ir-main.c
 
 ir-utils.o : src/ir/ir-utils.c
 	$(CC) -c src/ir/ir-utils.c
+
+mips-main : mips-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
+	$(CC) mips-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
+
+mips-main.o : src/mips/mips-main.c
+	$(CC) -c src/mips/mips-main.c
+
+mips-utils.o : src/mips/mips-utils.c
+	$(CC) -c src/mips/mips-utils.c
 
 # tests
 test-parser-output : parser-main
