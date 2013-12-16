@@ -68,6 +68,10 @@ void collect_symbol_data(Node *n, SymbolCreationData *scd) {
         case IDENTIFIER:
         case IDENTIFIER_EXPR:
             id_symbol = find_symbol(get_current_st(scd->stc), n->data.str);
+            if (id_symbol == NULL) {
+                id_symbol = find_prototype(scd->stc->function_prototypes,
+                                            n->data.str);
+            }
             if (id_symbol != NULL) {
                 set_symbol_table_entry(n, id_symbol);
             } else {
