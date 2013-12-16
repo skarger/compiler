@@ -5,6 +5,7 @@
 
 /* define PRETTY_PRINT for parser tests */
 #define PRETTY_PRINT
+#undef PRETTY_PRINT
 
 #define COLLECT_SYMBOLS
 

@@ -15,6 +15,7 @@ IrList *ir_list = NULL;
 static int reg_idx = 0;
 static int label_idx = 0;
 static Boolean is_function_def_spec = FALSE;
+static IrNode *cur_end_proc_label;
 
 /* helper functions */
 void compute_ir_pass_through(Node *n, IrList *irl);
@@ -34,42 +35,46 @@ char *next_reg() {
 }
 
 IrNode *irn_load_from_register(int instr, int to_idx, int from_idx) {
-    return create_ir_node(instr, to_idx, from_idx, NR, NULL);
+    return create_ir_node(instr, to_idx, from_idx, NR, NULL, NULL);
 }
 
 IrNode *irn_store_from_register(int instr, int from_idx, int to_idx) {
-    return create_ir_node(instr, from_idx, to_idx, NR, NULL);
+    return create_ir_node(instr, from_idx, to_idx, NR, NULL, NULL);
 }
 
 IrNode *irn_load_from_global(int instr, int to_idx, Symbol *s) {
-    return create_ir_node(instr, to_idx, NR, NR, s);
+    return create_ir_node(instr, to_idx, NR, NR, s, NULL);
 }
 
 IrNode *irn_load_number_constant(int instr, int to_idx, int val) {
-    return create_ir_node(instr, to_idx, val, NR, NULL);
+    return create_ir_node(instr, to_idx, val, NR, NULL, NULL);
 }
 
 IrNode *irn_store_number_constant(int instr, int val, int to_idx) {
-    return create_ir_node(instr, val, to_idx, NR, NULL);
+    return create_ir_node(instr, val, to_idx, NR, NULL, NULL);
 }
 
 IrNode *irn_binary_expr(int instr, int to_idx, int oprnd1, int oprnd2) {
-    return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL);
+    return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL, NULL);
 }
 
 IrNode *irn_statement(int instr, int res_idx) {
-    return create_ir_node(instr, res_idx, NR, NR, NULL);
+    return create_ir_node(instr, res_idx, NR, NR, NULL, NULL);
+}
+
+IrNode *irn_return(int instr, int res_idx, IrNode *label) {
+    return create_ir_node(instr, res_idx, NR, NR, NULL, label);
 }
 
 IrNode *irn_function(int instr, Symbol *s) {
-    return create_ir_node(instr, NR, NR, NR, s);
+    return create_ir_node(instr, NR, NR, NR, s, NULL);
 }
 
 IrNode *irn_label(int instr, int label_idx) {
-    return create_ir_node(instr, label_idx, NR, NR, NULL);
+    return create_ir_node(instr, label_idx, NR, NR, NULL, NULL);
 }
 
-IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
+IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s, IrNode *bl) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
     irn->instruction = instr;
@@ -77,6 +82,7 @@ IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s) {
     irn->n2 = n2;
     irn->n3 = n3;
     irn->s = s;
+    irn->branch = bl;
     return irn;
 }
 
@@ -151,13 +157,13 @@ void compute_ir(Node *n, IrList *irl) {
             compute_ir(n->children.child1, irl);
             /* now we have appended a BEGIN_PROC node to ir_list */
             /* it has the function symbol */
-            irn1 = irn_label(LABEL, label_idx++);
+            cur_end_proc_label = irn_label(LABEL, label_idx++);
             irn2 = irn_function(END_PROC, ir_list->tail->s);
             /* second child: compound statement */
             /* recurse over it to obtain IR nodes for the function body */
             compute_ir(n->children.child2, irl);
             /* finally end the proc */
-            append_ir_node(irn1, irl);
+            append_ir_node(cur_end_proc_label, irl);
             append_ir_node(irn2, irl);
             break;
         case FUNCTION_DEF_SPEC:
@@ -221,9 +227,9 @@ void compute_ir(Node *n, IrList *irl) {
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
             if (n->children.child1 != NULL) {
-                irn1 = irn_statement(RETURN, n->children.child1->expr->location);
+                irn1 = irn_return(RETURN, n->children.child1->expr->location, cur_end_proc_label);
             } else {
-                irn1 = irn_statement(RETURN, NR);
+                irn1 = irn_return(RETURN, NR, cur_end_proc_label);
             }
             append_ir_node(irn1, irl);
             break;
@@ -308,9 +314,9 @@ void print_ir_node(FILE *out, IrNode *irn) {
             break;
         case RETURN:
             if (irn->n1 == NR) {
-                fprintf(out, "return");
+                fprintf(out, "return, \"LABEL_%d\"", irn->branch->n1);
             } else {
-                fprintf(out, "return, $r%d", irn->n1);
+                fprintf(out, "return, \"LABEL_%d\", $r%d", irn->branch->n1, irn->n1);
             }
             break;
         case STORE_WORD_INDIRECT:

@@ -51,6 +51,7 @@ struct IrNode {
     int n2;
     int n3;
     Symbol *s;
+    struct IrNode *branch;
 };
 typedef struct IrNode IrNode;
 
@@ -67,7 +68,7 @@ void compute_ir(Node *n, IrList *irl);
 
 char *current_reg(void);
 char *next_reg(void);
-IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s);
+IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s, IrNode *bl);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
 IrNode *prepend_ir_node(IrNode *irn, IrList *irl);
