@@ -45,6 +45,6 @@ void start_traversal(Node *n) {
     #endif
 
     #ifdef MIPS_ASM
-    compute_mips_asm(output, ir_list);
+    compute_mips_asm(output, scd->stc, ir_list);
     #endif
 }

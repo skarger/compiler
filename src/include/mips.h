@@ -1,1 +1,1 @@
-void compute_mips_asm(FILE *out, IrList *irl);
+void compute_mips_asm(FILE *output, SymbolTableContainer *stc, IrList *irl);

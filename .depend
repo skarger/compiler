@@ -55,4 +55,5 @@ mips-main.o: src/mips/mips-main.c src/mips/../include/cmpl.h \
   src/mips/../include/literal.h src/mips/../include/ir.h
 mips-utils.o: src/mips/mips-utils.c src/mips/../include/ir.h \
   src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
-  src/mips/../include/utilities.h src/mips/../include/mips.h
+  src/mips/../include/utilities.h src/mips/../include/scope-fsm.h \
+  src/mips/../include/literal.h src/mips/../include/mips.h
