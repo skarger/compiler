@@ -1,0 +1,20 @@
+#!/bin/bash
+
+./mips-main test/mips/mips-in-1 test/mips/mips-output
+diff test/mips/mips-exp-1 test/mips/mips-output
+if [ $? -eq 0 ]
+then
+    echo "PASS: 1"
+else
+    echo "FAIL: 1"
+fi
+
+./mips-main test/mips/mips-in-2 test/mips/mips-output
+diff test/mips/mips-exp-2 test/mips/mips-output
+if [ $? -eq 0 ]
+then
+    echo "PASS: 2"
+else
+    echo "FAIL: 2"
+fi
+

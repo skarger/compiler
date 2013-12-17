@@ -41,7 +41,9 @@ void start_traversal(Node *n) {
         irn = irn->next;
     }
     */
-    print_ir_list(output, ir_list);
+        #ifdef PRINT_IR
+        print_ir_list(output, ir_list);
+        #endif
     #endif
 
     #ifdef MIPS_ASM

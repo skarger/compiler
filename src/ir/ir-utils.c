@@ -21,6 +21,7 @@ static IrNode *cur_end_proc_label;
 
 /* helper functions */
 void compute_ir_pass_through(Node *n, IrList *irl);
+Boolean is_statement(Node *n);
 
 char *current_reg(void) {
     char *buf;
@@ -153,6 +154,10 @@ void compute_ir(Node *n, IrList *irl) {
         return;
     }
 
+    if (is_statement(n)) {
+        reg_idx = 0;
+    }
+
     /* append IrNodes to the IrList  */
 
     /* for expressions compute_ir will update the node: */
@@ -251,11 +256,20 @@ void compute_ir(Node *n, IrList *irl) {
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
             if (n->children.child1 != NULL) {
-                irn1 = irn_return(RETURN_FROM_PROC, n->children.child1->expr->location, cur_end_proc_label);
+                if (n->children.child1->expr->lvalue) {
+                    irn1 = irn_load_from_register(LOAD_WORD_INDIRECT,
+                            reg_idx, n->children.child1->expr->location);
+                    append_ir_node(irn1, irl);
+                    irn2 = irn_return(RETURN_FROM_PROC, reg_idx++, cur_end_proc_label);
+                } else {
+                    irn2 = irn_return(RETURN_FROM_PROC, n->children.child1->expr->location, cur_end_proc_label);
+                }
+                append_ir_node(irn2, irl);
             } else {
                 irn1 = irn_return(RETURN_FROM_PROC, NR, cur_end_proc_label);
+                append_ir_node(irn1, irl);
             }
-            append_ir_node(irn1, irl);
+
             break;
         case FUNCTION_CALL:
             is_function_call = TRUE;
@@ -334,6 +348,29 @@ void compute_ir_pass_through(Node *n, IrList *irl) {
         default:
             /* error? */
             break;
+    }
+}
+
+Boolean is_statement(Node *n) {
+    if (n == NULL) {
+        return;
+    }
+    switch (n->n_type) {
+        case FOR_STATEMENT:
+        case IF_THEN_ELSE:
+        case WHILE_STATEMENT:
+        case DO_STATEMENT:
+        case IF_THEN:
+        case COMPOUND_STATEMENT:
+        case EXPRESSION_STATEMENT:
+        case RETURN_STATEMENT:
+        case GOTO_STATEMENT:
+        case BREAK_STATEMENT:
+        case CONTINUE_STATEMENT:
+        case NULL_STATEMENT:
+            return TRUE;
+        default:
+            return FALSE;
     }
 }
 

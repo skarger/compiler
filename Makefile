@@ -127,6 +127,9 @@ test-symbol-utils : symbol-utils.o test-symbol-utils.o utilities.o scope-fsm.o
 
 test-symtab-output : symbol-main
 
+test-mips: mips-main
+	./test/mips/test-mips
+
 test-ir : test/ir/test-ir.cpp libgtest.a \
 ir-utils.o y.tab.o cmpl.o scope-fsm.o symbol-collection.o symbol-utils.o \
 utilities.o

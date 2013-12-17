@@ -1,0 +1,9 @@
+void syscall_print_int(int i);
+int a;
+
+int main(void) {
+    a = 5;
+    syscall_print_int(a);
+    return a;
+}
+

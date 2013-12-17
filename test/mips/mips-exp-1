@@ -1,0 +1,32 @@
+    .data
+a: .word 0
+
+    .text
+main:
+    addiu   $sp, $sp, -48  # push space for our stack frame onto the stack
+    sw $fp, 44($sp)        # save the old $fp
+    addiu $fp, $sp, 44     # $fp -> stack frame
+    sw $ra, -4($fp)        # save the return address
+    la    $t0, a
+    li    $t1, 5
+    sw    $t1, ($t0)
+    addiu $sp, $sp, -4 # push space for argument
+    la    $t1, a
+    lw    $t2, ($t1)
+    or    $a0, $t2, $0
+    jal   syscall_print_int
+    addiu $sp, $sp, 4 # pop off space for argument
+    la    $t0, a
+    lw    $t1, ($t0)
+    move  $v0, $t1
+    j     LABEL_0
+LABEL_0:
+    lw  $ra, -4($fp)       # restore $ra
+    lw  $fp, ($fp)         # restore old $fp
+    addiu   $sp, $sp, 48   # pop off our stack frame
+    jr $ra
+
+syscall_print_int:
+    li $v0, 1         # v0 <- syscall code for print_int
+    syscall           # print
+    jr $ra            # return to caller

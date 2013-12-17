@@ -2,10 +2,22 @@
 #include "../include/scope-fsm.h"
 #include "../include/mips.h"
 
-static const char *syscall_print_int = "syscall_print_int:\n"
-"    li $v0, 1         # v0 <- syscall code for print_int\n"
-"    syscall           # print\n"
-"    jr $ra            # return to caller\n";
+/*
+# Layout of stack frame for "main" of size 48 bytes
+# Stack frame rounded up to 48 bytes (double word multiple)
+# Name Offset Size
+# (unused) $fp-44 4 (for alignment purposes)
+# $s7 $fp-36 4
+# $s6 $fp-32 4
+# $s5 $fp-28 4
+# $s4 $fp-24 4
+# $s3 $fp-20 4
+# $s2 $fp-16 4
+# $s1 $fp-12 4
+# $s0 $fp-8 4
+# $ra $fp-4 4
+# old $fp $fp 4
+*/
 
 static const char *main_intro ="    addiu   $sp, $sp, -48"
 "  # push space for our stack frame onto the stack\n"
@@ -18,6 +30,11 @@ static const char *main_outro = "    lw  $ra, -4($fp)       # restore $ra\n"
 "    addiu   $sp, $sp, 48   # pop off our stack frame\n"
 "    jr $ra\n";
 
+
+static const char *syscall_print_int = "syscall_print_int:\n"
+"    li $v0, 1         # v0 <- syscall code for print_int\n"
+"    syscall           # print\n"
+"    jr $ra            # return to caller\n";
 
 void print_global_variables(FILE *out, SymbolTable *st);
 void print_functions(FILE *out, SymbolTableContainer *stc, IrList *irl);
@@ -71,7 +88,7 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             break;
         case RETURN_FROM_PROC:
             if (irn->n1 != NR) {
-                fprintf(out, "    lw    $v0, ($t%d)\n", irn->n1);
+                fprintf(out, "    move  $v0, $t%d\n", irn->n1);
             }
             fprintf(out, "    j     LABEL_%d\n", irn->branch->n1);
             break;
@@ -104,7 +121,7 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             fprintf(out, "    or    $a%d, $t%d, $0\n", irn->n1, irn->n2);
             break;
         case CALL:
-            fprintf(out, "    jal %s\n", get_symbol_name(irn->s));
+            fprintf(out, "    jal   %s\n", get_symbol_name(irn->s));
             break;
         case END_CALL:
             fprintf(out, "    addiu $sp, $sp, 4 # pop off space for argument\n");

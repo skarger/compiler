@@ -44,4 +44,5 @@ test-ir
 test/symbol/st-output
 test/parser/second_output
 test/parser/test_output
+test/mips/mips-output
 
