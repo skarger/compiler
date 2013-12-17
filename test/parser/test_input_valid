@@ -92,7 +92,7 @@ while ( i > 0 ) i--;
 int main(void) {
 int i, j;
 
-for ( i = 1; i < len; i++ )
+for ( i = 1; i < len; i++ ) {
 j++;
 }
 
@@ -106,6 +106,7 @@ for ( ; 1 < 2; j++) {
 
 for (;;) {
 ;
+}
 }
 
 int main(void) {
