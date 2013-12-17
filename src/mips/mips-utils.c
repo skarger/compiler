@@ -41,18 +41,18 @@ void print_functions(FILE *out, SymbolTableContainer *stc, IrList *irl);
 void ir_to_mips(FILE *out, IrNode *irn);
 
 void compute_mips_asm(FILE *output, SymbolTableContainer *stc, IrList *irl) {
-    fprintf(output, "    .data\n");
     /* write each file scope non-function symbol */
+    fprintf(output, "    .data\n");
     SymbolTable *st;
     st = stc->symbol_tables[OTHER_NAMES]; /* this is the file level scope ST */
     print_global_variables(output, st);
-    /* st = stc->symbol_tables[STATEMENT_LABELS]; */
 
+    /* print each function defintion */
     fprintf(output, "\n");
     fprintf(output, "    .text\n");
-    /* print each function */
     print_functions(output, stc, irl);
 
+    /* provide syscall code */
     fprintf(output, "\n");
     fprintf(output, "%s", syscall_print_int);
 }
@@ -87,10 +87,10 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             #endif
             break;
         case RETURN_FROM_PROC:
-            if (irn->n1 != NR) {
-                fprintf(out, "    move  $v0, $t%d\n", irn->n1);
+            if (irn->args[RSRC] != NO_ARG) {
+                fprintf(out, "    move  $v0, $t%d\n", irn->args[RSRC]);
             }
-            fprintf(out, "    j     LABEL_%d\n", irn->branch->n1);
+            fprintf(out, "    j     LABEL_%d\n", irn->branch->args[LABIDX]);
             break;
         case END_PROC:
             #ifdef PROCEDURE_CALLS_SUPPORTED
@@ -100,25 +100,25 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             #endif
             break;
         case LOAD_ADDRESS:
-            fprintf(out, "    la    $t%d, %s\n", irn->n1, get_symbol_name(irn->s));
+            fprintf(out, "    la    $t%d, %s\n", irn->args[RDEST], get_symbol_name(irn->s));
             break;
         case LOAD_WORD_INDIRECT:
-            fprintf(out, "    lw    $t%d, ($t%d)\n", irn->n1, irn->n2);
+            fprintf(out, "    lw    $t%d, ($t%d)\n", irn->args[RDEST], irn->args[RSRC]);
             break;
         case LOAD_CONSTANT:
-            fprintf(out, "    li    $t%d, %d\n", irn->n1, irn->n2);
+            fprintf(out, "    li    $t%d, %d\n", irn->args[RDEST], irn->args[IMMVAL]);
             break;
         case STORE_WORD_INDIRECT:
-            fprintf(out, "    sw    $t%d, ($t%d)\n", irn->n1, irn->n2);
+            fprintf(out, "    sw    $t%d, ($t%d)\n", irn->args[RSRC], irn->args[RDEST]);
             break;
         case LABEL:
-            fprintf(out, "LABEL_%d:\n", irn->n1);
+            fprintf(out, "LABEL_%d:\n", irn->args[LABIDX]);
             break;
         case BEGIN_CALL:
             fprintf(out, "    addiu $sp, $sp, -4 # push space for argument\n");
             break;
         case PARAM:
-            fprintf(out, "    or    $a%d, $t%d, $0\n", irn->n1, irn->n2);
+            fprintf(out, "    or    $a%d, $t%d, $0\n", irn->args[RDEST], irn->args[RSRC]);
             break;
         case CALL:
             fprintf(out, "    jal   %s\n", get_symbol_name(irn->s));
@@ -127,7 +127,7 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             fprintf(out, "    addiu $sp, $sp, 4 # pop off space for argument\n");
             break;
         case LOG_OR:
-            fprintf(out, "    or    $t%d,  $t%d, $t%d\n", irn->n1, irn->n2, irn->n3);
+            fprintf(out, "    or    $t%d,  $t%d, $t%d\n", irn->args[RDEST], irn->args[OPRND1], irn->args[OPRND2]);
             break;
         default:
             fprintf(out, "unknown instruction\n");

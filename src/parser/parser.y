@@ -872,7 +872,7 @@ void *construct_node(enum data_type nt) {
     if (is_expression(nt)) {
         util_emalloc((void **) &e, sizeof(Expression));
         e->lvalue = FALSE;
-        e->location = NR;
+        e->location = NO_ARG;
     }
     n->expr = e;
     n->st_entry = NULL;
