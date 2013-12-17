@@ -71,7 +71,7 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             break;
         case RETURN_FROM_PROC:
             if (irn->n1 != NR) {
-                fprintf(out, "    lw    $v0, ($r%d)\n", irn->n1);
+                fprintf(out, "    lw    $v0, ($t%d)\n", irn->n1);
             }
             fprintf(out, "    j     LABEL_%d\n", irn->branch->n1);
             break;
@@ -108,6 +108,9 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             break;
         case END_CALL:
             fprintf(out, "    addiu $sp, $sp, 4 # pop off space for argument\n");
+            break;
+        case LOG_OR:
+            fprintf(out, "    or    $t%d,  $t%d, $t%d\n", irn->n1, irn->n2, irn->n3);
             break;
         default:
             fprintf(out, "unknown instruction\n");
