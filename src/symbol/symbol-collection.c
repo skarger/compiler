@@ -714,7 +714,7 @@ void validate_statement_labels(SymbolCreationData *scd) {
 }
 
 void print_symbol(FILE *out, Symbol *s) {
-    if (s == scd->dummy_symbol || s == NULL) {
+    if (s == NULL || s == scd->dummy_symbol) {
         return;
     }
     fprintf(out, "\n/*\n");

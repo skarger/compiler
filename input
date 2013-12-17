@@ -1,7 +1,9 @@
+int a;
 void syscall_print_int(int i);
 
 int main(void) {
-    syscall_print_int(3);
+    a = 23;
+    syscall_print_int(a);
     return 0;
 }
 
