@@ -159,7 +159,6 @@ void compute_ir(Node *n, IrList *irl) {
     /* type: assume SIGNED_INT unless node is a symbol with a known type */
     /* lvalue: yes or no */
     /* location: register index of its result */
-
     switch (n->n_type) {
         case FUNCTION_DEFINITION:
             /* first child: function def spec */
@@ -244,9 +243,9 @@ void compute_ir(Node *n, IrList *irl) {
         case RETURN_STATEMENT:
             compute_ir(n->children.child1, irl);
             if (n->children.child1 != NULL) {
-                irn1 = irn_return(RETURN, n->children.child1->expr->location, cur_end_proc_label);
+                irn1 = irn_return(RETURN_FROM_PROC, n->children.child1->expr->location, cur_end_proc_label);
             } else {
-                irn1 = irn_return(RETURN, NR, cur_end_proc_label);
+                irn1 = irn_return(RETURN_FROM_PROC, NR, cur_end_proc_label);
             }
             append_ir_node(irn1, irl);
             break;
@@ -351,7 +350,7 @@ void print_ir_node(FILE *out, IrNode *irn) {
         case END_PROC:
             fprintf(out, "endproc, \"%s\"", get_symbol_name(irn->s));
             break;
-        case RETURN:
+        case RETURN_FROM_PROC:
             if (irn->n1 == NR) {
                 fprintf(out, "return, \"LABEL_%d\"", irn->branch->n1);
             } else {
@@ -399,7 +398,7 @@ char *get_ir_name(enum ir_instruction instr) {
     #define CASE_FOR(instr) case instr: return #instr
         CASE_FOR(BEGIN_PROC);
         CASE_FOR(END_PROC);
-        CASE_FOR(RETURN);
+        CASE_FOR(RETURN_FROM_PROC);
         CASE_FOR(BEGIN_CALL);
         CASE_FOR(PARAM);
         CASE_FOR(CALL);
