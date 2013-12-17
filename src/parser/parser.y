@@ -1208,9 +1208,7 @@ void print_data_node(void *np) {
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
         case IDENTIFIER:
-            #ifdef COLLECT_SYMBOLS
             print_symbol(output, n->st_entry);
-            #endif
             fprintf(output, "%s", n->data.str);
             break;
         case STRING_CONSTANT:

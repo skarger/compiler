@@ -13,8 +13,8 @@ VPATH = src
 
 
 TESTS = libgtest.a test-ir test-symbol-utils test/symbol/st-output
-EXECS = lexer parser-main symbol-main ir-main mips-main
-SRCS = y.tab.c lex.yy.c src/lexer/lexer.c src/utilities/utilities.c \
+EXECS = lexer-main parser-main symbol-main ir-main mips-main
+SRCS = y.tab.c lex.yy.c src/lexer/lexer-main.c src/utilities/utilities.c \
 src/parser/parser-main.c src/cmpl/cmpl.c \
 src/symbol/symbol-utils.c test/symbol/test-symbol-utils.c \
 src/symbol/symbol-main.c src/symbol/scope-fsm.c \
@@ -43,11 +43,11 @@ lex.yy.o :
 lex.yy.c : lexer/lexer.lex
 	$(LEX) $(LFLAGS) -o $@ $<
 
-lexer.o : lex.yy.o
-	$(CC) -c src/lexer/lexer.c lex.yy.c
+lexer-main.o : lex.yy.o
+	$(CC) -c src/lexer/lexer-main.c lex.yy.c
 
-lexer : lexer.o
-	$(CC) lexer.o lex.yy.o -o $@
+lexer-main : lexer-main.o
+	$(CC) lexer-main.o lex.yy.o -o $@
 
 y.tab.c : src/parser/parser.y lex.yy.c
 	$(YACC) $(YFLAGS) -o $@ $<

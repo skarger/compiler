@@ -25,6 +25,8 @@
 #include <string.h>
 
 #include "../include/lexer.h"
+#include "../include/literal.h"
+#include "../include/parse-tree.h"
 #ifdef STANDALONE
 #include "src/include/token.h"
 #else
