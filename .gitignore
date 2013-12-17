@@ -32,7 +32,7 @@ lex.yy.c
 */include/lexer.h.gch
 
 # binaries
-lexer
+lexer-main
 parser-main
 symbol-main
 ir-main

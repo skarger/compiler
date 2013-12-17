@@ -21,9 +21,12 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#ifdef __linux
 #include <error.h>
+#endif
 
 #include "src/include/lexer.h"
+#include "src/include/literal.h"
 
 #ifdef STANDALONE
 #include "src/include/token.h"
@@ -508,6 +511,7 @@ void handle_error(enum lexer_error e, char *data, int line) {
     switch (e) {
         case E_SUCCESS:
             return;
+#ifdef __linux
         case E_MALLOC:
             error(e, 0, "%s: out of memory", data);
             return;
@@ -541,6 +545,41 @@ void handle_error(enum lexer_error e, char *data, int line) {
         case E_INTEGER_OVERFLOW:
             error(0, 0, "line %d: integer constant too large: %s", line, data);
             return;
+#else
+        case E_MALLOC:
+            fprintf(stderr, "%s: out of memory", data);
+            return;
+        case E_NOT_OCTAL:
+            fprintf(stderr, "line %d: %s: non-octal digit", line, data);
+            return;
+        case E_ESCAPE_SEQ:
+            fprintf(stderr, "line %d: invalid escape sequence %s", line, data);
+            return;
+        case E_NEWLINE:
+            fprintf(stderr, "line %d: invalid newline", line);
+            return;
+        case E_INVALID_STRING:
+            fprintf(stderr, "line %d: invalid string literal: %s", line, data);
+            return;
+        case E_INVALID_ID:
+            fprintf(stderr, "line %d: invalid identifier: %s", line, data);
+            return;
+        case E_INVALID_CHAR:
+            fprintf(stderr, "line %d: invalid character: %s", line, data);
+            return;
+        case E_EMPTY_CHAR:
+            fprintf(stderr, "line %d: empty character constant: %s", line, data);
+            return;
+        case E_OCTAL:
+            fprintf(stderr, "line %d: octal constants unsupported: %s", line, data);
+            return;
+        case E_FLOAT:
+            fprintf(stderr, "line %d: floating point unsupported: %s", line, data);
+            return;
+        case E_INTEGER_OVERFLOW:
+            fprintf(stderr, "line %d: integer constant too large: %s", line, data);
+            return;
+#endif
         default:
             return;
     }
