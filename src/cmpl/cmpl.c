@@ -35,12 +35,6 @@ void start_traversal(Node *n) {
     start_ir_computation();
     compute_ir(n, ir_list);
     IrNode *irn = ir_list->head;
-    /* DEBUG    
-    while(irn != NULL) {
-        printf("%s\n", get_ir_name(irn->instruction));
-        irn = irn->next;
-    }
-    */
         #ifdef PRINT_IR
         print_ir_list(output, ir_list);
         #endif

@@ -8,10 +8,17 @@
 #undef PRETTY_PRINT
 
 #define COLLECT_SYMBOLS
+#undef COLLECT_SYMBOLS
 
 #define COMPUTE_IR
+#undef COMPUTE_IR
+
+#define PRINT_IR
+#undef PRINT_IR
 
 #define MIPS_ASM
+#undef MIPS_ASM
+
 
 /* define INTERACTIVE to receive output from parser for each entered top level decl */
 /* if INTERACTIVE is not defined tree traversal will start upon reaching end-of-file */
