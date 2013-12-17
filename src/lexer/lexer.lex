@@ -191,7 +191,7 @@ while return WHILE;
         handle_error(E_INTEGER_OVERFLOW, yytext, yylineno);
         return UNRECOGNIZED;
     }
-    return NUMBER_CONSTANT;
+    return NUMBER_CONST;
 }
 0[0-9]+ {
     handle_error(E_OCTAL, yytext, yylineno);
@@ -210,12 +210,12 @@ while return WHILE;
 '{sp}'                    |
 '{graphic_no_apostrophe}' {
     yylval = (YYSTYPE) create_character(yytext[1]);
-    return CHAR_CONSTANT;
+    return CHAR_CONST;
 }
 '{char_esc}'  {
     yylval =
         (YYSTYPE) create_character( (char) convert_single_escape(yytext[2]) );
-    return CHAR_CONSTANT;
+    return CHAR_CONST;
 }
 '{octal_esc}' {
     /* minus the two apostrophes and slash, num of octal digits is len - 3 */
@@ -224,7 +224,7 @@ while return WHILE;
     char *start = yytext + 2;
     yylval =
         (YYSTYPE) create_character((char)convert_octal_escape(start, n_digits));
-    return CHAR_CONSTANT;
+    return CHAR_CONST;
 }
 '{invalid_esc}' {
     handle_error(E_ESCAPE_SEQ, yytext, yylineno);
@@ -306,7 +306,7 @@ while return WHILE;
     *( ((struct String *) yylval)->current ) = '\0';
     BEGIN(0);
     if (((struct String *) yylval)->valid) {
-        return STRING_CONSTANT;
+        return STRING_CONST;
     }
     /* error found somewhere in string */
     handle_error(E_INVALID_STRING, ((struct String *) yylval)->str, yylineno);
@@ -599,9 +599,9 @@ void handle_error(enum lexer_error e, char *data, int line) {
 char *get_token_name(int token) {
     switch (token) {
     #define CASE_FOR(token) case token: return #token
-        CASE_FOR(CHAR_CONSTANT);
-        CASE_FOR(STRING_CONSTANT);
-        CASE_FOR(NUMBER_CONSTANT);
+        CASE_FOR(CHAR_CONST);
+        CASE_FOR(STRING_CONST);
+        CASE_FOR(NUMBER_CONST);
         CASE_FOR(IDENTIFIER);
         CASE_FOR(CHAR);
         CASE_FOR(CONTINUE);

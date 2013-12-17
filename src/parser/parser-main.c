@@ -1,6 +1,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "../../y.tab.h"
+
+int yyparse(void);
 
 FILE *output;
 int main(int argc, char *argv[]) {

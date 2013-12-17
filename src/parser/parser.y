@@ -21,7 +21,7 @@ void yyerror(char *s);
 
 %start root
 
-%token UNRECOGNIZED CHAR_CONSTANT STRING_CONSTANT NUMBER_CONSTANT IDENTIFIER
+%token UNRECOGNIZED CHAR_CONST STRING_CONST NUMBER_CONST IDENTIFIER
 %token BREAK CHAR CONTINUE DO ELSE FOR GOTO IF INT
 %token LONG RETURN SIGNED SHORT UNSIGNED VOID WHILE
 %token LOGICAL_NOT REMAINDER BITWISE_XOR AMPERSAND ASTERISK MINUS PLUS ASSIGN
@@ -417,11 +417,11 @@ primary_expr : IDENTIFIER
         { $$ = $2; }
     ;
 
-constant : CHAR_CONSTANT
+constant : CHAR_CONST
         { $$ = create_node( CHAR_CONSTANT, yylval ); }
-    | STRING_CONSTANT
+    | STRING_CONST
         { $$ = create_node( STRING_CONSTANT, yylval ); }
-    | NUMBER_CONSTANT
+    | NUMBER_CONST
         { $$ = create_node( NUMBER_CONSTANT, yylval ); }
     ;
 
@@ -676,7 +676,6 @@ int has_literal_data(enum data_type nt) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
         case NUMBER_CONSTANT:
         case CHAR_CONSTANT:
         case STRING_CONSTANT:
@@ -700,7 +699,6 @@ void set_literal_data(Node *n, YYSTYPE data) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
             n->data.str =
                 strdup( ((struct String *) data)->str );
             break;
@@ -727,7 +725,6 @@ int number_of_children(enum data_type nt) {
         case NULL_STATEMENT:
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
-        case IDENTIFIER:
         case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
         case NUMBER_CONSTANT:
@@ -1051,7 +1048,6 @@ void pretty_print(void *np) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
         case STRING_CONSTANT:
@@ -1206,7 +1202,6 @@ void print_data_node(void *np) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
             #ifdef COLLECT_SYMBOLS
             print_symbol(output, n->st_entry);
             #endif
@@ -1409,6 +1404,7 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
     switch (e) {
         case PE_SUCCESS:
             return;
+    #ifdef __linux
         case PE_INVALID_DATA_TYPE:
             error(0, 0, "line %d: invalid data type: %s", line, data);
             return;
@@ -1421,6 +1417,20 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             #ifdef DEBUG
             error(0, 0, "line %d: %s: unrecognized operator", line, data);
             #endif
+    #else
+        case PE_INVALID_DATA_TYPE:
+            fprintf(stderr, "line %d: invalid data type: %s", line, data);
+            return;
+        case PE_UNRECOGNIZED_NODE_TYPE:
+            #ifdef DEBUG
+            fprintf(stderr, "line %d: %s: unrecognized node type", line, data);
+            #endif
+            return;
+        case PE_UNRECOGNIZED_OP:
+            #ifdef DEBUG
+            fprintf(stderr, "line %d: %s: unrecognized operator", line, data);
+            #endif
+    #endif
         default:
             return;
     }

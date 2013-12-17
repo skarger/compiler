@@ -165,17 +165,17 @@ int main(int argc, char *argv[]) {
                 case LOGICAL_OR:
                     fprintf(output, "    cmp op = %-20s\n", get_token_name(token));
                     break;
-                case NUMBER_CONSTANT:
+                case NUMBER_CONST:
                     number = (struct Number *) yylval;
                     fprintf(output, "\ttype = %20s\tvalue = %-10lu\n", 
                             get_integer_type(number->type),
                             number->value);
                     break;
-                case CHAR_CONSTANT:
+                case CHAR_CONST:
                     character = (struct Character *) yylval;
                     fprintf(output, "\tvalue: %c\n", character->c);
                     break;
-                case STRING_CONSTANT:
+                case STRING_CONST:
                     string = (struct String *) yylval;
                     fprintf(output, "\tvalue: %s\n", string->str);
                     break;

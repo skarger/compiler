@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+int yyparse(void);
 FILE *output;
 int main(int argc, char *argv[]) {
     extern FILE *yyin;

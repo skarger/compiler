@@ -508,6 +508,7 @@ void handle_symbol_error(enum symbol_error e, char *data) {
     switch (e) {
         case STE_SUCCESS:
             return;
+    #ifdef __linux
         case STE_NOT_ARRAY:
             error(0, 0, "%s", data);
             return;
@@ -561,6 +562,61 @@ void handle_symbol_error(enum symbol_error e, char *data) {
         case STE_LAB_UNDEFINED:
             error(0, 0, "error: '%s' used but not defined", data);
             return;
+    #else
+        case STE_NOT_ARRAY:
+            fprintf(stderr, "%s", data);
+            return;
+        case STE_DUPLICATE_SYMBOL:
+            fprintf(stderr, "error: \"%s\": duplicate symbol", data);
+            return;
+        case STE_NON_POSITIVE_ARRAY_SIZE:
+            fprintf(stderr, "error: %s: array size must be positive", data);
+            return;
+        case STE_VARIABLE_ARRAY_SIZE:
+            fprintf(stderr, "error: %s: variable size not permitted", data);
+            return;
+        case STE_ARRAY_SIZE_TYPE:
+            fprintf(stderr, "error: %s: array size must be an integer", data);
+            return;
+        case STE_ARRAY_SIZE_MISSING:
+            fprintf(stderr, "error: %s: array size required", data);
+            return;
+        case STE_ARRAY_OF_FUNC:
+            fprintf(stderr, "error: %s: arrays cannot contain functions", data);
+            return;
+        case STE_FUNC_RET_ARRAY:
+            fprintf(stderr, "error: %s: functions cannot return arrays", data);
+            return;
+        case STE_FUNC_RET_FUNC:
+            fprintf(stderr, "error: %s: functions cannot return functions", data);
+            return;
+        case STE_CAST_ARRAY_SIZE:
+            fprintf(stderr, "error: %s: cast expressions not supported", data);
+            return;
+        case STE_NULL_PARAM:
+            fprintf(stderr, "error: %s: trying to manipulate null parameter", data);
+            return;
+        case STE_FUNCTION_POINTER:
+            fprintf(stderr, "error: %s: function pointers not supported", data);
+            return;
+        case STE_NOT_FUNCTION:
+            fprintf(stderr, "error: %s", data);
+        case STE_PROTO_MISMATCH:
+            fprintf(stderr, "error: %s: redeclaration of function", data);
+            return;
+        case STE_FUNC_DECL_SCOPE:
+            fprintf(stderr, "error: %s: function declared at non-file scope", data);
+            return;
+        case STE_ABS_DECL_PARAM:
+            fprintf(stderr, "error: %s: function parameters must be named", data);
+            return;
+        case STE_ID_UNDECLARED:
+            fprintf(stderr, "error: \"%s\" undeclared", data);
+            return;
+        case STE_LAB_UNDEFINED:
+            fprintf(stderr, "error: '%s' used but not defined", data);
+            return;
+    #endif
         default:
             return;
     }

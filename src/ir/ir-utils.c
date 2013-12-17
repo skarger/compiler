@@ -370,7 +370,7 @@ IrNode *prepend_ir_node(IrNode *irn, IrList *irl) {
 
 Boolean is_statement(Node *n) {
     if (n == NULL) {
-        return;
+        return FALSE;
     }
     switch (n->n_type) {
         case FOR_STATEMENT:
