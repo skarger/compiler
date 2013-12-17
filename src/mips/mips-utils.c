@@ -70,7 +70,10 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             #endif
             break;
         case RETURN_FROM_PROC:
-            fprintf(out, "    j LABEL_%d\n", irn->branch->n1);
+            if (irn->n1 != NR) {
+                fprintf(out, "    lw    $v0, ($r%d)\n", irn->n1);
+            }
+            fprintf(out, "    j     LABEL_%d\n", irn->branch->n1);
             break;
         case END_PROC:
             #ifdef PROCEDURE_CALLS_SUPPORTED
@@ -81,6 +84,9 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             break;
         case LOAD_ADDRESS:
             fprintf(out, "    la    $t%d, %s\n", irn->n1, get_symbol_name(irn->s));
+            break;
+        case LOAD_WORD_INDIRECT:
+            fprintf(out, "    lw    $t%d, ($t%d)\n", irn->n1, irn->n2);
             break;
         case LOAD_CONSTANT:
             fprintf(out, "    li    $t%d, %d\n", irn->n1, irn->n2);

@@ -221,13 +221,21 @@ void compute_ir(Node *n, IrList *irl) {
         case IDENTIFIER_EXPR:
             n->expr->lvalue = TRUE;
             n->expr->location = reg_idx++;
-            if (is_function_call) {
+            if (is_function_call && !is_function_argument) {
                 irn1 = irn_function_call(BEGIN_CALL, n->st_entry);
+                append_ir_node(irn1, irl);
             } else {
                 irn1 = irn_load_from_global(LOAD_ADDRESS,
-                            n->expr->location, n->st_entry);
+                        n->expr->location, n->st_entry);
+                append_ir_node(irn1, irl);
+                if (is_function_argument) {
+                    irn2 = irn_load_from_register(LOAD_WORD_INDIRECT,
+                            reg_idx, n->expr->location);
+                    irn3 = irn_param(PARAM, 0, reg_idx++);
+                    append_ir_node(irn2, irl);
+                    append_ir_node(irn3, irl);
+                }
             }
-            append_ir_node(irn1, irl);
             break;
         case NUMBER_CONSTANT:
             n->expr->lvalue = FALSE;
@@ -376,7 +384,7 @@ void print_ir_node(FILE *out, IrNode *irn) {
             fprintf(out, "loadaddress, $r%d, %s", irn->n1, get_symbol_name(irn->s));
             break;
         case LOAD_WORD_INDIRECT:
-            fprintf(out, "loadwordindirect, $r%d, %s", irn->n1, irn->n2);
+            fprintf(out, "loadwordindirect, $r%d, $r%d", irn->n1, irn->n2);
             break;
         case LOAD_CONSTANT:
             fprintf(out, "loadconstant, $r%d, %d", irn->n1, irn->n2);
