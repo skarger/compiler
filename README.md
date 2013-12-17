@@ -3,51 +3,54 @@ compiler
 
 Only tested on Linux. Currently will not compile OS X; untested on Windows.
 
-Symbol Table - traverse a parse tree and create symbol tables for each
-identifier, for both declarations and references.
-
-Build:
-make symbol-main
-
-Run:
-./symbol-main [input_file] [output_file]
-Will use stdin and stdout if input_file or output_file ommitted.
-Pretty prints the parse tree with comments for each symbol.
+Each "main" program will use stdin/stdout if input_file or output_file ommitted.
 Note: prints error messages to stderr.
 
-Test:
-make test-symbol (redirects error messages to /dev/null)
-make test-symtab-errors (shows error messages emitted by program)
+Lexer - Scan a C input file and output information about each distinct token.
+Build: make lexer-main
+Run: ./lexer-main [input_file] [output_file]
 
 
 Parser - construct a parse tree for a subset of the C language and print it.
-
-Build:
-make parser-main
-
-Run:
-./parser-main [input_file] [output_file]
-Will use stdin and stdout if input_file or output_file ommitted.
-Note: prints error messages to stderr.
-
+Build: make parser-main
+Run: ./parser-main [input_file] [output_file]
 Test:
 make test-parser-output
 make test-parser-errors
 
 
+Symbol Table - traverse a parse tree and create symbol tables for each
+identifier, for both declarations and references.
+Build: make symbol-main
+Run: ./symbol-main [input_file] [output_file]
+Test:
+make test-symbol (redirects error messages to /dev/null)
+make test-symtab-errors (shows error messages emitted by program)
+
+
+IR Generator - output Intermediate Representation instructions given
+a parse tree and symbol table derived from a C source file.
+Build: make ir-main
+Run: ./ir-main [input_file] [output_file]
+Test: make test-ir
+
+
+MIPS Assembly Generator
+Build: make mips-main
+Run: ./mips-main [input_file] [output_file]
+Test: make test-mips
+
+
 Files:
-Makefile
+Makefile  README.md  src  test
+
 ./src: Source files for compiler components.
+cmpl  include  ir  lexer  mips	parser	symbol	utilities
+
+./src: 
 include  lexer	parser	symbol	utilities
 
 ./src/include: header files
 
-./src/symbol:
-symbol-main.c: executable program for symbol table generation. Calls yyparse.
-traverse.c: Parse tree traversal procedures that create symbols.
-symbol-utils.c: Utility functions for symbols and symbol tables.
-scope-fsm.c: Finite state machine to manage scope and overloading class.
-
-./src/parser:
-parser-main.c: main program for parser
-parser.y: Bison grammar specification and parse tree building helpers
+./test: Testing scripts. Google Test is the only third-party library.
+gtest-1.7.0  ir  lexer	mips  parser  symbol
