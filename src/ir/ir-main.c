@@ -9,10 +9,13 @@
 #include "../../y.tab.h"
 #include "../include/parse-tree.h"
 #include "../include/parser.h"
+#include "../include/symbol.h"
+#include "../include/symbol-collection.h"
 #include "../include/symbol-utils.h"
+#include "../include/ir.h"
 
-
-
+extern SymbolCreationData *scd;
+extern IrList *ir_list;
 
 FILE *input, *output;
 
@@ -95,4 +98,31 @@ void test_print_ir(void) {
         compute_ir(func_def_spec, ir_list);
 
         print_ir_list(stdout, ir_list);
+}
+
+
+extern SymbolCreationData *scd;
+extern IrList *ir_list;
+
+/*
+ * start_traversal
+ * Purpose: Kick off traversal of parse tree. Meant for parser to call.
+ * Parameters:
+ *  n       Node * The node to start traversing from. Recursively traverses
+ *          the children of n.
+ * Returns: None
+ * Side-effects: Allocates heap memory
+ */
+void start_traversal(Node *n) {
+    if (scd == NULL) {
+        util_emalloc((void **) &scd, sizeof(SymbolCreationData));
+        initialize_symbol_creation_data(scd);
+        scd->outfile = output;
+    }
+    collect_symbol_data(n, scd);
+
+    start_ir_computation();
+    compute_ir(n, ir_list);
+    IrNode *irn = ir_list->head;
+    print_ir_list(output, ir_list);
 }

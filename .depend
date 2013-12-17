@@ -10,7 +10,9 @@ utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h \
   src/utilities/../include/parse-tree.h src/utilities/../include/symbol.h \
   src/utilities/../include/utilities.h src/utilities/../../y.tab.h
-parser-main.o: src/parser/parser-main.c
+parser-main.o: src/parser/parser-main.c \
+  src/parser/../include/parse-tree.h src/parser/../include/symbol.h \
+  src/parser/../include/utilities.h
 cmpl.o: src/cmpl/cmpl.c src/cmpl/../include/cmpl.h \
   src/cmpl/../include/parse-tree.h src/cmpl/../include/symbol.h \
   src/cmpl/../include/utilities.h src/cmpl/../include/symbol-collection.h \
@@ -31,7 +33,11 @@ test-symbol-utils.o: test/symbol/test-symbol-utils.c \
   test/symbol/../../src/include/literal.h \
   test/symbol/../../src/include/scope-fsm.h \
   test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
-symbol-main.o: src/symbol/symbol-main.c
+symbol-main.o: src/symbol/symbol-main.c \
+  src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
+  src/symbol/../include/utilities.h src/symbol/../include/symbol.h \
+  src/symbol/../include/symbol-collection.h \
+  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h
 scope-fsm.o: src/symbol/scope-fsm.c src/symbol/../include/parse-tree.h \
   src/symbol/../include/symbol.h src/symbol/../include/utilities.h \
   src/symbol/../../y.tab.h src/symbol/../include/symbol-utils.h \
@@ -42,7 +48,8 @@ ir-main.o: src/ir/ir-main.c src/ir/../include/ir.h \
   src/ir/../include/utilities.h src/ir/../include/cmpl.h \
   src/ir/../include/lexer.h src/ir/../../y.tab.h \
   src/ir/../include/parse-tree.h src/ir/../include/parser.h \
-  src/ir/../include/symbol-utils.h src/ir/../include/literal.h
+  src/ir/../include/symbol.h src/ir/../include/symbol-collection.h \
+  src/ir/../include/literal.h src/ir/../include/symbol-utils.h
 ir-utils.o: src/ir/ir-utils.c src/ir/../include/ir.h \
   src/ir/../include/parse-tree.h src/ir/../include/symbol.h \
   src/ir/../include/utilities.h src/ir/../include/utilities.h \
@@ -52,7 +59,9 @@ mips-main.o: src/mips/mips-main.c src/mips/../include/cmpl.h \
   src/mips/../include/utilities.h src/mips/../include/lexer.h \
   src/mips/../../y.tab.h src/mips/../include/parse-tree.h \
   src/mips/../include/parser.h src/mips/../include/symbol-utils.h \
-  src/mips/../include/literal.h src/mips/../include/ir.h
+  src/mips/../include/literal.h src/mips/../include/ir.h \
+  src/mips/../include/symbol-collection.h src/mips/../include/symbol.h \
+  src/mips/../include/mips.h
 mips-utils.o: src/mips/mips-utils.c src/mips/../include/ir.h \
   src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
   src/mips/../include/utilities.h src/mips/../include/scope-fsm.h \

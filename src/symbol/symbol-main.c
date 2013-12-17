@@ -1,6 +1,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "../include/parse-tree.h"
+#include "../include/symbol.h"
+#include "../include/symbol-collection.h"
+
+extern SymbolCreationData *scd;
 
 FILE *output;
 int main(int argc, char *argv[]) {
@@ -36,4 +41,15 @@ int main(int argc, char *argv[]) {
     }
 
     return rv;
+}
+
+void start_traversal(Node *n) {
+    if (scd == NULL) {
+        util_emalloc((void **) &scd, sizeof(SymbolCreationData));
+        initialize_symbol_creation_data(scd);
+        scd->outfile = output;
+    }
+    collect_symbol_data(n, scd);
+
+    pretty_print(n);
 }

@@ -18,29 +18,19 @@ extern IrList *ir_list;
  * Side-effects: Allocates heap memory
  */
 void start_traversal(Node *n) {
-    #ifdef COLLECT_SYMBOLS
     if (scd == NULL) {
         util_emalloc((void **) &scd, sizeof(SymbolCreationData));
         initialize_symbol_creation_data(scd);
         scd->outfile = output;
     }
     collect_symbol_data(n, scd);
-    #endif
 
-    #ifdef PRETTY_PRINT
     pretty_print(n);
-    #endif
 
-    #ifdef COMPUTE_IR
     start_ir_computation();
     compute_ir(n, ir_list);
     IrNode *irn = ir_list->head;
-        #ifdef PRINT_IR
-        print_ir_list(output, ir_list);
-        #endif
-    #endif
+    print_ir_list(output, ir_list);
 
-    #ifdef MIPS_ASM
     compute_mips_asm(output, scd->stc, ir_list);
-    #endif
 }

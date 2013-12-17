@@ -58,17 +58,17 @@ y.tab.o :
 parser-main.o : src/parser/parser-main.c
 	$(CC) -c src/parser/parser-main.c -o $@
 
-parser-main : parser-main.o y.tab.o utilities.o cmpl.o \
+parser-main : parser-main.o y.tab.o utilities.o \
 symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o mips-utils.o
-	$(CC) parser-main.o y.tab.o utilities.o cmpl.o \
+	$(CC) parser-main.o y.tab.o utilities.o \
 symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o mips-utils.o -o $@
 
 symbol-main.o : src/symbol/symbol-main.c
 	$(CC) -c src/symbol/symbol-main.c -o $@
 
-symbol-main : symbol-main.o y.tab.o utilities.o cmpl.o \
+symbol-main : symbol-main.o y.tab.o utilities.o \
 symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o mips-utils.o
-	$(CC) symbol-main.o y.tab.o utilities.o cmpl.o \
+	$(CC) symbol-main.o y.tab.o utilities.o \
 symbol-collection.o symbol-utils.o scope-fsm.o ir-utils.o mips-utils.o -o $@
 
 symbol-utils.o : src/symbol/symbol-utils.c
@@ -83,9 +83,9 @@ cmpl.o : src/cmpl/cmpl.c
 scope-fsm.o : src/symbol/scope-fsm.c
 	$(CC) -c src/symbol/scope-fsm.c
 
-ir-main : ir-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+ir-main : ir-main.o mips-utils.o ir-utils.o y.tab.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
-	$(CC) ir-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+	$(CC) ir-main.o mips-utils.o ir-utils.o y.tab.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
 
 ir-main.o : src/ir/ir-main.c
@@ -94,9 +94,9 @@ ir-main.o : src/ir/ir-main.c
 ir-utils.o : src/ir/ir-utils.c
 	$(CC) -c src/ir/ir-utils.c
 
-mips-main : mips-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+mips-main : mips-main.o mips-utils.o ir-utils.o y.tab.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o
-	$(CC) mips-main.o mips-utils.o ir-utils.o y.tab.o cmpl.o \
+	$(CC) mips-main.o mips-utils.o ir-utils.o y.tab.o \
 scope-fsm.o symbol-collection.o symbol-utils.o utilities.o -o $@
 
 mips-main.o : src/mips/mips-main.c

@@ -16,6 +16,7 @@
 YYSTYPE yylval;
 int yylex(void);
 void yyerror(char *s);
+void start_traversal(Node *n);
 
 %}
 
