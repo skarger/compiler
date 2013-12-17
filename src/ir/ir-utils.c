@@ -37,65 +37,106 @@ char *next_reg() {
     return buf;
 }
 
+/* merge 2 */
 IrNode *irn_load_from_register(int instr, int to_idx, int from_idx) {
-    return create_ir_node(instr, to_idx, from_idx, NR, NULL, NULL);
-}
-
-IrNode *irn_store_from_register(int instr, int from_idx, int to_idx) {
-    return create_ir_node(instr, from_idx, to_idx, NR, NULL, NULL);
-}
-
-IrNode *irn_load_from_global(int instr, int to_idx, Symbol *s) {
-    return create_ir_node(instr, to_idx, NR, NR, s, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = to_idx;
+    irn->n2 = from_idx;
+    return irn;
 }
 
 IrNode *irn_load_number_constant(int instr, int to_idx, int val) {
-    return create_ir_node(instr, to_idx, val, NR, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = to_idx;
+    irn->n2 = val;
+    return irn;
+}
+
+
+IrNode *irn_load_from_global(int instr, int to_idx, Symbol *s) {
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = to_idx;
+    irn->s = s;
+    return irn;
+}
+
+
+
+
+/* merge 2 */
+IrNode *irn_store_from_register(int instr, int from_idx, int to_idx) {
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = from_idx;
+    irn->n2 = to_idx;
+    return irn;
 }
 
 IrNode *irn_store_number_constant(int instr, int val, int to_idx) {
-    return create_ir_node(instr, val, to_idx, NR, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = val;
+    irn->n2 = to_idx;
+    return irn;
 }
 
 IrNode *irn_binary_expr(int instr, int to_idx, int oprnd1, int oprnd2) {
-    return create_ir_node(instr, to_idx, oprnd1, oprnd2, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = to_idx;
+    irn->n2 = oprnd1;
+    irn->n3 = oprnd2;
+    return irn;
 }
 
+/* merge 2 */
 IrNode *irn_statement(int instr, int res_idx) {
-    return create_ir_node(instr, res_idx, NR, NR, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = res_idx;
+    return irn;
 }
 
 IrNode *irn_return(int instr, int res_idx, IrNode *label) {
-    return create_ir_node(instr, res_idx, NR, NR, NULL, label);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = res_idx;
+    irn->branch = label;
+    return irn;
 }
 
-IrNode *irn_function(int instr, Symbol *s) {
-    return create_ir_node(instr, NR, NR, NR, s, NULL);
+/* merge 2 */
+IrNode *irn_function_def(int instr, Symbol *s) {
+    IrNode *irn = construct_ir_node(instr);
+    irn->s = s;
+    return irn;
 }
 
 IrNode *irn_function_call(int instr, Symbol *s) {
-    return create_ir_node(instr, NR, NR, NR, s, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->s = s;
+    return irn;
 }
 
 IrNode *irn_param(int instr, int par_reg, int src_reg) {
-    return create_ir_node(instr, par_reg, src_reg, NR, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = par_reg;
+    irn->n2 = src_reg;
+    return irn;
 }
 
 IrNode *irn_label(int instr, int label_idx) {
-    return create_ir_node(instr, label_idx, NR, NR, NULL, NULL);
+    IrNode *irn = construct_ir_node(instr);
+    irn->n1 = label_idx;
+    return irn;
 }
 
-IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s, IrNode *bl) {
+IrNode *construct_ir_node(enum ir_instruction instr) {
     IrNode *irn;
     util_emalloc((void *) &irn, sizeof(IrNode));
     irn->instruction = instr;
-    irn->n1 = n1;
-    irn->n2 = n2;
-    irn->n3 = n3;
-    irn->s = s;
-    irn->branch = bl;
-    return irn;
+    irn->prev = NULL;
+    irn->next = NULL;
+    irn->n1 = irn->n2 = irn->n3 = NR;
+    irn->s = NULL;
+    irn->branch = NULL;
 }
+
 
 IrList *create_ir_list(void) {
     IrList *irl;
@@ -172,7 +213,7 @@ void compute_ir(Node *n, IrList *irl) {
             /* now we have appended a BEGIN_PROC node to ir_list */
             /* it has the function symbol */
             cur_end_proc_label = irn_label(LABEL, label_idx++);
-            irn2 = irn_function(END_PROC, ir_list->tail->s);
+            irn2 = irn_function_def(END_PROC, ir_list->tail->s);
             /* second child: compound statement */
             /* recurse over it to obtain IR nodes for the function body */
             compute_ir(n->children.child2, irl);
@@ -198,7 +239,7 @@ void compute_ir(Node *n, IrList *irl) {
             break;
         case SIMPLE_DECLARATOR:
             if (is_function_def_spec) {
-                irn1 = irn_function(BEGIN_PROC, n->st_entry);
+                irn1 = irn_function_def(BEGIN_PROC, n->st_entry);
                 append_ir_node(irn1, irl);
             }
             break;

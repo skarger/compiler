@@ -72,6 +72,7 @@ void compute_ir(Node *n, IrList *irl);
 char *current_reg(void);
 char *next_reg(void);
 IrNode *create_ir_node(int instr, int n1, int n2, int n3, Symbol *s, IrNode *bl);
+IrNode *construct_ir_node(enum ir_instruction instr);
 IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
 IrNode *prepend_ir_node(IrNode *irn, IrList *irl);
