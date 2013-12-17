@@ -21,20 +21,20 @@
 
 static const char *main_intro ="    addiu   $sp, $sp, -48"
 "  # push space for our stack frame onto the stack\n"
-"    sw $fp, 44($sp)        # save the old $fp\n"
+"    sw    $fp, 44($sp)        # save the old $fp\n"
 "    addiu $fp, $sp, 44     # $fp -> stack frame\n"
-"    sw $ra, -4($fp)        # save the return address\n";
+"    sw    $ra, -4($fp)        # save the return address\n";
 
 static const char *main_outro = "    lw  $ra, -4($fp)       # restore $ra\n"
-"    lw  $fp, ($fp)         # restore old $fp\n"
-"    addiu   $sp, $sp, 48   # pop off our stack frame\n"
-"    jr $ra\n";
+"    lw    $fp, ($fp)         # restore old $fp\n"
+"    addiu $sp, $sp, 48   # pop off our stack frame\n"
+"    jr    $ra\n";
 
 
 static const char *syscall_print_int = "syscall_print_int:\n"
-"    li $v0, 1         # v0 <- syscall code for print_int\n"
+"    li    $v0, 1         # v0 <- syscall code for print_int\n"
 "    syscall           # print\n"
-"    jr $ra            # return to caller\n";
+"    jr    $ra            # return to caller\n";
 
 void print_global_variables(FILE *out, SymbolTable *st);
 void print_functions(FILE *out, SymbolTableContainer *stc, IrList *irl);
