@@ -46,24 +46,19 @@ enum ir_instruction {
     LOG_OR
 };
 
-#define NUM_ARG_TYPES 6
-#define IMMVAL 0
-#define OPRND1 1
-#define OPRND2 2
-#define RDEST  3
-#define RSRC   4
-#define LABIDX 5
-
 struct IrNode {
     struct IrNode *prev;
     struct IrNode *next;
     enum ir_instruction instruction;
-    int args[NUM_ARG_TYPES];
-    int n1;
-    int n2;
-    int n3;
-    Symbol *s;
     struct IrNode *branch;
+    /* instruction arguments */
+    int IMMVAL;
+    int OPRND1;
+    int OPRND2;
+    int RDEST;
+    int RSRC;
+    int LABIDX;
+    Symbol *s;
 };
 typedef struct IrNode IrNode;
 

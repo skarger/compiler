@@ -39,16 +39,16 @@ char *next_reg() {
 
 IrNode *irn_load(int instr, int dest, int src, Symbol *global) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[RDEST] = dest;
+    irn->RDEST = dest;
     switch(instr) {
         case LOAD_ADDRESS:
             irn->s = global;
             break;
         case LOAD_WORD_INDIRECT:
-            irn->args[RSRC] = src;
+            irn->RSRC = src;
             break;
         case LOAD_CONSTANT:
-            irn->args[IMMVAL] = src;
+            irn->IMMVAL = src;
             break;
         default:
             break;
@@ -58,10 +58,10 @@ IrNode *irn_load(int instr, int dest, int src, Symbol *global) {
 
 IrNode *irn_store(int instr, int src, int dest) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[RDEST] = dest;
+    irn->RDEST = dest;
     switch (instr) {
         case STORE_WORD_INDIRECT:
-            irn->args[RSRC] = src;
+            irn->RSRC = src;
         default:
             break;
     }
@@ -70,15 +70,15 @@ IrNode *irn_store(int instr, int src, int dest) {
 
 IrNode *irn_binary_expr(int instr, int dest, int oprnd1, int oprnd2) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[RDEST] = dest;
-    irn->args[OPRND1] = oprnd1;
-    irn->args[OPRND2] = oprnd2;
+    irn->RDEST = dest;
+    irn->OPRND1 = oprnd1;
+    irn->OPRND2 = oprnd2;
     return irn;
 }
 
 IrNode *irn_statement(int instr, int res_idx, IrNode *label) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[RSRC] = res_idx;
+    irn->RSRC = res_idx;
     irn->branch = label;
     return irn;
 }
@@ -91,14 +91,14 @@ IrNode *irn_function(int instr, Symbol *function_symbol) {
 
 IrNode *irn_param(int instr, int par_reg, int src_reg) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[RDEST] = par_reg;
-    irn->args[RSRC] = src_reg;
+    irn->RDEST = par_reg;
+    irn->RSRC = src_reg;
     return irn;
 }
 
 IrNode *irn_label(int instr, int label_idx) {
     IrNode *irn = construct_ir_node(instr);
-    irn->args[LABIDX] = label_idx;
+    irn->LABIDX = label_idx;
     return irn;
 }
 
@@ -108,10 +108,14 @@ IrNode *construct_ir_node(enum ir_instruction instr) {
     irn->instruction = instr;
     irn->prev = NULL;
     irn->next = NULL;
-    int i;
-    for (i = 0; i < NUM_ARG_TYPES; i++) {
-        irn->args[i] = NO_ARG;
-    }
+
+    irn->IMMVAL = NO_ARG;
+    irn->OPRND1 = NO_ARG;
+    irn->OPRND2 = NO_ARG;
+    irn->RDEST = NO_ARG;
+    irn->RSRC = NO_ARG;
+    irn->LABIDX = NO_ARG;
+
     irn->s = NULL;
     irn->branch = NULL;
 }
@@ -415,17 +419,17 @@ void print_ir_node(FILE *out, IrNode *irn) {
             fprintf(out, "endproc, \"%s\"", get_symbol_name(irn->s));
             break;
         case RETURN_FROM_PROC:
-            if (irn->args[RSRC] == NO_ARG) {
-                fprintf(out, "return, \"LABEL_%d\"", irn->branch->args[LABIDX]);
+            if (irn->RSRC == NO_ARG) {
+                fprintf(out, "return, \"LABEL_%d\"", irn->branch->LABIDX);
             } else {
-                fprintf(out, "return, \"LABEL_%d\", $r%d", irn->branch->args[LABIDX], irn->args[RSRC]);
+                fprintf(out, "return, \"LABEL_%d\", $r%d", irn->branch->LABIDX, irn->RSRC);
             }
             break;
         case BEGIN_CALL:
             fprintf(out, "begincall, \"%s\"", get_symbol_name(irn->s));
             break;
         case PARAM:
-            fprintf(out, "param, %d, $r%d", irn->args[RDEST], irn->args[RSRC]);
+            fprintf(out, "param, %d, $r%d", irn->RDEST, irn->RSRC);
             break;
         case CALL:
             fprintf(out, "call, \"%s\"", get_symbol_name(irn->s));
@@ -434,22 +438,22 @@ void print_ir_node(FILE *out, IrNode *irn) {
             fprintf(out, "endcall, \"%s\"", get_symbol_name(irn->s));
             break;
         case STORE_WORD_INDIRECT:
-            fprintf(out, "storewordindirect, $r%d, $r%d", irn->args[RSRC], irn->args[RDEST]);
+            fprintf(out, "storewordindirect, $r%d, $r%d", irn->RSRC, irn->RDEST);
             break;
         case LOAD_ADDRESS:
-            fprintf(out, "loadaddress, $r%d, %s", irn->args[RDEST], get_symbol_name(irn->s));
+            fprintf(out, "loadaddress, $r%d, %s", irn->RDEST, get_symbol_name(irn->s));
             break;
         case LOAD_WORD_INDIRECT:
-            fprintf(out, "loadwordindirect, $r%d, $r%d", irn->args[RDEST], irn->args[RSRC]);
+            fprintf(out, "loadwordindirect, $r%d, $r%d", irn->RDEST, irn->RSRC);
             break;
         case LOAD_CONSTANT:
-            fprintf(out, "loadconstant, $r%d, %d", irn->args[RDEST], irn->args[IMMVAL]);
+            fprintf(out, "loadconstant, $r%d, %d", irn->RDEST, irn->IMMVAL);
             break;
         case LOG_OR:
-            fprintf(out, "logicalor, $r%d, $r%d, $r%d", irn->args[RDEST], irn->args[OPRND1], irn->args[OPRND2]);
+            fprintf(out, "logicalor, $r%d, $r%d, $r%d", irn->RDEST, irn->OPRND1, irn->OPRND2);
             break;
         case LABEL:
-            fprintf(out, "label, \"LABEL_%d\"", irn->args[LABIDX]);
+            fprintf(out, "label, \"LABEL_%d\"", irn->LABIDX);
             break;
         default:
             break;
