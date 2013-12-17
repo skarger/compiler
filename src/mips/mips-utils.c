@@ -19,13 +19,13 @@
 # old $fp $fp 4
 */
 
-static const char *main_intro ="    addiu   $sp, $sp, -48"
+static const char *main_intro ="    addiu $sp, $sp, -48"
 "  # push space for our stack frame onto the stack\n"
 "    sw    $fp, 44($sp)        # save the old $fp\n"
 "    addiu $fp, $sp, 44     # $fp -> stack frame\n"
 "    sw    $ra, -4($fp)        # save the return address\n";
 
-static const char *main_outro = "    lw  $ra, -4($fp)       # restore $ra\n"
+static const char *main_outro = "    lw    $ra, -4($fp)       # restore $ra\n"
 "    lw    $fp, ($fp)         # restore old $fp\n"
 "    addiu $sp, $sp, 48   # pop off our stack frame\n"
 "    jr    $ra\n";

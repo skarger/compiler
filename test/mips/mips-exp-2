@@ -2,7 +2,7 @@
 
     .text
 main:
-    addiu   $sp, $sp, -48  # push space for our stack frame onto the stack
+    addiu $sp, $sp, -48  # push space for our stack frame onto the stack
     sw    $fp, 44($sp)        # save the old $fp
     addiu $fp, $sp, 44     # $fp -> stack frame
     sw    $ra, -4($fp)        # save the return address
@@ -15,7 +15,7 @@ main:
     move  $v0, $t0
     j     LABEL_0
 LABEL_0:
-    lw  $ra, -4($fp)       # restore $ra
+    lw    $ra, -4($fp)       # restore $ra
     lw    $fp, ($fp)         # restore old $fp
     addiu $sp, $sp, 48   # pop off our stack frame
     jr    $ra
