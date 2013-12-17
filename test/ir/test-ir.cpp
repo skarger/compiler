@@ -98,15 +98,6 @@ class IrTest : public ::testing::Test {
         compute_ir(root, ir_list);
     }
 
-    void ExpectReg(void) {
-        char *r0 = current_reg();
-        char *r1 = next_reg();
-        char *r2 = current_reg();
-        EXPECT_STREQ("$r0", r0);
-        EXPECT_STREQ("$r1", r1);
-        EXPECT_EQ(0, strcmp(r1, r2));
-    }
-
     void ExpectIRNode(void) {
         IrNode *ir_node = construct_ir_node(LOAD_ADDR);
         EXPECT_EQ(LOAD_ADDR, instruction(ir_node));
@@ -146,8 +137,6 @@ TEST_F(IrTest, ValTest) {
 
   EXPECT_EQ(0, 0);
 }
-
-TEST_F(IrTest, RegTest) { this->ExpectReg(); }
 
 TEST_F(IrTest, IrNodeCreation) { this->ExpectIRNode(); }
 

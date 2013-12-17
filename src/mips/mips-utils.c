@@ -23,7 +23,7 @@ static const char *main_intro ="    addiu $sp, $sp, -48"
 "  # push space for our stack frame onto the stack\n"
 "    sw    $fp, 44($sp)        # save the old $fp\n"
 "    addiu $fp, $sp, 44     # $fp -> stack frame\n"
-"    sw    $ra, -4($fp)        # save the return address\n";
+"    sw    $ra, -4($fp)        # save the return address";
 
 static const char *main_outro = "    lw    $ra, -4($fp)       # restore $ra\n"
 "    lw    $fp, ($fp)         # restore old $fp\n"
@@ -53,7 +53,6 @@ void compute_mips_asm(FILE *output, SymbolTableContainer *stc, IrList *irl) {
     print_functions(output, stc, irl);
 
     /* provide syscall code */
-    fprintf(output, "\n");
     fprintf(output, "%s", syscall_print_int);
 }
 
@@ -79,18 +78,18 @@ void print_functions(FILE *out, SymbolTableContainer *stc, IrList *irl) {
 void ir_to_mips(FILE *out, IrNode *irn) {
     switch(irn->instruction) {
         case BEGIN_PROC:
-            fprintf(out, "%s:\n", get_symbol_name(irn->s));
+            fprintf(out, "%s:", get_symbol_name(irn->s));
             #ifdef PROCEDURE_CALLS_SUPPORTED
                 /* procedure entry steps */
             #else
-            fprintf(out, "%s", main_intro);
+            fprintf(out, "\n%s", main_intro);
             #endif
             break;
         case RETURN_FROM_PROC:
             if (irn->RSRC != NO_ARG) {
-                fprintf(out, "    move  $v0, $t%d\n", irn->RSRC);
+                fprintf(out, "    move  $v0, $t%d", irn->RSRC);
             }
-            fprintf(out, "    j     LABEL_%d\n", irn->branch->LABIDX);
+            fprintf(out, "\n    j     LABEL_%d", irn->branch->LABIDX);
             break;
         case END_PROC:
             #ifdef PROCEDURE_CALLS_SUPPORTED
@@ -100,37 +99,40 @@ void ir_to_mips(FILE *out, IrNode *irn) {
             #endif
             break;
         case LOAD_ADDRESS:
-            fprintf(out, "    la    $t%d, %s\n", irn->RDEST, get_symbol_name(irn->s));
+            fprintf(out, "    la    $t%d, %s",
+                        irn->RDEST, get_symbol_name(irn->s));
             break;
         case LOAD_WORD_INDIRECT:
-            fprintf(out, "    lw    $t%d, ($t%d)\n", irn->RDEST, irn->RSRC);
+            fprintf(out, "    lw    $t%d, ($t%d)", irn->RDEST, irn->RSRC);
             break;
         case LOAD_CONSTANT:
-            fprintf(out, "    li    $t%d, %d\n", irn->RDEST, irn->IMMVAL);
+            fprintf(out, "    li    $t%d, %d", irn->RDEST, irn->IMMVAL);
             break;
         case STORE_WORD_INDIRECT:
-            fprintf(out, "    sw    $t%d, ($t%d)\n", irn->RSRC, irn->RDEST);
+            fprintf(out, "    sw    $t%d, ($t%d)", irn->RSRC, irn->RDEST);
             break;
         case LABEL:
-            fprintf(out, "LABEL_%d:\n", irn->LABIDX);
+            fprintf(out, "LABEL_%d:", irn->LABIDX);
             break;
         case BEGIN_CALL:
-            fprintf(out, "    addiu $sp, $sp, -4 # push space for argument\n");
+            fprintf(out, "    addiu $sp, $sp, -4 # push space for argument");
             break;
         case PARAM:
-            fprintf(out, "    or    $a%d, $t%d, $0\n", irn->RDEST, irn->RSRC);
+            fprintf(out, "    or    $a%d, $t%d, $0", irn->RDEST, irn->RSRC);
             break;
         case CALL:
-            fprintf(out, "    jal   %s\n", get_symbol_name(irn->s));
+            fprintf(out, "    jal   %s", get_symbol_name(irn->s));
             break;
         case END_CALL:
-            fprintf(out, "    addiu $sp, $sp, 4 # pop off space for argument\n");
+            fprintf(out, "    addiu $sp, $sp, 4 # pop off space for argument");
             break;
         case LOG_OR:
-            fprintf(out, "    or    $t%d,  $t%d, $t%d\n", irn->RDEST, irn->OPRND1, irn->OPRND2);
+            fprintf(out, "    or    $t%d,  $t%d, $t%d",
+                    irn->RDEST, irn->OPRND1, irn->OPRND2);
             break;
         default:
-            fprintf(out, "unknown instruction\n");
+            fprintf(out, "unknown instruction");
             break;
     }
+    fprintf(out, "\n");
 }

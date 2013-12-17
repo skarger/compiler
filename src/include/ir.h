@@ -81,6 +81,7 @@ IrList *create_ir_list(void);
 IrNode *append_ir_node(IrNode *irn, IrList *irl);
 IrNode *prepend_ir_node(IrNode *irn, IrList *irl);
 int instruction(IrNode *irn);
+Boolean is_statement(Node *n);
 Boolean node_is_lvalue(Node *n);
 
 
