@@ -68,18 +68,10 @@ make test-mips
 
 
 ### Files:
-./ Project root
-Makefile  README.md  src  test
-
 ./src: Source files for compiler components.
-cmpl  include  ir  lexer  mips	parser	symbol	utilities
-
-./src: 
-include  lexer	parser	symbol	utilities
 
 ./src/include: header files
 
 ./test: Testing scripts.
-gtest-1.7.0  ir  lexer	mips  parser  symbol
 
 gtest-1.7.0 is [Google Test](https://code.google.com/p/googletest/), which is the only third-party library.
