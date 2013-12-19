@@ -6,7 +6,8 @@ Tested on Linux (Ubuntu 8.04) and Mac OS X (10.8.5); untested on Windows.
 Each "main" program will use stdin/stdout if input_file or output_file omitted.
 Note: prints error messages to stderr.
 
-### Lexer - Scan a C input file and output information about each distinct token.
+### Lexer
+Scan a C input file and output information about each distinct token.
 ```
 # Build:
 make lexer-main
@@ -15,7 +16,8 @@ make lexer-main
 ```
 
 
-### Parser - construct a parse tree for a subset of the C language and print it.
+### Parser
+Construct a parse tree for a subset of the C language and print it.
 ```
 # Build:
 make parser-main
@@ -27,8 +29,8 @@ make test-parser-errors
 ```
 
 
-### Symbol Table - traverse a parse tree and create symbol tables for each
-identifier, for both declarations and references.
+### Symbol Table
+Traverse a parse tree and create symbol tables for each identifier, for both declarations and references.
 ```
 # Build:
 make symbol-main
@@ -40,7 +42,8 @@ make test-symtab-errors # (shows error messages emitted by program)
 ```
 
 
-### IR Generator - output Intermediate Representation instructions given
+### IR Generator
+Output Intermediate Representation instructions given
 a parse tree and symbol table derived from a C source file.
 ```
 # Build:
@@ -53,6 +56,7 @@ make test-ir
 
 
 ### MIPS Assembly Generator
+Output MIPS assembly code, fit for running in [SPIM](http://pages.cs.wisc.edu/~larus/spim.html) or even a real MIPS machine!
 ```
 # Build:
 make mips-main
@@ -63,7 +67,8 @@ make test-mips
 ```
 
 
-Files:
+### Files:
+./ Project root
 Makefile  README.md  src  test
 
 ./src: Source files for compiler components.
