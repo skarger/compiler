@@ -1,7 +1,7 @@
 compiler
 ========
 
-Only tested on Linux. Currently will not compile OS X; untested on Windows.
+Tested on Linux (Ubuntu 8.04) and Mac OS X (10.8.5); untested on Windows.
 
 Each "main" program will use stdin/stdout if input_file or output_file ommitted.
 Note: prints error messages to stderr.
