@@ -19,7 +19,7 @@ make lexer-main
 ```
 # Build:
 make parser-main
-Run:
+# Run:
 ./parser-main [input_file] [output_file]
 # Test:
 make test-parser-output
@@ -29,24 +29,38 @@ make test-parser-errors
 
 ### Symbol Table - traverse a parse tree and create symbol tables for each
 identifier, for both declarations and references.
-Build: make symbol-main
-Run: ./symbol-main [input_file] [output_file]
-Test:
-make test-symbol (redirects error messages to /dev/null)
-make test-symtab-errors (shows error messages emitted by program)
+```
+# Build:
+make symbol-main
+# Run:
+./symbol-main [input_file] [output_file]
+# Test:
+make test-symbol # (redirects error messages to /dev/null)
+make test-symtab-errors # (shows error messages emitted by program)
+```
 
 
 ### IR Generator - output Intermediate Representation instructions given
 a parse tree and symbol table derived from a C source file.
-Build: make ir-main
-Run: ./ir-main [input_file] [output_file]
-Test: make test-ir
+```
+# Build:
+make ir-main
+# Run:
+./ir-main [input_file] [output_file]
+# Test:
+make test-ir
+```
 
 
 ### MIPS Assembly Generator
-Build: make mips-main
-Run: ./mips-main [input_file] [output_file]
-Test: make test-mips
+```
+# Build:
+make mips-main
+# Run:
+./mips-main [input_file] [output_file]
+# Test:
+make test-mips
+```
 
 
 Files:
