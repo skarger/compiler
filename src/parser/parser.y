@@ -1408,6 +1408,7 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
     switch (e) {
         case PE_SUCCESS:
             return;
+    #ifdef __linux
         case PE_INVALID_DATA_TYPE:
             error(0, 0, "line %d: invalid data type: %s", line, data);
             return;
@@ -1420,6 +1421,20 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             #ifdef DEBUG
             error(0, 0, "line %d: %s: unrecognized operator", line, data);
             #endif
+    #else
+        case PE_INVALID_DATA_TYPE:
+            fprintf(stderr, "line %d: invalid data type: %s", line, data);
+            return;
+        case PE_UNRECOGNIZED_NODE_TYPE:
+            #ifdef DEBUG
+            fprintf(stderr, "line %d: %s: unrecognized node type", line, data);
+            #endif
+            return;
+        case PE_UNRECOGNIZED_OP:
+            #ifdef DEBUG
+            fprintf(stderr, "line %d: %s: unrecognized operator", line, data);
+            #endif
+    #endif
         default:
             return;
     }
