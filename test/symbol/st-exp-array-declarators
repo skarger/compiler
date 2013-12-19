@@ -417,7 +417,7 @@ signed int ((
  * scope: file
  * overloading class: other names
  */
-largearr2)[(-2147483648)]);
+largearr2)[(2147483648)]);
 signed int ((
 /*
  * symbol: umi
