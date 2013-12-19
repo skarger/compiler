@@ -82,7 +82,7 @@ while (0 != token) {
      * truncating if the text is too long.
      * Do not print scanned string text. TODO: change that?
      */
-    if (token == STRING_CONSTANT) {
+    if (token == STRING_LITERAL) {
         fprintf(output, "    %-20s\t", "");
     } else {
         fprintf(output, (yyleng < 20 ? "text = %-20s\t" : "text = %s\t"), yytext);
@@ -166,17 +166,17 @@ while (0 != token) {
             case LOGICAL_OR:
                 fprintf(output, "    cmp op = %-20s\n", get_token_name(token));
                 break;
-            case NUMBER_CONSTANT:
+            case NUMBER_LITERAL:
                 number = (struct Number *) yylval;
                 fprintf(output, "\ttype = %20s\tvalue = %-10lu\n", 
                         get_integer_type(number->type),
                         number->value);
                 break;
-            case CHAR_CONSTANT:
+            case CHAR_LITERAL:
                 character = (struct Character *) yylval;
                 fprintf(output, "\tvalue: %c\n", character->c);
                 break;
-            case STRING_CONSTANT:
+            case STRING_LITERAL:
                 string = (struct String *) yylval;
                 fprintf(output, "\tvalue: %s\n", string->str);
                 break;

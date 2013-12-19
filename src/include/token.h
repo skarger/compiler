@@ -8,9 +8,9 @@
 #define TOKEN_H
 
 #define UNRECOGNIZED 1
-#define CHAR_CONSTANT 2
-#define STRING_CONSTANT 3
-#define NUMBER_CONSTANT 4
+#define CHAR_LITERAL 2
+#define STRING_LITERAL 3
+#define NUMBER_LITERAL 4
 #define IDENTIFIER 5
 #define BREAK 6
 #define CHAR 7

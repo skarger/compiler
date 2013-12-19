@@ -3,6 +3,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "../include/symbol-collection.h"
 #include "../include/parse-tree.h"
 #include "../include/symbol-utils.h"
@@ -16,7 +17,6 @@
 SymbolCreationData *scd = NULL;
 
 /* file helper procs */
-void initialize_symbol_creation_data(SymbolCreationData *scd);
 long resolve_array_size(SymbolCreationData *scd, Node *n);
 Boolean array_bound_optional(SymbolCreationData *scd);
 Boolean invalid_operand(long operand);
@@ -65,7 +65,6 @@ void collect_symbol_data(Node *n, SymbolCreationData *scd) {
     transition_scope(n, START, scd->stc);
 
     switch (n->n_type) {
-        case IDENTIFIER:
         case IDENTIFIER_EXPR:
             id_symbol = find_symbol(get_current_st(scd->stc), n->data.str);
             if (id_symbol == NULL) {
@@ -656,6 +655,10 @@ void create_symbol_if_necessary(SymbolCreationData *scd) {
 
 void reset_current_symbol(SymbolCreationData *scd) {
     scd->current_symbol = NULL;
+}
+
+void set_symbol_table_entry(Node *n, Symbol *s) {
+    n->st_entry = s;
 }
 
 void record_current_symbol(SymbolCreationData *scd, Node *n) {

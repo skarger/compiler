@@ -13,6 +13,7 @@ extern "C" {
 #include "../../src/include/parse-tree.h"
 #include "../../src/include/parser.h"
 #include "../../src/include/symbol-utils.h"
+#include "../../src/include/symbol-collection.h"
 }
 
 extern FILE *yyin;

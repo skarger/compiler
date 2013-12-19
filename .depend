@@ -1,72 +1,66 @@
 y.tab.o: y.tab.c src/include/lexer.h src/include/utilities.h \
   src/include/parser.h src/include/parse-tree.h src/include/symbol.h \
-  src/include/utilities.h src/include/cmpl.h \
-  src/include/symbol-collection.h src/include/literal.h src/include/ir.h \
-  lex.yy.c src/include/literal.h src/include/parse-tree.h y.tab.h
+  src/include/cmpl.h src/include/symbol-collection.h \
+  src/include/literal.h src/include/ir.h lex.yy.c y.tab.h
 lex.yy.o: lex.yy.c src/include/lexer.h src/include/utilities.h \
   src/include/literal.h src/include/parse-tree.h src/include/symbol.h \
-  src/include/parse-tree.h y.tab.h
+  y.tab.h
 lexer-main.o: src/lexer/lexer-main.c src/lexer/../include/lexer.h \
   src/lexer/../include/utilities.h src/lexer/../include/literal.h \
   src/lexer/../include/parse-tree.h src/lexer/../include/symbol.h \
-  src/lexer/../include/parse-tree.h src/lexer/../../y.tab.h
+  src/lexer/../../y.tab.h
 utilities.o: src/utilities/utilities.c \
   src/utilities/../include/utilities.h \
-  src/utilities/../include/parse-tree.h src/utilities/../include/symbol.h \
-  src/utilities/../include/utilities.h src/utilities/../../y.tab.h
+  src/utilities/../include/parse-tree.h \
+  src/utilities/../include/symbol.h src/utilities/../../y.tab.h
 parser-main.o: src/parser/parser-main.c \
   src/parser/../include/parse-tree.h src/parser/../include/symbol.h \
-  src/parser/../include/utilities.h
+  src/parser/../include/utilities.h src/parser/../include/parser.h
 cmpl.o: src/cmpl/cmpl.c src/cmpl/../include/cmpl.h \
   src/cmpl/../include/parse-tree.h src/cmpl/../include/symbol.h \
-  src/cmpl/../include/utilities.h src/cmpl/../include/symbol-collection.h \
-  src/cmpl/../include/literal.h src/cmpl/../include/symbol.h \
+  src/cmpl/../include/utilities.h src/cmpl/../../src/include/parser.h \
+  src/cmpl/../include/symbol-collection.h src/cmpl/../include/literal.h \
   src/cmpl/../include/ir.h src/cmpl/../include/mips.h
 symbol-utils.o: src/symbol/symbol-utils.c src/symbol/../include/symbol.h \
   src/symbol/../include/utilities.h src/symbol/../include/symbol-utils.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
-  src/symbol/../include/literal.h src/symbol/../include/scope-fsm.h \
-  src/symbol/../include/symbol-collection.h \
-  src/symbol/../include/literal.h src/symbol/../include/utilities.h
+  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
+  src/symbol/../include/scope-fsm.h \
+  src/symbol/../include/symbol-collection.h
 test-symbol-utils.o: test/symbol/test-symbol-utils.c \
   test/symbol/../../src/include/symbol.h \
   test/symbol/../../src/include/utilities.h \
   test/symbol/../../src/include/symbol-utils.h \
   test/symbol/../../src/include/parse-tree.h \
-  test/symbol/../../src/include/symbol.h \
   test/symbol/../../src/include/literal.h \
-  test/symbol/../../src/include/scope-fsm.h \
-  test/symbol/../../src/include/literal.h test/symbol/../../y.tab.h
+  test/symbol/../../src/include/scope-fsm.h test/symbol/../../y.tab.h
 symbol-main.o: src/symbol/symbol-main.c \
   src/symbol/../include/parse-tree.h src/symbol/../include/symbol.h \
-  src/symbol/../include/utilities.h src/symbol/../include/symbol.h \
+  src/symbol/../include/utilities.h src/symbol/../include/parser.h \
   src/symbol/../include/symbol-collection.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h
+  src/symbol/../include/literal.h src/symbol/../include/symbol-utils.h
 scope-fsm.o: src/symbol/scope-fsm.c src/symbol/../include/parse-tree.h \
   src/symbol/../include/symbol.h src/symbol/../include/utilities.h \
   src/symbol/../../y.tab.h src/symbol/../include/symbol-utils.h \
-  src/symbol/../include/parse-tree.h src/symbol/../include/literal.h \
-  src/symbol/../include/scope-fsm.h
+  src/symbol/../include/literal.h src/symbol/../include/scope-fsm.h
 ir-main.o: src/ir/ir-main.c src/ir/../include/ir.h \
   src/ir/../include/parse-tree.h src/ir/../include/symbol.h \
   src/ir/../include/utilities.h src/ir/../include/cmpl.h \
   src/ir/../include/lexer.h src/ir/../../y.tab.h \
-  src/ir/../include/parse-tree.h src/ir/../include/parser.h \
-  src/ir/../include/symbol.h src/ir/../include/symbol-collection.h \
+  src/ir/../include/parser.h src/ir/../include/symbol-collection.h \
   src/ir/../include/literal.h src/ir/../include/symbol-utils.h
 ir-utils.o: src/ir/ir-utils.c src/ir/../include/ir.h \
   src/ir/../include/parse-tree.h src/ir/../include/symbol.h \
-  src/ir/../include/utilities.h src/ir/../include/utilities.h \
-  src/ir/../../y.tab.h src/ir/../include/parse-tree.h
+  src/ir/../include/utilities.h src/ir/../../y.tab.h \
+  src/ir/../include/symbol-utils.h src/ir/../include/literal.h
 mips-main.o: src/mips/mips-main.c src/mips/../include/cmpl.h \
   src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
   src/mips/../include/utilities.h src/mips/../include/lexer.h \
-  src/mips/../../y.tab.h src/mips/../include/parse-tree.h \
-  src/mips/../include/parser.h src/mips/../include/symbol-utils.h \
-  src/mips/../include/literal.h src/mips/../include/ir.h \
-  src/mips/../include/symbol-collection.h src/mips/../include/symbol.h \
+  src/mips/../../y.tab.h src/mips/../include/parser.h \
+  src/mips/../include/symbol-utils.h src/mips/../include/literal.h \
+  src/mips/../include/ir.h src/mips/../include/symbol-collection.h \
   src/mips/../include/mips.h
 mips-utils.o: src/mips/mips-utils.c src/mips/../include/ir.h \
   src/mips/../include/parse-tree.h src/mips/../include/symbol.h \
   src/mips/../include/utilities.h src/mips/../include/scope-fsm.h \
-  src/mips/../include/literal.h src/mips/../include/mips.h
+  src/mips/../include/literal.h src/mips/../include/mips.h \
+  src/mips/../include/symbol-utils.h

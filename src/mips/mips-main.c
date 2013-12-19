@@ -19,6 +19,8 @@ extern IrList *ir_list;
 
 FILE *input, *output;
 
+int yyparse(void);
+
 int main(int argc, char *argv[]) {
     extern FILE *yyin;
     int rv;

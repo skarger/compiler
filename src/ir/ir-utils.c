@@ -6,8 +6,11 @@
 #include "../include/utilities.h"
 #include "../../y.tab.h"
 #include "../include/parse-tree.h"
+#include "../include/symbol-utils.h"
 
 FILE *output;
+
+
 
 /* external variable. this is the defining declaration. */
 IrList *ir_list = NULL;
@@ -18,6 +21,7 @@ static Boolean is_function_def_spec = FALSE;
 static Boolean is_function_call = FALSE;
 static Boolean is_function_argument = FALSE;
 static IrNode *cur_end_proc_label;
+static Symbol *function_symbol;
 
 /* file helper functions */
 void compute_ir_pass_through(Node *n, IrList *irl);
@@ -181,12 +185,11 @@ void compute_ir(Node *n, IrList *irl) {
             /* get func symbol to get name and parameters */
             /* will append BEGIN_CALL node */
             compute_ir(n->children.child1, irl);
-            Symbol *function_symbol = ir_list->tail->s;
+            function_symbol = ir_list->tail->s;
             /* arguments */
             is_function_argument = TRUE;
             compute_ir(n->children.child2, irl);
             is_function_argument = FALSE;
-
             irn2 = irn_function(CALL, function_symbol);
             irn3 = irn_function(END_CALL, function_symbol);
             append_ir_node(irn2, irl);
@@ -265,6 +268,7 @@ IrNode *construct_ir_node(enum ir_instruction instr) {
     irn->RSRC =   NO_ARG;
     irn->LABIDX = NO_ARG;
     irn->s = NULL;
+    return irn;
 }
 
 IrNode *irn_load(int instr, int dest, int src, Symbol *global) {
@@ -370,7 +374,7 @@ IrNode *prepend_ir_node(IrNode *irn, IrList *irl) {
 
 Boolean is_statement(Node *n) {
     if (n == NULL) {
-        return;
+        return FALSE;
     }
     switch (n->n_type) {
         case FOR_STATEMENT:

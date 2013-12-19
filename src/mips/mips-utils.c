@@ -1,6 +1,7 @@
 #include "../include/ir.h"
 #include "../include/scope-fsm.h"
 #include "../include/mips.h"
+#include "../include/symbol-utils.h"
 
 /*
 # Layout of stack frame for "main" of size 48 bytes

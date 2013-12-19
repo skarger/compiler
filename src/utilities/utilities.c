@@ -1,4 +1,6 @@
+#ifdef __linux
 #include <error.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +45,11 @@ void util_handle_error(enum util_error e, char *data) {
         case UE_SUCCESS:
             return;
         case UE_MALLOC:
+            #ifdef __linux
             error(e, 0, "%s: out of memory", data);
+            #else
+            fprintf(stderr,  "%s: out of memory", data);
+            #endif
             return;
         default:
             return;

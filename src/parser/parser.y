@@ -22,7 +22,7 @@ void start_traversal(Node *n);
 
 %start root
 
-%token UNRECOGNIZED CHAR_CONSTANT STRING_CONSTANT NUMBER_CONSTANT IDENTIFIER
+%token UNRECOGNIZED CHAR_LITERAL STRING_LITERAL NUMBER_LITERAL IDENTIFIER
 %token BREAK CHAR CONTINUE DO ELSE FOR GOTO IF INT
 %token LONG RETURN SIGNED SHORT UNSIGNED VOID WHILE
 %token LOGICAL_NOT REMAINDER BITWISE_XOR AMPERSAND ASTERISK MINUS PLUS ASSIGN
@@ -418,11 +418,11 @@ primary_expr : IDENTIFIER
         { $$ = $2; }
     ;
 
-constant : CHAR_CONSTANT
+constant : CHAR_LITERAL
         { $$ = create_node( CHAR_CONSTANT, yylval ); }
-    | STRING_CONSTANT
+    | STRING_LITERAL
         { $$ = create_node( STRING_CONSTANT, yylval ); }
-    | NUMBER_CONSTANT
+    | NUMBER_LITERAL
         { $$ = create_node( NUMBER_CONSTANT, yylval ); }
     ;
 
@@ -677,7 +677,6 @@ int has_literal_data(enum data_type nt) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
         case NUMBER_CONSTANT:
         case CHAR_CONSTANT:
         case STRING_CONSTANT:
@@ -701,7 +700,6 @@ void set_literal_data(Node *n, YYSTYPE data) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
             n->data.str =
                 strdup( ((struct String *) data)->str );
             break;
@@ -728,7 +726,6 @@ int number_of_children(enum data_type nt) {
         case NULL_STATEMENT:
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
-        case IDENTIFIER:
         case IDENTIFIER_EXPR:
         case STRING_CONSTANT:
         case NUMBER_CONSTANT:
@@ -878,11 +875,6 @@ void *construct_node(enum data_type nt) {
     n->expr = e;
     n->st_entry = NULL;
     return n;
-}
-
-
-void set_symbol_table_entry(Node *n, Symbol *s) {
-    n->st_entry = s;
 }
 
 
@@ -1052,7 +1044,6 @@ void pretty_print(void *np) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
         case CHAR_CONSTANT:
         case NUMBER_CONSTANT:
         case STRING_CONSTANT:
@@ -1207,7 +1198,6 @@ void print_data_node(void *np) {
         case SIMPLE_DECLARATOR:
         case NAMED_LABEL:
         case IDENTIFIER_EXPR:
-        case IDENTIFIER:
             print_symbol(output, n->st_entry);
             fprintf(output, "%s", n->data.str);
             break;
@@ -1216,7 +1206,7 @@ void print_data_node(void *np) {
             fprintf(output, "\"%s\"", n->data.str);
             break;
         case NUMBER_CONSTANT:
-            fprintf(output, "%d", n->data.num);
+            fprintf(output, "%lu", n->data.num);
             break;
         case CHAR_CONSTANT:
             /* TODO: replace special characters, e.g. replace null with \0 */
@@ -1423,16 +1413,16 @@ void handle_parser_error(enum parser_error e, char *data, int line) {
             #endif
     #else
         case PE_INVALID_DATA_TYPE:
-            fprintf(stderr, "line %d: invalid data type: %s", line, data);
+            fprintf(stderr, "line %d: invalid data type: %s\n", line, data);
             return;
         case PE_UNRECOGNIZED_NODE_TYPE:
             #ifdef DEBUG
-            fprintf(stderr, "line %d: %s: unrecognized node type", line, data);
+            fprintf(stderr, "line %d: %s: unrecognized node type\n", line, data);
             #endif
             return;
         case PE_UNRECOGNIZED_OP:
             #ifdef DEBUG
-            fprintf(stderr, "line %d: %s: unrecognized operator", line, data);
+            fprintf(stderr, "line %d: %s: unrecognized operator\n", line, data);
             #endif
     #endif
         default:

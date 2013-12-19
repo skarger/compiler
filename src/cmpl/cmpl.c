@@ -1,5 +1,6 @@
 
 #include "../include/cmpl.h"
+#include "../../src/include/parser.h"
 #include "../include/symbol-collection.h"
 #include "../include/symbol.h"
 #include "../include/ir.h"

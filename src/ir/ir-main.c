@@ -17,6 +17,8 @@
 extern SymbolCreationData *scd;
 extern IrList *ir_list;
 
+int yyparse(void);
+
 FILE *input, *output;
 
 void test_print_ir(void);

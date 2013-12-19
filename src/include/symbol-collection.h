@@ -36,9 +36,11 @@ void print_symbol_table(FILE *out, SymbolTable *st);
 void print_symbol_param_list(FILE *out, Symbol *s);
 
 /* symbol creation during traversal */
+void initialize_symbol_creation_data(SymbolCreationData *scd);
 void create_symbol_if_necessary(SymbolCreationData *scd);
 unsigned long resolve_constant_expr(Node *n);
 void reset_current_symbol(SymbolCreationData *scd);
+void set_symbol_table_entry(Node *n, Symbol *s);
 void record_current_symbol(SymbolCreationData *scd, Node *n);
 void validate_symbol(Symbol *s, SymbolCreationData *scd);
 void validate_function_symbol(Symbol *s, SymbolCreationData *scd);

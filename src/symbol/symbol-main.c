@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 #include "../include/parse-tree.h"
+#include "../include/parser.h"
 #include "../include/symbol.h"
 #include "../include/symbol-collection.h"
+#include "../include/symbol-utils.h"
 
 extern SymbolCreationData *scd;
 
 FILE *output;
+int yyparse(void);
 int main(int argc, char *argv[]) {
     extern FILE *yyin;
     FILE *input;

@@ -58,6 +58,7 @@ SymbolTable *get_current_st(SymbolTableContainer *stc);
 SymbolTable *create_symbol_table(int scope, int overloading_class);
 void initialize_st(SymbolTable *st, int scope, int overloading_class);
 SymbolTable *create_function_prototypes();
+void append_function_prototype(SymbolTable *prototypes, Symbol *s);
 void append_symbol(SymbolTable *st, Symbol *s);
 void attach_symbol(SymbolTable *st, Symbol *s, Symbol *prev);
 Symbol *st_symbols(SymbolTable *st);
